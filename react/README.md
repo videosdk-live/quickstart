@@ -196,7 +196,7 @@ If you want to learn more about the SDK, read the Complete Documentation of [Rea
 
 ## Documentation
 
-[Read the documentation](https://docs.videosdk.live/) to start using Video SDK.
+[Read the documentation](https://docs.videosdk.live/) to start using VideoSDK.
 
 ## Community
 
