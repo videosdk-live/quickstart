@@ -1,8 +1,6 @@
 # Video SDK for Flutter (Android and iOS)
 
 [![Documentation](https://img.shields.io/badge/Read-Documentation-blue)](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/getting-started)
-[![Firebase](https://img.shields.io/badge/Download%20Android-Firebase-green)](https://appdistribution.firebase.dev/i/80c2c6cc9fcb89b0)
-[![TestFlight](https://img.shields.io/badge/Download%20iOS-TestFlight-blue)](https://testflight.apple.com/join/C1UOYbxh)
 [![Discord](https://img.shields.io/discord/876774498798551130?label=Join%20on%20Discord)](https://discord.gg/bGZtAbwvab)
 [![Register](https://img.shields.io/badge/Contact-Know%20More-blue)](https://app.videosdk.live/signup)
 
