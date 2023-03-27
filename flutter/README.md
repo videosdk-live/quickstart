@@ -59,8 +59,8 @@ flutter pub get
 
 Update the api_call.dart file with your Authentication Token generated from [VideoSDK Dashboard](https://app.videosdk.live/api-keys).
 
-```js title=".env"
-token = "TEMPORARY-TOKEN";
+```js
+const token = '<Generated-from-dashboard>';
 ```
 
 ### 4. Run the sample app
@@ -145,13 +145,7 @@ Token is used to create and validate a meeting using API and also initialise a m
         displayName: "GUEST",
         micEnabled: true,
         camEnabled: true,
-        maxResolution: 'hd',
         defaultCameraIndex: 1,
-        notification: const NotificationInfo(
-          title: "Video SDK",
-          message: "Video SDK is sharing screen in the meeting",
-          icon: "notification_share", // drawable icon name
-        ),
       );
 ```
 
