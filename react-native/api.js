@@ -1,4 +1,4 @@
-export const token = null;
+export const token = null; // token should be in String format
 
 // API call to create meeting
 export const createMeeting = async ({token}) => {
