@@ -181,7 +181,7 @@ function ParticipantList({participants}) {
 
 function MeetingView() {
   // Get `participants` from useMeeting Hook
-  const {join, leave, toggleWebcam, toggleMic, participants} = useMeeting({});
+  const {join, leave, toggleWebcam, toggleMic, participants,meetingId} = useMeeting({});
   const participantsArrId = [...participants.keys()];
 
   return (
