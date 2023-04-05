@@ -1,0 +1,21 @@
+PODS:
+  - VideoSDKRTC (2.0.3)
+
+DEPENDENCIES:
+  - VideoSDKRTC (from `https://github.com/videosdk-live/videosdk-rtc-ios-sdk.git`)
+
+EXTERNAL SOURCES:
+  VideoSDKRTC:
+    :git: https://github.com/videosdk-live/videosdk-rtc-ios-sdk.git
+
+CHECKOUT OPTIONS:
+  VideoSDKRTC:
+    :commit: 897b63d1df9c9a3f422b43a24ec475fff3e5970c
+    :git: https://github.com/videosdk-live/videosdk-rtc-ios-sdk.git
+
+SPEC CHECKSUMS:
+  VideoSDKRTC: 25b11933a6233c6bf510e6da6858b4638af3777b
+
+PODFILE CHECKSUM: c7ac1e741be56893d0523f7edfd0b6e819406525
+
+COCOAPODS: 1.12.0

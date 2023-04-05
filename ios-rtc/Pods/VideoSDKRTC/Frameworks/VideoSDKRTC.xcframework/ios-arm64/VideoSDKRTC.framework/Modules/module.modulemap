@@ -1,0 +1,11 @@
+framework module VideoSDKRTC {
+  umbrella header "VideoSDKRTC-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module VideoSDKRTC.Swift {
+  header "VideoSDKRTC-Swift.h"
+  requires objc
+}

@@ -1,0 +1,5 @@
+${PODS_ROOT}/Target Support Files/VideoSDKRTC/VideoSDKRTC-xcframeworks.sh
+${PODS_ROOT}/VideoSDKRTC/Frameworks/VideoSDKRTC.xcframework
+${PODS_ROOT}/VideoSDKRTC/Frameworks/Mediasoup.xcframework
+${PODS_ROOT}/VideoSDKRTC/Frameworks/WebRTC.xcframework
+${PODS_ROOT}/VideoSDKRTC/Frameworks/Starscream.xcframework

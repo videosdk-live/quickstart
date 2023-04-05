@@ -1,0 +1,5 @@
+${PODS_ROOT}/Target Support Files/Pods-iOSQuickStartDemo/Pods-iOSQuickStartDemo-frameworks.sh
+${PODS_XCFRAMEWORKS_BUILD_DIR}/VideoSDKRTC/VideoSDKRTC.framework/VideoSDKRTC
+${PODS_XCFRAMEWORKS_BUILD_DIR}/VideoSDKRTC/Mediasoup.framework/Mediasoup
+${PODS_XCFRAMEWORKS_BUILD_DIR}/VideoSDKRTC/WebRTC.framework/WebRTC
+${PODS_XCFRAMEWORKS_BUILD_DIR}/VideoSDKRTC/Starscream.framework/Starscream
