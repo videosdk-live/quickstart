@@ -200,6 +200,38 @@ By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client a
 
 <br/>
 
+## Event associated with HLS
+
+- **onHlsStateChanged** - Whenever meeting HLS state changes, then `onHlsStateChanged` event will trigger.
+
+- You can get the **`downstreamUrl`** of the HLS to play it on the Viewer side when the state changes to **`HLS_PLAYABLE`**.
+```
+private final MeetingEventListener meetingEventListener = new MeetingEventListener() {
+  @Override
+  public void onHlsStateChanged(JSONObject HlsState) {
+      switch (HlsState.getString("status")) {
+          case "HLS_STARTING":
+              Log.d("onHlsStateChanged", "Meeting hls is starting");
+              break;
+          case "HLS_STARTED":
+              Log.d("onHlsStateChanged", "Meeting hls is started");
+              break;
+          case "HLS_PLAYABLE":
+              Log.d("onHlsStateChanged", "Meeting hls is playable now");
+              // on hls playable you will receive downstreamUrl
+              String downStreamUrl = HlsState.getString("downstreamUrl");
+              break;
+          case "HLS_STOPPING":
+              Log.d("onHlsStateChanged", "Meeting hls is stopping");
+              break;
+          case "HLS_STOPPED":
+              Log.d("onHlsStateChanged", "Meeting hls is stopped");
+              break;
+      }
+  }
+}
+```
+
 ## Methods and Listeners for Conference(Speaker) mode
 
 ## [Mute/Unmute Local Audio](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/mic-controls)
