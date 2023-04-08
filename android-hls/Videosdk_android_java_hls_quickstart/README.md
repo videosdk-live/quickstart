@@ -205,8 +205,10 @@ By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client a
 - **onHlsStateChanged** - Whenever meeting HLS state changes, then `onHlsStateChanged` event will trigger.
 
 - You can get the **`downstreamUrl`** of the HLS to play it on the Viewer side when the state changes to **`HLS_PLAYABLE`**.
-```
+
+```js
 private final MeetingEventListener meetingEventListener = new MeetingEventListener() {
+
   @Override
   public void onHlsStateChanged(JSONObject HlsState) {
       switch (HlsState.getString("status")) {
@@ -229,6 +231,7 @@ private final MeetingEventListener meetingEventListener = new MeetingEventListen
               break;
       }
   }
+  
 }
 ```
 
