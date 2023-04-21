@@ -144,7 +144,7 @@ function TemplateManager() {
             setViewerMessage(e.target.value);
           }}
         />
-        <button onClick={handleViewerMessage}>send Viewer Message</button>
+        <button onClick={handleViewerMessage}>Notify Viewers</button>
       </div>
     </div>
   );
@@ -248,15 +248,7 @@ function ViewerView() {
   // States to store downstream url and current HLS state
   const playerRef = useRef(null);
   const { hlsUrls, hlsState } = useMeeting();
-  const { publish } = usePubSub("REACTION");
-  //highlight-start
-  function sendEmoji(emoji) {
-    publish(emoji);
-    // Dispatch custom event here so the local user can see their own emoji
-    window.dispatchEvent(
-      new CustomEvent("reaction_added", { detail: { emoji } })
-    );
-  }
+
   useEffect(() => {
     if (hlsUrls.downstreamUrl && hlsState == "HLS_PLAYABLE") {
       if (Hls.isSupported()) {
