@@ -109,7 +109,6 @@ Token is used to create and validate a meeting using API and also initialise a m
 
 ```js
 const { toggleWebcam } = useMeeting();
-
 const onClick = () => {
   // Enable/Disable Webcam in Meeting
   toggleWebcam();
@@ -122,7 +121,6 @@ const onClick = () => {
 
 ```js
 const { toggleMic } = useMeeting();
-
 const onClick = () => {
   // Enable/Disable Mic in Meeting
   toggleMic();
@@ -135,11 +133,9 @@ const onClick = () => {
 
 ```js
 const { leave, end } = useMeeting();
-
 const onClick = () => {
   // Leave Meeting
   leave();
-
   //End Meeting
   end();
 };
@@ -160,10 +156,8 @@ function onMeetingLeft() {
   // This event will be emitted when a localParticipant(you) left the meeting.
   console.log("onMeetingLeft");
 }
-
 function onHlsStateChanged(data) {
   const { status } = data;
-
   if (status === Constants.hlsEvents.HLS_STARTING) {
     console.log("Meeting HLS is starting");
   } else if (status === Constants.hlsEvents.HLS_STARTED) {
@@ -178,7 +172,6 @@ function onHlsStateChanged(data) {
     //
   }
 }
-
 const { meetingId, meeting, localParticipant } = useMeeting({
   onMeetingJoined,
   onMeetingLeft,
@@ -192,15 +185,26 @@ If you want to learn more about the SDK, read the Complete Documentation of [Rea
 
 <br/>
 
-## Examples
 
-- [Prebuilt SDK Examples](https://github.com/videosdk-live/videosdk-rtc-prebuilt-examples)
-- [JavaScript SDK Example](https://github.com/videosdk-live/videosdk-rtc-javascript-sdk-example)
-- [React JS SDK Example](https://github.com/videosdk-live/videosdk-rtc-react-sdk-example)
-- [React Native SDK Example](https://github.com/videosdk-live/videosdk-rtc-react-native-sdk-example)
-- [Flutter SDK Example](https://github.com/videosdk-live/videosdk-rtc-flutter-sdk-example)
-- [Android SDK Example](https://github.com/videosdk-live/videosdk-rtc-android-java-sdk-example)
-- [iOS SDK Example](https://github.com/videosdk-live/videosdk-rtc-ios-sdk-example)
+## Examples 
+### Examples for Conference
+
+- [videosdk-rtc-prebuilt-examples](https://github.com/videosdk-live/videosdk-rtc-prebuilt-examples)
+- [videosdk-rtc-javascript-sdk-example](https://github.com/videosdk-live/videosdk-rtc-javascript-sdk-example)
+- [videosdk-rtc-react-sdk-examplee](https://github.com/videosdk-live/videosdk-rtc-react-sdk-example)
+- [videosdk-rtc-react-native-sdk-example](https://github.com/videosdk-live/videosdk-rtc-react-native-sdk-example)
+- [videosdk-rtc-flutter-sdk-example](https://github.com/videosdk-live/videosdk-rtc-flutter-sdk-example)
+- [videosdk-rtc-android-java-sdk-example](https://github.com/videosdk-live/videosdk-rtc-android-java-sdk-example)
+- [videosdk-rtc-android-kotlin-sdk-example](https://github.com/videosdk-live/videosdk-rtc-android-kotlin-sdk-example)
+- [videosdk-rtc-ios-sdk-example](https://github.com/videosdk-live/videosdk-rtc-ios-sdk-example)
+
+### Examples for Live Streaming
+
+- [videosdk-hls-react-sdk-example](https://github.com/videosdk-live/videosdk-hls-react-sdk-example)
+- [videosdk-hls-react-native-sdk-example](https://github.com/videosdk-live/videosdk-hls-react-native-sdk-example)
+- [videosdk-hls-flutter-sdk-example](https://github.com/videosdk-live/videosdk-hls-flutter-sdk-example)
+- [videosdk-hls-android-java-example](https://github.com/videosdk-live/videosdk-hls-android-java-example)
+- [videosdk-hls-android-kotlin-example](https://github.com/videosdk-live/videosdk-hls-android-kotlin-example)
 
 ## Documentation
 
