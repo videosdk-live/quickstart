@@ -57,7 +57,7 @@ cd ios && pod install
 npm run start
 ```
 
-### Step 5: Run the Sample App
+### Step 5: Run the App
 
 Bingo, it's time to push the launch button.
 
