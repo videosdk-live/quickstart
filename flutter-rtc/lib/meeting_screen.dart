@@ -106,6 +106,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
                     ),
                     itemBuilder: (context, index) {
                       return ParticipantTile(
+                        key: Key(participants.values.elementAt(index).id),
                           participant: participants.values.elementAt(index));
                     },
                     itemCount: participants.length,
