@@ -59,12 +59,15 @@ class JoinScreen extends StatelessWidget {
               onPressed: () => onCreateButtonPressed(context),
               child: const Text('Create Meeting'),
             ),
-            TextField(
-              decoration: const InputDecoration(
-                hintText: 'Meeting Id',
-                border: OutlineInputBorder(),
+            Container(
+              margin: const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: 'Meeting Id',
+                  border: OutlineInputBorder(),
+                ),
+                controller: _meetingIdController,
               ),
-              controller: _meetingIdController,
             ),
             ElevatedButton(
               onPressed: () => onJoinButtonPressed(context),

@@ -95,17 +95,22 @@ class _MeetingScreenState extends State<MeetingScreen> {
               Text(widget.meetingId),
               //render all participant
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      mainAxisExtent: 300,
+                    ),
+                    itemBuilder: (context, index) {
+                      return ParticipantTile(
+                        key: Key(participants.values.elementAt(index).id),
+                          participant: participants.values.elementAt(index));
+                    },
+                    itemCount: participants.length,
                   ),
-                  itemBuilder: (context, index) {
-                    return ParticipantTile(
-                        participant: participants.values.elementAt(index));
-                  },
-                  itemCount: participants.length,
                 ),
               ),
               MeetingControls(
