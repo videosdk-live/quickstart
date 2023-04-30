@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/createorjoinlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnCreateMeeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Meeting"
+        android:textAllCaps="false" />
+
+    <TextView
+        android:id="@+id/tvText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="5sp"
+        android:text="OR"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/etMeetingId"
+        android:theme="@android:style/Theme.Holo"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter Meeting Id"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white" />
+
+    <Button
+        android:id="@+id/btnJoinHostMeeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8sp"
+        android:text="Join as Host"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnJoinViewerMeeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join as Viewer"
+        android:textAllCaps="false" />
+
+</LinearLayout>

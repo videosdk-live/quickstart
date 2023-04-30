@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".ViewerFragment">
+
+    <LinearLayout
+        android:id="@+id/meetingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12sp"
+        android:paddingVertical="5sp">
+
+        <TextView
+            android:id="@+id/meetingId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="Meeting Id : "
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnLeave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Leave" />
+
+    </LinearLayout>
+
+    <TextView
+            android:id="@+id/waitingLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Waiting for host \n to start the live streaming"
+            android:textColor="@color/white"
+            android:textFontWeight="700"
+            android:textSize="20sp"
+            android:gravity="center"/>
+
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:resize_mode="fixed_width"
+        app:show_buffering="when_playing"
+        app:show_subtitle_button="false"
+        app:use_artwork="false"
+        app:show_next_button="false"
+        app:show_previous_button="false"
+        app:use_controller="true"
+        android:layout_below="@id/meetingLayout"/>
+
+
+</RelativeLayout>
