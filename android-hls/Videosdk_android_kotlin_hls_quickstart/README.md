@@ -19,7 +19,7 @@ At Video SDK, we’re building tools to help companies create world-class collab
 <img src="https://cdn.videosdk.live/website-resources/docs-resources/mobile_hls.png"/>
 </p>
 
-- VideoSDK also allows you to configure the interactive livestream layouts in numerous ways like by simply setting different prebuilt layouts in the configuration or by providing your own [custom template](https://docs.videosdk.live/docs/tutorials/customized-layout) to do the livestream according to your layout choice.
+- VideoSDK also allows you to configure the interactive livestream layouts in numerous ways like by simply setting different prebuilt layouts in the configuration or by providing your own [custom template](https://docs.videosdk.live/android/guide/interactive-live-streaming/custom-template) to do the livestream according to your layout choice.
 
 <br/>
 
