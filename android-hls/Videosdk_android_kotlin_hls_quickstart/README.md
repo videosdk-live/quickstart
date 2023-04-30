@@ -56,7 +56,13 @@ Clone the repository to your local environment.
 git clone https://github.com/videosdk-live/quickstart.git
 ```
 
-### 2. Update the JoinActivity.kt file
+### 2. Change Directory.
+
+```js
+cd quickstart/android-hls/Videosdk_android_kotlin_hls_quickstart
+```
+
+### 3. Update the JoinActivity.kt file
 
 Generate temporary token from [Video SDK Account](https://app.videosdk.live/signup).
 
@@ -64,7 +70,7 @@ Generate temporary token from [Video SDK Account](https://app.videosdk.live/sign
 private var sampleToken = "TEMPORARY-TOKEN";
 ```
 
-### 3. Run the sample app
+### 4. Run the sample app
 
 Run the android app with **Shift+F10** or the **▶ Run** from toolbar.
 
