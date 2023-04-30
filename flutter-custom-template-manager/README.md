@@ -41,7 +41,7 @@ At Video SDK, we’re building tools to help companies create world-class collab
 Clone the repository to your local environment.
 
 ```js
-git clone https://github.com/videosdk-live/quickstart-hls.git
+git clone https://github.com/videosdk-live/quickstart.git
 cd quickstart/flutter-custom-template-manager
 ```
 
