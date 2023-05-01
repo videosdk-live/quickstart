@@ -41,8 +41,8 @@ At Video SDK, we’re building tools to help companies create world-class collab
 Clone the repository to your local environment.
 
 ```js
-git clone https://github.com/videosdk-live/quickstart-hls.git
-cd quickstart/flutter
+git clone https://github.com/videosdk-live/quickstart.git
+cd quickstart/flutter-hls
 ```
 
 ### 2. Install the dependecies
@@ -185,6 +185,25 @@ room.end();
 
 <br/>
 
+## [Start HLS](https://docs.videosdk.live/flutter/guide/interactive-live-streaming/integrate-hls/start-hls)
+
+```js
+// start hls
+room.startHls(config: config);
+```
+
+<br/>
+
+## [Stop HLS](https://docs.videosdk.live/flutter/guide/interactive-live-streaming/integrate-hls/stop-hls)
+
+```js
+// stop hls
+room.stopHls();
+```
+
+<br/>
+
+
 ## [Listen for Room Events](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events)
 
 By registering callback handlers, VideoSDK sends callbacks to the client app whenever there is a change or update in the meeting after a user joins.
@@ -233,6 +252,29 @@ By registering callback handlers, VideoSDK sends callbacks to the client app whe
   });
 
 ```
+
+<br/>
+
+## [Event associated with HLS](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events#hlsstatechanged)
+
+- `hlsStateChanged` - Whenever meeting HLS state changes, then `hlsStateChanged` event will trigger.
+
+- You can get the `downstreamUrl` of the HLS to play it on the Viewer side when the state changes to `HLS_PLAYABLE`
+
+```js
+room.on(Events.hlsStateChanged, (Map<String, dynamic> data) {
+  //Status can be :: HLS_STARTING
+  //Status can be :: HLS_STARTED
+  //Status can be :: HLS_PLAYABLE
+  //Status can be :: HLS_STOPPING
+  //Status can be :: HLS_STOPPED
+  log("Meeting HLS status : ${data['status']}");
+  if (data['status'] == "HLS_PLAYABLE")
+    log("DOWNSTREAM URL -- " + data['downstreamUrl']);
+});
+```
+
+<br/>
 
 If you want to learn more about the SDK, read the Complete Documentation of [Flutter VideoSDK](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/getting-started)
 
