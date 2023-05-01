@@ -147,6 +147,9 @@ class _ILSSpeakerViewState extends State<ILSSpeakerView> {
         <String, dynamic>{
           "roomId": widget.room.id,
           "templateUrl": templateUrl,
+          "config":{
+            "orientation":"portrait",
+          },
         },
       ),
     );
