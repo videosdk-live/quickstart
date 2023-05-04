@@ -86,7 +86,7 @@ updates:
       interval: "daily"
       
   - package-ecosystem: "gradle" # See documentation for possible values
-    directory: "/android-custom-template-manager/Videosdk_android_java_hls_quickstart/app" # Location of package manifests
+    directory: "/android-custom-template-manager/Videosdk_android_kotlin_hls_quickstart/app" # Location of package manifests
     schedule:
       interval: "daily"
 
