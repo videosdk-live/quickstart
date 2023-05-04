@@ -89,3 +89,4 @@ updates:
     directory: "/android-custom-template-manager/Videosdk_android_java_hls_quickstart/app" # Location of package manifests
     schedule:
       interval: "daily"
+
