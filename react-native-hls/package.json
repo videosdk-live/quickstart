@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@videosdk.live/react-native-sdk": "^0.0.45",
+    "@videosdk.live/react-native-sdk": "^0.0.48",
     "react": "18.2.0",
     "react-native": "0.71.7",
     "react-native-video": "^5.2.1"
