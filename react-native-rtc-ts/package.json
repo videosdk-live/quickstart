@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@videosdk.live/react-native-incallmanager": "^0.0.9",
-    "@videosdk.live/react-native-sdk": "^0.0.47",
+    "@videosdk.live/react-native-sdk": "^0.0.48",
     "react": "18.2.0",
     "react-native": "0.71.7"
   },
