@@ -1,0 +1,91 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-rtc" # Location of package manifests
+    schedule:
+      interval: "daily"
+   
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-hls" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+      
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-native" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+      
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-native-hls" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-rtc-ts" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-native-rtc-ts" # Location of package manifests
+    schedule:
+      interval: "daily"
+     
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/react-custom-template-manager" # Location of package manifests
+    schedule:
+      interval: "daily"
+     
+  - package-ecosystem: "pub" # See documentation for possible values
+    directory: "/flutter-rtc" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+      
+  - package-ecosystem: "pub" # See documentation for possible values
+    directory: "/flutter-hls" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+      
+  - package-ecosystem: "pub" # See documentation for possible values
+    directory: "/flutter-custom-template-manager" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+      
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/android-hls/Videosdk_android_java_hls_quickstart/app" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/android-hls/Videosdk_android_kotlin_hls_quickstart/app" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/android-rtc/Videosdk_android_java_quickstart/app" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/android-rtc/Videosdk_android_kotlin_quickstart/app" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/android-custom-template-manager/Videosdk_android_java_hls_quickstart/app" # Location of package manifests
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/android-custom-template-manager/Videosdk_android_java_hls_quickstart/app" # Location of package manifests
+    schedule:
+      interval: "daily"
