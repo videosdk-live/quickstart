@@ -1,5 +1,4 @@
-let token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI5N2FmNjg0NC02ZjM5LTRjMDMtYmQ4Ny0xNGQ5MzJhMTAwZDUiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTY4MDc3MzczMSwiZXhwIjoxNjg4NTQ5NzMxfQ.082peE9OzHKwdfVtuu3o4ttNOCHgTNLTlLqsRnCgkz8";
+let token = "YOUR_TOKEN";
 
 // getting Elements from Dom
 const joinButton = document.getElementById("joinBtn");
