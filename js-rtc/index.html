@@ -1,45 +1,37 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-</head>
-
-<body>
+  ​
+  <head> </head>
+  ​
+  <body>
     <div id="join-screen">
-        <!-- Create new Meeting Button -->
-        <button id="createMeetingBtn">
-            New Meeting
-        </button>
-        OR
-        <!-- Join existing Meeting -->
-        <input type="text" id="meetingIdTxt" placeholder="Enter Meeting id" />
-        <button id="joinBtn">Join Meeting</button>
+      <!-- Create new Meeting Button -->
+      <button id="createMeetingBtn">New Meeting</button>
+      OR
+      <!-- Join existing Meeting -->
+      <input type="text" id="meetingIdTxt" placeholder="Enter Meeting id" />
+      <button id="joinBtn">Join Meeting</button>
     </div>
-
+    ​
     <!-- for Managing meeting status -->
     <div id="textDiv"></div>
-
-    <div id="grid-screen" style="display: none;">
-        <!-- To Display MeetingId -->
-        <h3 id="meetingIdHeading"></h3>
-
-        <!-- Controllers -->
-        <button id="leaveBtn">
-            Leave
-        </button>
-        <button id="toggleMicBtn">
-            Toggle Mic
-        </button>
-        <button id="toggleWebCamBtn">
-            Toggle WebCam
-        </button>
-
-        <!-- render Video -->
-        <div class="row" id="videoContainer"></div>
+    ​
+    <div id="grid-screen" style="display: none">
+      <!-- To Display MeetingId -->
+      <h3 id="meetingIdHeading"></h3>
+      ​
+      <!-- Controllers -->
+      <button id="leaveBtn">Leave</button>
+      <button id="toggleMicBtn">Toggle Mic</button>
+      <button id="toggleWebCamBtn">Toggle WebCam</button>
+      ​
+      <!-- render Video -->
+      <div class="row" id="videoContainer"></div>
     </div>
-
+    ​
     <script src="index.js"></script>
     <script src="https://sdk.videosdk.live/js-sdk/0.0.63/videosdk.js"></script>
-</body>
-
+    <script src="config.js"></script>
+  </body>
+  ​
 </html>

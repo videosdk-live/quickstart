@@ -1,5 +1,3 @@
-let token = "YOUR_TOKEN";
-
 // getting Elements from Dom
 const joinButton = document.getElementById("joinBtn");
 const leaveButton = document.getElementById("leaveBtn");
@@ -20,14 +18,14 @@ let isMicOn = false;
 let isWebCamOn = false;
 
 // Join Meeting Button Event Listener
-joinButton.addEventListener("click", () => {
+joinButton.addEventListener("click", async () => {
   document.getElementById("join-screen").style.display = "none";
   textDiv.textContent = "Joining the meeting...";
 
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  initializeMeeting();
+  await initializeMeeting();
 });
 
 // Create Meeting Button Event Listener
@@ -38,7 +36,7 @@ createButton.addEventListener("click", async () => {
   const url = `https://api.videosdk.live/v2/rooms`;
   const options = {
     method: "POST",
-    headers: { Authorization: token, "Content-Type": "application/json" },
+    headers: { Authorization: TOKEN, "Content-Type": "application/json" },
   };
 
   const { roomId } = await fetch(url, options)
@@ -46,18 +44,38 @@ createButton.addEventListener("click", async () => {
     .catch((error) => alert("error", error));
   meetingId = roomId;
 
-  initializeMeeting();
+  await initializeMeeting();
 });
 
+function makeid(length) {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
 // Initialize meeting
-function initializeMeeting() {
-  window.VideoSDK.config(token);
+async function initializeMeeting() {
+  window.VideoSDK.config(TOKEN);
+
+  let customTrack = await window.VideoSDK.createCameraVideoTrack({
+    optimizationMode: "motion",
+    encoderConfig: "h720p_w1280p",
+    multiStream: false,
+  });
 
   meeting = window.VideoSDK.initMeeting({
     meetingId: meetingId, // required
-    name: "Tirth", // required
+    name: makeid(6), // required
     micEnabled: true, // optional, default: true
     webcamEnabled: true, // optional, default: true
+    customCameraVideoTrack: customTrack,
   });
 
   meeting.join();
@@ -76,11 +94,16 @@ function initializeMeeting() {
   });
 
   meeting.on("meeting-joined", () => {
-    textDiv.style.display = "none";
+    textDiv.textContent = null;
+
     document.getElementById("grid-screen").style.display = "block";
     document.getElementById(
       "meetingIdHeading"
     ).textContent = `Meeting Id: ${meetingId}`;
+  });
+
+  meeting.on("meeting-left", () => {
+    videoContainer.innerHTML = "";
   });
 
   // other participants
@@ -102,12 +125,12 @@ function initializeMeeting() {
   // participants left
   meeting.on("participant-left", (participant) => {
     let vElement = document.getElementById(`f-${participant.id}`);
-    vElement.parentNode.removeChild(vElement);
+    vElement.remove(vElement);
 
     let aElement = document.getElementById(`a-${participant.id}`);
-    aElement.parentNode.removeChild(aElement);
+    aElement.remove(aElement);
     //remove it from participant list participantId;
-    document.getElementById(`p-${participant.id}`).remove();
+    // document.getElementById(`p-${participant.id}`).remove();
   });
 }
 
