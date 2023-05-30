@@ -7,12 +7,8 @@ const createButton = document.getElementById("createMeetingBtn");
 const videoContainer = document.getElementById("videoContainer");
 const textDiv = document.getElementById("textDiv");
 
-// decalare Variables
-let participants = [];
+// declare Variables
 let meeting = null;
-let localParticipant;
-let localParticipantAudio;
-let remoteParticipantId = "";
 let meetingId = "";
 let isMicOn = false;
 let isWebCamOn = false;
@@ -47,35 +43,15 @@ createButton.addEventListener("click", async () => {
   await initializeMeeting();
 });
 
-function makeid(length) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-}
-
 // Initialize meeting
 async function initializeMeeting() {
   window.VideoSDK.config(TOKEN);
 
-  let customTrack = await window.VideoSDK.createCameraVideoTrack({
-    optimizationMode: "motion",
-    encoderConfig: "h720p_w1280p",
-    multiStream: false,
-  });
-
   meeting = window.VideoSDK.initMeeting({
     meetingId: meetingId, // required
-    name: makeid(6), // required
+    name: "Tirth", // required
     micEnabled: true, // optional, default: true
     webcamEnabled: true, // optional, default: true
-    customCameraVideoTrack: customTrack,
   });
 
   meeting.join();
@@ -85,12 +61,7 @@ async function initializeMeeting() {
 
   // setting local participant stream
   meeting.localParticipant.on("stream-enabled", (stream) => {
-    setTrack(
-      stream,
-      localParticipantAudio,
-      meeting.localParticipant,
-      (isLocal = true)
-    );
+    setTrack(stream, null, meeting.localParticipant, true);
   });
 
   meeting.on("meeting-joined", () => {
@@ -106,17 +77,16 @@ async function initializeMeeting() {
     videoContainer.innerHTML = "";
   });
 
-  // other participants
+  //  participant joined
   meeting.on("participant-joined", (participant) => {
     let videoElement = createVideoElement(
       participant.id,
       participant.displayName
     );
     let audioElement = createAudioElement(participant.id);
-    remoteParticipantId = participant.id;
 
     participant.on("stream-enabled", (stream) => {
-      setTrack(stream, audioElement, participant, (isLocal = false));
+      setTrack(stream, audioElement, participant, false);
     });
     videoContainer.appendChild(videoElement);
     videoContainer.appendChild(audioElement);
@@ -129,8 +99,6 @@ async function initializeMeeting() {
 
     let aElement = document.getElementById(`a-${participant.id}`);
     aElement.remove(aElement);
-    //remove it from participant list participantId;
-    // document.getElementById(`p-${participant.id}`).remove();
   });
 }
 
@@ -167,7 +135,7 @@ function createAudioElement(pId) {
 
 // creating local participant
 function createLocalParticipant() {
-  localParticipant = createVideoElement(
+  let localParticipant = createVideoElement(
     meeting.localParticipant.id,
     meeting.localParticipant.displayName
   );
@@ -188,16 +156,17 @@ function setTrack(stream, audioElement, participant, isLocal) {
         console.error("videoElem.current.play() failed", error)
       );
   }
-  if (stream.kind == "audio" && !isLocal) {
-    const mediaStream = new MediaStream();
-    mediaStream.addTrack(stream.track);
-    audioElement.srcObject = mediaStream;
-    audioElement
-      .play()
-      .catch((error) => console.error("audioElem.play() failed", error));
-  }
-  if (stream.kind == "audio" && isLocal) {
-    isMicOn = true;
+  if (stream.kind == "audio") {
+    if (isLocal) {
+      isMicOn = true;
+    } else {
+      const mediaStream = new MediaStream();
+      mediaStream.addTrack(stream.track);
+      audioElement.srcObject = mediaStream;
+      audioElement
+        .play()
+        .catch((error) => console.error("audioElem.play() failed", error));
+    }
   }
 }
 
