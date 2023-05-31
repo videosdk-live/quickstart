@@ -1,0 +1,73 @@
+<div
+  style="height: 60px; background-color: lightgray"
+  ng-controller="myController"
+  ng-show="showMeetingScreen"
+  id="top-bar"
+>
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-left: 16px;
+      margin-right: 16px;
+      height: 100%;
+    "
+  >
+    <div>
+      <p style="margin-top: 0px; margin-bottom: 0px; font-weight: 700">
+        Name: {{name}}
+      </p>
+    </div>
+    <div
+      style="
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <button
+        ng-show="disableWebcamBtn"
+        style="margin-left: 4px; cursor: pointer"
+        ng-click="disableWebcam()"
+      >
+        Disable Webcam
+      </button>
+      <button
+        ng-show="enableWebcamBtn"
+        style="margin-left: 4px; cursor: pointer"
+        ng-click="enableWebcam()"
+      >
+        Enable Webcam
+      </button>
+      <button
+        ng-show="disableMicBtn"
+        style="margin-left: 4px; cursor: pointer"
+        ng-click="muteMic()"
+      >
+        Disable Mic
+      </button>
+      <button
+        ng-show="enableMicBtn"
+        style="margin-left: 4px; cursor: pointer"
+        ng-click="unmuteMic()"
+      >
+        Enable Mic
+      </button>
+      <button
+        style="
+          max-width: max-content;
+          margin-left: 4px;
+          cursor: pointer;
+          background-color: red;
+          color: white;
+          border: 2px solid red;
+        "
+        ng-click="leaveMeeting()"
+      >
+        Leave Meeting
+      </button>
+    </div>
+  </div>
+</div>

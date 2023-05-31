@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+  <head>
+    <base href="/" />
+    <title>Angular JS - Videosdk</title>
+    <link
+      href="https://lab.videosdk.live/angular-js-quick-start/content/css/styles.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="app/lib/angular.min.js"></script>
+    <script src="config.js"></script>
+    <script src="app/app.js"></script>
+
+    <style>
+      #videoContainer {
+        display: flex;
+        width: 70%;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        justify-content: center;
+      }
+      #videoContainer video {
+        width: 25%;
+        height: 200px;
+        object-fit: cover;
+      }
+      #screenShare {
+        /* margin-top: 20px; */
+        width: 80%;
+      }
+      audio {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <top-bar></top-bar>
+    <div ng-show="showJoinScreen">
+      <join-screen></join-screen>
+    </div>
+    <div ng-show="showMeetingScreen">
+      <meeting-container></meeting-container>
+    </div>
+    <script src="https://sdk.videosdk.live/js-sdk/0.0.67/videosdk.js"></script>
+  </body>
+</html>
