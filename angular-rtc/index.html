@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+  <head>
+    <base href="/" />
+    <title>Angular JS - Videosdk</title>
+    <link href="content/css/styles.css" rel="stylesheet" type="text/css" />
+    <script src="app/lib/angular.min.js"></script>
+    <script src="config.js"></script>
+    <script src="app/app.js"></script>
+  </head>
+
+  <body>
+    <top-bar></top-bar>
+    <div ng-show="showJoinScreen">
+      <join-screen></join-screen>
+    </div>
+    <div ng-show="showMeetingScreen">
+      <meeting-container></meeting-container>
+    </div>
+    <script src="https://sdk.videosdk.live/js-sdk/0.0.67/videosdk.js"></script>
+  </body>
+</html>
