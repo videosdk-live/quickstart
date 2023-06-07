@@ -1,0 +1,68 @@
+<div *ngIf="showTopBar" style="height: 60px; background-color: lightgray">
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-left: 16px;
+      margin-right: 16px;
+      height: 100%;
+    "
+  >
+    <div>
+      <p style="margin-top: 0px; margin-bottom: 0px; font-weight: 700">
+        MeetingId: {{ meetingId }}
+      </p>
+    </div>
+    <div
+      style="
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <button
+        *ngIf="disableWebcamBtn"
+        style="margin-left: 4px; cursor: pointer"
+        (click)="fireDisableWebcam()"
+      >
+        Disable Webcam
+      </button>
+      <button
+        *ngIf="enableWebcamBtn"
+        style="margin-left: 4px; cursor: pointer"
+        (click)="fireEnableWebcam()"
+      >
+        Enable Webcam
+      </button>
+      <button
+        *ngIf="disableMicBtn"
+        style="margin-left: 4px; cursor: pointer"
+        (click)="fireMuteMic()"
+      >
+        Disable Mic
+      </button>
+      <button
+        *ngIf="enableMicBtn"
+        style="margin-left: 4px; cursor: pointer"
+        (click)="fireUnmuteMic()"
+      >
+        Enable Mic
+      </button>
+      <button
+        style="
+          max-width: max-content;
+          margin-left: 4px;
+          cursor: pointer;
+          background-color: red;
+          color: white;
+          border: 2px solid red;
+        "
+        (click)="fireLeaveMeeting()"
+      >
+        Leave Meeting
+      </button>
+    </div>
+  </div>
+</div>
