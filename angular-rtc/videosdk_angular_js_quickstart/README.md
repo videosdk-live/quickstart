@@ -1,4 +1,4 @@
-# VideoSDK for Angular 2
+# VideoSDK for Angular JS
 
 [![Documentation](https://img.shields.io/badge/Read-Documentation-blue)](https://docs.videosdk.live/react/guide/video-and-audio-calling-api-sdk/getting-started)
 [![Discord](https://img.shields.io/discord/876774498798551130?label=Join%20on%20Discord)](https://discord.gg/kgAvyxtTxv)
@@ -28,34 +28,27 @@ Clone the repository to your local environment.
 
 ```js
 git clone https://github.com/videosdk-live/quickstart.git
-cd quickstart/angular-rtc/videosdk_angular_2_quickstart
+cd quickstart/angular-rtc/videosdk_angular_js_quickstart
 ```
 
-### 2. Install the dependecies
+### 3. Update the config.js file
 
-Install all the dependecies to run the project.
+- Create a new file config.js and Copy the config.example.js file's data to config.js file
+
+- Update the TOKEN in `config.js` file.Token would be generated from dashboard `https://app.videosdk.live/dashboard`
 
 ```js
-npm i
+token: YOUR_TOKEN,
 ```
-
-### 3. Update the enviroment.ts file
-
-- Create a new file enviroment.ts inside `src/enviroments` and Copy the enviroment.example.ts file's data to enviroment.ts file
-
-- Update the TOKEN in `enviroment.ts` file.Token would be generated from dashboard `https://app.videosdk.live/dashboard`
-
-  ```js
-  token: YOUR_TOKEN,
-  ```
 
 ### 4. Run the sample app
 
 - Bingo, It's time to run app
 
-  ```js
-  ng serve
-  ```
+```sh
+npm install -g live-server
+live-server --port=8000
+```
 
 <br/>
 

@@ -6,13 +6,10 @@ import { MeetingService } from './meeting.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   @ViewChild('participantGridContainer') participantGridContainer: ElementRef;
-
   title = 'videosdk_angular_2_quickstart';
-
   meeting: any;
   participantName: string = '';
   meetingId: string = '';
@@ -119,10 +116,7 @@ export class AppComponent {
       'style',
       'width: 100%; height: 100%;position: absolute;top: 0;left: 0;object-fit: cover;'
     );
-    // this.renderer.setAttribute(video, 'transform', "rotate('90')");
-    // this.renderer.setAttribute(video, 'border-radius', '10px');
     this.renderer.setProperty(video, 'srcObject', mediaStream);
-
     const videoElement = this.renderer.createElement('div');
     this.renderer.setAttribute(
       videoElement,
@@ -192,6 +186,23 @@ export class AppComponent {
     this.renderer.appendChild(audioElement, audio);
   }
 
+  createNameElemeent(participant: any) {
+    var nameElement = this.renderer.createElement('div');
+    this.renderer.setAttribute(
+      nameElement,
+      'id',
+      `name-container-${participant.id}`
+    );
+    nameElement.innerHTML = participant.displayName.charAt(0).toUpperCase();
+    this.renderer.setStyle(nameElement, 'backgroundColor', 'black');
+    this.renderer.setStyle(nameElement, 'color', 'white');
+    this.renderer.setStyle(nameElement, 'textAlign', 'center');
+    this.renderer.setStyle(nameElement, 'padding', '32px');
+    this.renderer.setStyle(nameElement, 'borderRadius', '100%');
+    this.renderer.setStyle(nameElement, 'fontSize', '20px');
+    return nameElement;
+  }
+
   handleStreamEnabled(
     stream: any,
     participant: any,
@@ -226,19 +237,7 @@ export class AppComponent {
         `video-container-${participant.id}`
       );
 
-      var nameElement = this.renderer.createElement('div');
-      this.renderer.setAttribute(
-        nameElement,
-        'id',
-        `name-container-${participant.id}`
-      );
-      nameElement.innerHTML = participant.displayName.charAt(0).toUpperCase();
-      this.renderer.setStyle(nameElement, 'backgroundColor', 'black');
-      this.renderer.setStyle(nameElement, 'color', 'white');
-      this.renderer.setStyle(nameElement, 'textAlign', 'center');
-      this.renderer.setStyle(nameElement, 'padding', '32px');
-      this.renderer.setStyle(nameElement, 'borderRadius', '100%');
-      this.renderer.setStyle(nameElement, 'fontSize', '20px');
+      var nameElement = this.createNameElemeent(participant);
       this.renderer.removeChild(participantMediaElement, videoElement);
       this.renderer.appendChild(participantMediaElement, nameElement);
     }
@@ -261,15 +260,12 @@ export class AppComponent {
       'lightgrey'
     );
     this.renderer.setStyle(participantGridItem1, 'borderRadius', '10px');
-    // this.renderer.setStyle(participantGridItem1, 'height', '0');
     this.renderer.setStyle(participantGridItem1, 'aspectRatio', 16 / 9);
     this.renderer.setStyle(participantGridItem1, 'width', '360px');
     this.renderer.setStyle(participantGridItem1, 'marginTop', '8px');
     this.renderer.setStyle(participantGridItem1, 'display', 'flex');
     this.renderer.setStyle(participantGridItem1, 'alignItems', 'center');
     this.renderer.setStyle(participantGridItem1, 'justifyContent', 'center');
-    // this.renderer.setStyle(participantGridItem1, 'position', 'relative');
-    // this.renderer.setStyle(participantGridItem1, 'paddingTop', '56.25%');
     this.renderer.setStyle(participantGridItem1, 'overflow', 'hidden');
 
     this.renderer.setAttribute(
@@ -297,28 +293,13 @@ export class AppComponent {
       'center'
     );
 
-    var nameElement = this.renderer.createElement('div');
-    this.renderer.setAttribute(
-      nameElement,
-      'id',
-      `name-container-${participant.id}`
-    );
-    nameElement.innerHTML = participant.displayName.charAt(0).toUpperCase();
-    this.renderer.setStyle(nameElement, 'backgroundColor', 'black');
-    this.renderer.setStyle(nameElement, 'color', 'white');
-    this.renderer.setStyle(nameElement, 'textAlign', 'center');
-    this.renderer.setStyle(nameElement, 'padding', '32px');
-    this.renderer.setStyle(nameElement, 'borderRadius', '100%');
-    this.renderer.setStyle(nameElement, 'fontSize', '20px');
-
+    var nameElement = this.createNameElemeent(participant);
     this.renderer.appendChild(
       this.participantGridContainer.nativeElement,
       participantGridItem1
     );
-
     this.renderer.appendChild(participantGridItem1, participantMediaElement1);
     this.renderer.appendChild(participantMediaElement1, nameElement);
-
     var participantGridItem = document.getElementById(
       `participant-grid-item-${participant.id}`
     );

@@ -1,11 +1,12 @@
-<div *ngIf="showTopBar" style="height: 60px; background-color: lightgray">
+<div *ngIf="showTopBar" style="height: 65px; background-color: lightgray">
   <div
     style="
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
       margin-left: 16px;
       margin-right: 16px;
+      padding-top: 8px;
+      padding-bottom: 8px;
       height: 100%;
     "
   >
@@ -14,24 +15,17 @@
         MeetingId: {{ meetingId }}
       </p>
     </div>
-    <div
-      style="
-        display: flex;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-      "
-    >
+    <div style="display: flex; margin-top: 8px">
       <button
         *ngIf="disableWebcamBtn"
-        style="margin-left: 4px; cursor: pointer"
+        style="cursor: pointer"
         (click)="fireDisableWebcam()"
       >
         Disable Webcam
       </button>
       <button
         *ngIf="enableWebcamBtn"
-        style="margin-left: 4px; cursor: pointer"
+        style="cursor: pointer"
         (click)="fireEnableWebcam()"
       >
         Enable Webcam
