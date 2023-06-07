@@ -1,35 +1,19 @@
 <div
-  style="height: 60px; background-color: lightgray"
+  style="height: 70px; background-color: lightgray"
   ng-controller="myController"
   ng-show="showMeetingScreen"
   id="top-bar"
 >
-  <div
-    style="
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-left: 16px;
-      margin-right: 16px;
-      height: 100%;
-    "
-  >
+  <div class="top-bar-div">
     <div>
       <p style="margin-top: 0px; margin-bottom: 0px; font-weight: 700">
-        Name: {{name}}
+        MeetingId: {{meetingId}}
       </p>
     </div>
-    <div
-      style="
-        display: flex;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-      "
-    >
+    <div style="display: flex; align-items: center; margin-top: 8px">
       <button
         ng-show="disableWebcamBtn"
-        style="margin-left: 4px; cursor: pointer"
+        style="cursor: pointer"
         ng-click="disableWebcam()"
       >
         Disable Webcam
@@ -55,19 +39,7 @@
       >
         Enable Mic
       </button>
-      <button
-        style="
-          max-width: max-content;
-          margin-left: 4px;
-          cursor: pointer;
-          background-color: red;
-          color: white;
-          border: 2px solid red;
-        "
-        ng-click="leaveMeeting()"
-      >
-        Leave Meeting
-      </button>
+      <button class="leave-btn" ng-click="leaveMeeting()">Leave Meeting</button>
     </div>
   </div>
 </div>

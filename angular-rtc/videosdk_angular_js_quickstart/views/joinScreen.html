@@ -1,0 +1,42 @@
+<div
+  id="joinPage"
+  class="main-bg"
+  style="display: flex"
+  ng-controller="myController"
+>
+  <div style="display: flex; flex-direction: column; margin-left: 8px">
+    <h3>AngularJS quickstart with Videosdk</h3>
+    <form name="myForm" style="display: flex">
+      <div style="margin-right: 8px">
+        <button
+          class="btn secondary text-white"
+          id="meetingStartButton"
+          ng-click="createMeeting()"
+        >
+          Create Meeting
+        </button>
+      </div>
+      <p>OR</p>
+      <div style="margin-left: 10px; margin-right: 16px">
+        <input
+          class="text-input"
+          type="text"
+          ng-model="meetingId"
+          placeholder="Enter meeting id"
+        />
+        <p ng-show="showMeetingIdError" class="input-err">
+          Please enter valid meeting Id
+        </p>
+      </div>
+      <div>
+        <button
+          class="btn secondary text-white"
+          id="meetingJoinButton"
+          ng-click="validateMeeting()"
+        >
+          Join Meeting
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

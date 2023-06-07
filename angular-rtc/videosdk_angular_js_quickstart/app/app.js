@@ -4,18 +4,6 @@ myApp.config(function () {});
 
 myApp.run(function () {});
 
-myApp.directive("participantGridContainer", [
-  function () {
-    return {
-      restrict: "E",
-      templateUrl: "views/participantGridContainer.html",
-      transclude: true,
-      controller: "myController",
-      replace: true,
-    };
-  },
-]);
-
 myApp.directive("topBar", [
   function () {
     return {
@@ -52,12 +40,14 @@ myApp.directive("meetingContainer", [
   },
 ]);
 
-myApp.controller("myController", function ($scope, ENV) {
+myApp.controller("myController", function ($scope, $http, ENV) {
   // variable initialization
   $scope.name = "Homi J. Bhabha";
   $scope.meetingId = "";
+  $scope.showMeetingIdError = false;
   $scope.showMeetingScreen = false;
   $scope.showJoinScreen = true;
+
   $scope.localParticipant = null;
   $scope.participants = [];
   $scope.meeting = null;
@@ -65,27 +55,9 @@ myApp.controller("myController", function ($scope, ENV) {
   $scope.enableMicBtn = false;
   $scope.disableWebcamBtn = true;
   $scope.disableMicBtn = true;
-
-  $scope.videoElement = document.getElementById("videoElement");
   $scope.participantGridContainer = document.getElementById(
     "participant-grid-container"
   );
-
-  if ($scope.showJoinScreen) {
-    // Check if the browser supports mediaDevices
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      // Request permission to access the camera
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then(function (stream) {
-          // Set the video source to the stream from the camera
-          $scope.videoElement.srcObject = stream;
-        })
-        .catch(function (error) {
-          console.error("Error accessing camera:", error);
-        });
-    }
-  }
 
   $scope.createVideoElement = function (
     stream,
@@ -150,6 +122,20 @@ myApp.controller("myController", function ($scope, ENV) {
     audioElement.appendChild(audio);
   };
 
+  $scope.createNameElement = function (participant) {
+    var nameElement = document.createElement("div");
+    nameElement.setAttribute("id", `name-container-${participant.id}`);
+    nameElement.innerHTML = participant.displayName.charAt(0).toUpperCase();
+    nameElement.style.backgroundColor = "black";
+    nameElement.style.color = "white";
+    nameElement.style.textAlign = "center";
+    nameElement.style.padding = "32px";
+    nameElement.style.borderRadius = "100%";
+    nameElement.style.fontSize = "20px";
+
+    return nameElement;
+  };
+
   $scope.handleStreamEnabled = function (
     stream,
     participant,
@@ -178,27 +164,15 @@ myApp.controller("myController", function ($scope, ENV) {
     participantMediaElement
   ) {
     if (stream.kind == "video") {
-      console.log("video stream disabled");
-
       var videoElement = document.getElementById(
         `video-container-${participant.id}`
       );
-      var nameElement = document.createElement("div");
-      nameElement.setAttribute("id", `name-container-${participant.id}`);
-      nameElement.innerHTML = participant.displayName.charAt(0).toUpperCase();
-      nameElement.style.backgroundColor = "black";
-      nameElement.style.color = "white";
-      nameElement.style.textAlign = "center";
-      nameElement.style.padding = "32px";
-      nameElement.style.borderRadius = "100%";
-      nameElement.style.fontSize = "20px";
-
+      var nameElement = $scope.createNameElement(participant);
       participantMediaElement.removeChild(videoElement);
       participantMediaElement.appendChild(nameElement);
     }
     if (!isLocal) {
       if (stream.kind == "audio") {
-        console.log("audio stream disabled");
         var audioElement = document.getElementById(
           `audio-container-${participant.id}`
         );
@@ -207,34 +181,78 @@ myApp.controller("myController", function ($scope, ENV) {
     }
   };
 
-  $scope.joinMeeting = function () {
+  $scope.createMeeting = function () {
+    const url = "https://api.videosdk.live/v2/rooms";
+    const config = {
+      headers: {
+        Authorization: ENV.token,
+        "Content-Type": "application/json",
+      },
+    };
+
+    $http
+      .post(url, { name: $scope.name }, config)
+      .then(function (response) {
+        const { roomId } = response.data;
+        $scope.meetingId = roomId;
+        $scope.initMeeting();
+      })
+      .catch(function (error) {
+        alert("error", error);
+      });
+  };
+
+  $scope.validateMeeting = function () {
+    const url = `https://api.videosdk.live/v2/rooms/validate/${$scope.meetingId}`;
+    const config = {
+      headers: {
+        Authorization: ENV.token,
+        "Content-Type": "application/json",
+      },
+    };
+
+    $http
+      .get(url, config)
+      .then(function (response) {
+        if (response.data.roomId === $scope.meetingId) {
+          $scope.showMeetingIdError = false;
+          $scope.initMeeting();
+        }
+      })
+      .catch(function (error) {
+        $scope.showMeetingIdError = true;
+        console.log("error", error);
+      });
+  };
+
+  $scope.initMeeting = function () {
     window.VideoSDK.config(ENV.token); // required;
 
     var meeting = window.VideoSDK.initMeeting({
-      meetingId: ENV.meetingId, // required
+      meetingId: $scope.meetingId, // required
       name: $scope.name, // required
       micEnabled: true, // optional, default: true
       webcamEnabled: true, // optional, default: true
       maxResolution: "hd",
     });
-
     meeting.join();
     $scope.meeting = meeting;
-    $scope.handleMeetingEvents(meeting);
-    var showJoinScreenMessage = document.createElement("div");
-    var topBar = document.getElementById("top-bar");
 
-    topBar.style.display = "none";
+    if ($scope.meeting) {
+      $scope.handleMeetingEvents($scope.meeting);
+      var showJoinScreenMessage = document.createElement("div");
+      var topBar = document.getElementById("top-bar");
+      topBar.style.display = "none";
 
-    showJoinScreenMessage.setAttribute("id", "show-join-screen-message");
-    showJoinScreenMessage.innerHTML = "Please wait to join meeting...";
-    showJoinScreenMessage.style.color = "black";
-    showJoinScreenMessage.style.fontSize = "20px";
-    showJoinScreenMessage.style.fontWeight = "bold";
-    showJoinScreenMessage.style.marginTop = "20px";
-    showJoinScreenMessage.style.marginLeft = "20px";
-
-    $scope.participantGridContainer.appendChild(showJoinScreenMessage);
+      showJoinScreenMessage.setAttribute("id", "show-join-screen-message");
+      showJoinScreenMessage.innerHTML = "Please wait to join meeting...";
+      showJoinScreenMessage.style.color = "black";
+      showJoinScreenMessage.style.fontSize = "20px";
+      showJoinScreenMessage.style.fontWeight = "bold";
+      showJoinScreenMessage.style.marginTop = "20px";
+      showJoinScreenMessage.style.marginLeft = "20px";
+      $scope.participantGridContainer.appendChild(showJoinScreenMessage);
+    }
   };
 
   $scope.handleMeetingEvents = function (meeting) {
@@ -252,32 +270,19 @@ myApp.controller("myController", function ($scope, ENV) {
       participantGridItem1.style.alignItems = "center";
       participantGridItem1.style.justifyContent = "center";
       participantGridItem1.style.position = "relative";
-
       participantGridItem1.setAttribute(
         "id",
         `participant-grid-item-${participant.id}`
       );
       participantGridItem1.setAttribute("class", "col-4");
-      // participantGridItem1.setAttribute("ng-controller", "myController");
-      // participantGridItem1.style.display = "flex";
       var participantMediaElement1 = document.createElement("div");
       participantMediaElement1.setAttribute(
         "id",
         `participant-media-container-${participant.id}`
       );
-
-      var nameElement = document.createElement("div");
-      nameElement.setAttribute("id", `name-container-${participant.id}`);
-      nameElement.innerHTML = participant.displayName.charAt(0).toUpperCase();
-      nameElement.style.backgroundColor = "black";
-      nameElement.style.color = "white";
-      nameElement.style.textAlign = "center";
-      nameElement.style.padding = "32px";
-      nameElement.style.borderRadius = "100%";
-      nameElement.style.fontSize = "20px";
+      var nameElement = $scope.createNameElement(participant);
       $scope.participantGridContainer.appendChild(participantGridItem1);
       participantGridItem1.appendChild(participantMediaElement1);
-
       participantMediaElement1.appendChild(nameElement);
       var participantGridItem = document.getElementById(
         `participant-grid-item-${participant.id}`
@@ -291,6 +296,11 @@ myApp.controller("myController", function ($scope, ENV) {
         participantMediaElement,
       };
     };
+
+    if (meeting) {
+      $scope.showJoinScreen = false;
+      $scope.showMeetingScreen = true;
+    }
 
     meeting.on("meeting-joined", function () {
       var showJoinScreenMessage = document.getElementById(
@@ -323,12 +333,9 @@ myApp.controller("myController", function ($scope, ENV) {
     });
 
     meeting.on("participant-left", (participant) => {
-      console.log("Participant Left: ", participant.id);
-
       var participantGridItem = document.getElementById(
         `participant-grid-item-${participant.id}`
       );
-
       $scope.participantGridContainer.removeChild(participantGridItem);
     });
 
@@ -345,8 +352,6 @@ myApp.controller("myController", function ($scope, ENV) {
 
     //remote participant
     meeting.on("participant-joined", (participant) => {
-      console.log("New Participant Joined: ", participant.id);
-
       var { participantMediaElement } = $scope.participantGridGenerator({
         participant: participant,
       });
@@ -368,11 +373,6 @@ myApp.controller("myController", function ($scope, ENV) {
         );
       });
     });
-
-    if (meeting) {
-      $scope.showJoinScreen = false;
-      $scope.showMeetingScreen = true;
-    }
 
     $scope.disableWebcam = function () {
       $scope.meeting.disableWebcam();
