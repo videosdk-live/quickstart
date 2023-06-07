@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head> </head>
+
+<body>
+    <div id="join-screen">
+        <!-- Create new Meeting Button -->
+        <button id="createMeetingBtn">New Meeting</button>
+        OR
+        <!-- Join existing Meeting -->
+        <input type="text" id="meetingIdTxt" placeholder="Enter Meeting id" />
+        <button id="joinHostBtn">Join As Host</button>
+        <button id="joinViewerBtn">Join As Viewer</button>
+    </div>
+
+    <!-- for Managing meeting status -->
+    <div id="textDiv"></div>
+
+    <div id="grid-screen" style="display: none">
+        <!-- To Display MeetingId -->
+        <h3 id="meetingIdHeading"></h3>
+        <h3 id="hlsStatusHeading"></h3>
+
+        <div id="speakerView" style="display: none">
+            <!-- Controllers -->
+            <button id="leaveBtn">Leave</button>
+            <button id="toggleMicBtn">Toggle Mic</button>
+            <button id="toggleWebCamBtn">Toggle WebCam</button>
+            <button id="startHlsBtn">Start HLS</button>
+            <button id="stopHlsBtn">Stop HLS</button>
+        </div>
+
+        <!-- render Video -->
+        <div id="videoContainer"></div>
+    </div>
+    <script src="https://sdk.videosdk.live/js-sdk/0.0.63/videosdk.js"></script>
+    <script src="config.js"></script>
+    <script src="index.js"></script>
+
+    <!-- hls lib script  -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js"></script>
+</body>
+
+</html>
