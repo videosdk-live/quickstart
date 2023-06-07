@@ -36,7 +36,7 @@ cd quickstart/angular-rtc/videosdk_angular_2_quickstart
 Install all the dependecies to run the project.
 
 ```js
-npm i
+npm install
 ```
 
 ### 3. Update the enviroment.ts file
