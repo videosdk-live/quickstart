@@ -9,14 +9,8 @@
   <app-top-bar
     [meetingId]="meetingId"
     [showTopBar]="showTopBar"
-    [disableWebcamBtn]="disableWebcamBtn"
-    [enableWebcamBtn]="enableWebcamBtn"
-    [disableMicBtn]="disableMicBtn"
-    [enableMicBtn]="enableMicBtn"
-    (disableWebcam)="disableWebcam()"
-    (enableWebcam)="enableWebcam()"
-    (muteMic)="muteMic()"
-    (unmuteMic)="unmuteMic()"
+    (toogleWebcam)="toogleWebcam()"
+    (toogleMic)="toogleMic()"
     (leaveMeeting)="leaveMeeting()"
   ></app-top-bar>
   <!-- topbar End -->

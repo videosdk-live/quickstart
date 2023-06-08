@@ -6,33 +6,19 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class TopBarComponent {
   @Input() showTopBar: boolean = false;
-  @Input() disableWebcamBtn: boolean = false;
-  @Input() enableWebcamBtn: boolean = false;
-  @Input() disableMicBtn: boolean = false;
-  @Input() enableMicBtn: boolean = false;
-  @Output() disableWebcam = new EventEmitter();
-  @Output() enableWebcam = new EventEmitter();
-  @Output() muteMic = new EventEmitter();
-  @Output() unmuteMic = new EventEmitter();
+  @Output() toogleWebcam = new EventEmitter();
+  @Output() toogleMic = new EventEmitter();
   @Output() leaveMeeting = new EventEmitter();
   @Input() meetingId: string = '';
 
   constructor() {}
 
-  fireDisableWebcam() {
-    this.disableWebcam.emit();
+  fireToggleWebcam() {
+    this.toogleWebcam.emit();
   }
 
-  fireEnableWebcam() {
-    this.enableWebcam.emit();
-  }
-
-  fireMuteMic() {
-    this.muteMic.emit();
-  }
-
-  fireUnmuteMic() {
-    this.unmuteMic.emit();
+  fireToggleMic() {
+    this.toogleMic.emit();
   }
 
   fireLeaveMeeting() {

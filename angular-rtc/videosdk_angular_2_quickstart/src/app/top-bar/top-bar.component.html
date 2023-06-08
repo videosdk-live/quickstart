@@ -16,33 +16,14 @@
       </p>
     </div>
     <div style="display: flex; margin-top: 8px">
-      <button
-        *ngIf="disableWebcamBtn"
-        style="cursor: pointer"
-        (click)="fireDisableWebcam()"
-      >
-        Disable Webcam
+      <button style="cursor: pointer" (click)="fireToggleWebcam()">
+        Toggle Webcam
       </button>
       <button
-        *ngIf="enableWebcamBtn"
-        style="cursor: pointer"
-        (click)="fireEnableWebcam()"
-      >
-        Enable Webcam
-      </button>
-      <button
-        *ngIf="disableMicBtn"
         style="margin-left: 4px; cursor: pointer"
-        (click)="fireMuteMic()"
+        (click)="fireToggleMic()"
       >
-        Disable Mic
-      </button>
-      <button
-        *ngIf="enableMicBtn"
-        style="margin-left: 4px; cursor: pointer"
-        (click)="fireUnmuteMic()"
-      >
-        Enable Mic
+        Toggle Mic
       </button>
       <button
         style="

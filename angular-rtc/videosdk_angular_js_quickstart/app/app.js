@@ -44,6 +44,8 @@ myApp.controller("myController", function ($scope, $http, ENV) {
   // variable initialization
   $scope.name = "Homi J. Bhabha";
   $scope.meetingId = "";
+  $scope.isWebcamOn = false;
+  $scope.isMicOn = false;
   $scope.showMeetingIdError = false;
   $scope.showMeetingScreen = false;
   $scope.showJoinScreen = true;
@@ -51,10 +53,6 @@ myApp.controller("myController", function ($scope, $http, ENV) {
   $scope.localParticipant = null;
   $scope.participants = [];
   $scope.meeting = null;
-  $scope.enableWebcamBtn = false;
-  $scope.enableMicBtn = false;
-  $scope.disableWebcamBtn = true;
-  $scope.disableMicBtn = true;
   $scope.participantGridContainer = document.getElementById(
     "participant-grid-container"
   );
@@ -143,6 +141,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     participantMediaElement
   ) {
     if (stream.kind == "video") {
+      $scope.isWebcamOn = true;
       var nameElement = document.getElementById(
         `name-container-${participant.id}`
       );
@@ -151,6 +150,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     }
     if (!isLocal) {
       if (stream.kind == "audio") {
+        $scope.isMicOn = true;
         console.log("audio stream enabled");
         $scope.createAudioElement(stream, participant, participantMediaElement);
       }
@@ -164,6 +164,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     participantMediaElement
   ) {
     if (stream.kind == "video") {
+      $scope.isWebcamOn = false;
       var videoElement = document.getElementById(
         `video-container-${participant.id}`
       );
@@ -173,6 +174,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     }
     if (!isLocal) {
       if (stream.kind == "audio") {
+        $scope.isMicOn = false;
         var audioElement = document.getElementById(
           `audio-container-${participant.id}`
         );
@@ -260,40 +262,36 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     $scope.participants = meeting.participants;
 
     $scope.participantGridGenerator = function ({ participant }) {
-      var participantGridItem1 = document.createElement("div");
-      participantGridItem1.style.backgroundColor = "lightgrey";
-      participantGridItem1.style.borderRadius = "10px";
-      participantGridItem1.style.height = "300px";
-      participantGridItem1.style.width = "320px";
-      participantGridItem1.style.marginTop = "8px";
-      participantGridItem1.style.display = "flex";
-      participantGridItem1.style.alignItems = "center";
-      participantGridItem1.style.justifyContent = "center";
-      participantGridItem1.style.position = "relative";
-      participantGridItem1.setAttribute(
+      var participantGridItem = document.createElement("div");
+      participantGridItem.style.backgroundColor = "lightgrey";
+      participantGridItem.style.borderRadius = "10px";
+      participantGridItem.style.height = "300px";
+      participantGridItem.style.width = "320px";
+      participantGridItem.style.marginTop = "8px";
+      participantGridItem.style.display = "flex";
+      participantGridItem.style.alignItems = "center";
+      participantGridItem.style.justifyContent = "center";
+      participantGridItem.style.position = "relative";
+      participantGridItem.setAttribute(
         "id",
         `participant-grid-item-${participant.id}`
       );
-      participantGridItem1.setAttribute("class", "col-4");
-      var participantMediaElement1 = document.createElement("div");
-      participantMediaElement1.setAttribute(
+      participantGridItem.setAttribute("class", "col-4");
+      var participantMediaElement = document.createElement("div");
+      participantMediaElement.setAttribute(
         "id",
         `participant-media-container-${participant.id}`
       );
       var nameElement = $scope.createNameElement(participant);
-      $scope.participantGridContainer.appendChild(participantGridItem1);
-      participantGridItem1.appendChild(participantMediaElement1);
-      participantMediaElement1.appendChild(nameElement);
-      var participantGridItem = document.getElementById(
-        `participant-grid-item-${participant.id}`
-      );
-      var participantMediaElement = document.getElementById(
+      $scope.participantGridContainer.appendChild(participantGridItem);
+      participantGridItem.appendChild(participantMediaElement);
+      participantMediaElement.appendChild(nameElement);
+      var getParticipantMediaElement = document.getElementById(
         `participant-media-container-${participant.id}`
       );
 
       return {
-        participantGridItem,
-        participantMediaElement,
+        getParticipantMediaElement,
       };
     };
 
@@ -310,7 +308,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
       showJoinScreenMessage.style.display = "none";
       topBar.style.display = "block";
 
-      const { participantMediaElement } = $scope.participantGridGenerator({
+      const { getParticipantMediaElement } = $scope.participantGridGenerator({
         participant: meeting.localParticipant,
       });
 
@@ -319,7 +317,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
           stream,
           meeting.localParticipant,
           true,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
       meeting.localParticipant.on("stream-disabled", (stream) => {
@@ -327,7 +325,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
           stream,
           meeting.localParticipant,
           true,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
     });
@@ -352,7 +350,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
 
     //remote participant
     meeting.on("participant-joined", (participant) => {
-      var { participantMediaElement } = $scope.participantGridGenerator({
+      var { getParticipantMediaElement } = $scope.participantGridGenerator({
         participant: participant,
       });
       participant.setQuality("high");
@@ -361,7 +359,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
           stream,
           participant,
           false,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
       participant.on("stream-disabled", (stream) => {
@@ -369,33 +367,25 @@ myApp.controller("myController", function ($scope, $http, ENV) {
           stream,
           participant,
           false,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
     });
 
-    $scope.disableWebcam = function () {
-      $scope.meeting.disableWebcam();
-      $scope.enableWebcamBtn = true;
-      $scope.disableWebcamBtn = false;
+    $scope.toggleWebcam = function () {
+      if ($scope.isWebcamOn) {
+        $scope.meeting.disableWebcam();
+      } else {
+        $scope.meeting.enableWebcam();
+      }
     };
 
-    $scope.enableWebcam = function () {
-      $scope.meeting.enableWebcam();
-      $scope.enableWebcamBtn = false;
-      $scope.disableWebcamBtn = true;
-    };
-
-    $scope.muteMic = function () {
-      $scope.meeting.muteMic();
-      $scope.enableMicBtn = true;
-      $scope.disableMicBtn = false;
-    };
-
-    $scope.unmuteMic = function () {
-      $scope.meeting.unmuteMic();
-      $scope.enableMicBtn = false;
-      $scope.disableMicBtn = true;
+    $scope.toggleMic = function () {
+      if ($scope.isMicOn) {
+        $scope.meeting.muteMic();
+      } else {
+        $scope.meeting.unmuteMic();
+      }
     };
 
     $scope.leaveMeeting = function () {

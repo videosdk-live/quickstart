@@ -18,10 +18,8 @@ export class AppComponent {
   showTopBar: boolean = false;
   localParticipant: any;
   participants: any[] = [];
-  enableWebcamBtn: boolean = false;
-  enableMicBtn: boolean = false;
-  disableWebcamBtn: boolean = true;
-  disableMicBtn: boolean = true;
+  isWebcamOn: boolean = false;
+  isMicOn: boolean = false;
 
   participant: any;
 
@@ -210,6 +208,7 @@ export class AppComponent {
     participantMediaElement: any
   ) {
     if (stream.kind == 'video') {
+      this.isWebcamOn = true;
       var nameElement = document.getElementById(
         `name-container-${participant.id}`
       );
@@ -218,6 +217,7 @@ export class AppComponent {
     }
     if (!isLocal) {
       if (stream.kind == 'audio') {
+        this.isMicOn = true;
         console.log('audio stream enabled');
         this.createAudioElement(stream, participant, participantMediaElement);
       }
@@ -231,6 +231,7 @@ export class AppComponent {
     participantMediaElement: any
   ) {
     if (stream.kind == 'video') {
+      this.isWebcamOn = false;
       console.log('video stream disabled');
 
       var videoElement = document.getElementById(
@@ -243,6 +244,7 @@ export class AppComponent {
     }
     if (!isLocal) {
       if (stream.kind == 'audio') {
+        this.isMicOn = false;
         console.log('audio stream disabled');
         var audioElement = document.getElementById(
           `audio-container-${participant.id}`
@@ -253,63 +255,52 @@ export class AppComponent {
   }
 
   participantGridGenerator(participant: any) {
-    var participantGridItem1 = this.renderer.createElement('div');
-    this.renderer.setStyle(
-      participantGridItem1,
-      'backgroundColor',
-      'lightgrey'
-    );
-    this.renderer.setStyle(participantGridItem1, 'borderRadius', '10px');
-    this.renderer.setStyle(participantGridItem1, 'aspectRatio', 16 / 9);
-    this.renderer.setStyle(participantGridItem1, 'width', '360px');
-    this.renderer.setStyle(participantGridItem1, 'marginTop', '8px');
-    this.renderer.setStyle(participantGridItem1, 'display', 'flex');
-    this.renderer.setStyle(participantGridItem1, 'alignItems', 'center');
-    this.renderer.setStyle(participantGridItem1, 'justifyContent', 'center');
-    this.renderer.setStyle(participantGridItem1, 'overflow', 'hidden');
+    var participantGridItem = this.renderer.createElement('div');
+    this.renderer.setStyle(participantGridItem, 'backgroundColor', 'lightgrey');
+    this.renderer.setStyle(participantGridItem, 'borderRadius', '10px');
+    this.renderer.setStyle(participantGridItem, 'aspectRatio', 16 / 9);
+    this.renderer.setStyle(participantGridItem, 'width', '360px');
+    this.renderer.setStyle(participantGridItem, 'marginTop', '8px');
+    this.renderer.setStyle(participantGridItem, 'display', 'flex');
+    this.renderer.setStyle(participantGridItem, 'alignItems', 'center');
+    this.renderer.setStyle(participantGridItem, 'justifyContent', 'center');
+    this.renderer.setStyle(participantGridItem, 'overflow', 'hidden');
 
     this.renderer.setAttribute(
-      participantGridItem1,
+      participantGridItem,
       'id',
       `participant-grid-item-${participant.id}`
     );
 
-    this.renderer.setAttribute(participantGridItem1, 'class', 'col-4');
+    this.renderer.setAttribute(participantGridItem, 'class', 'col-4');
 
-    var participantMediaElement1 = this.renderer.createElement('div');
+    var participantMediaElement = this.renderer.createElement('div');
     this.renderer.setAttribute(
-      participantMediaElement1,
+      participantMediaElement,
       'id',
       `participant-media-container-${participant.id}`
     );
-    this.renderer.setStyle(participantMediaElement1, 'position', 'relative');
-    this.renderer.setStyle(participantMediaElement1, 'width', '100%');
-    this.renderer.setStyle(participantMediaElement1, 'height', '100%');
-    this.renderer.setStyle(participantMediaElement1, 'display', 'flex');
-    this.renderer.setStyle(participantMediaElement1, 'alignItems', 'center');
-    this.renderer.setStyle(
-      participantMediaElement1,
-      'justifyContent',
-      'center'
-    );
+    this.renderer.setStyle(participantMediaElement, 'position', 'relative');
+    this.renderer.setStyle(participantMediaElement, 'width', '100%');
+    this.renderer.setStyle(participantMediaElement, 'height', '100%');
+    this.renderer.setStyle(participantMediaElement, 'display', 'flex');
+    this.renderer.setStyle(participantMediaElement, 'alignItems', 'center');
+    this.renderer.setStyle(participantMediaElement, 'justifyContent', 'center');
 
     var nameElement = this.createNameElemeent(participant);
     this.renderer.appendChild(
       this.participantGridContainer.nativeElement,
-      participantGridItem1
+      participantGridItem
     );
-    this.renderer.appendChild(participantGridItem1, participantMediaElement1);
-    this.renderer.appendChild(participantMediaElement1, nameElement);
-    var participantGridItem = document.getElementById(
-      `participant-grid-item-${participant.id}`
-    );
-    var participantMediaElement = document.getElementById(
+    this.renderer.appendChild(participantGridItem, participantMediaElement);
+    this.renderer.appendChild(participantMediaElement, nameElement);
+
+    var getParticipantMediaElement = document.getElementById(
       `participant-media-container-${participant.id}`
     );
 
     return {
-      participantGridItem,
-      participantMediaElement,
+      getParticipantMediaElement,
     };
   }
 
@@ -322,7 +313,7 @@ export class AppComponent {
         'show-join-screen-message'
       );
       this.renderer.removeChild(document.body, showJoinScreenMessage);
-      const { participantMediaElement } = this.participantGridGenerator(
+      const { getParticipantMediaElement } = this.participantGridGenerator(
         this.meeting.localParticipant
       );
       this.showTopBar = true;
@@ -333,7 +324,7 @@ export class AppComponent {
           stream,
           meeting.localParticipant,
           true,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
       meeting.localParticipant.on('stream-disabled', (stream: any) => {
@@ -342,7 +333,7 @@ export class AppComponent {
           stream,
           meeting.localParticipant,
           true,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
     });
@@ -353,7 +344,6 @@ export class AppComponent {
       var participantGridItem = document.getElementById(
         `participant-grid-item-${participant.id}`
       );
-
       this.participantGridContainer.nativeElement.removeChild(
         participantGridItem
       );
@@ -375,7 +365,7 @@ export class AppComponent {
     meeting.on('participant-joined', (participant: any) => {
       console.log('New Participant Joined: ', participant.id);
 
-      var { participantMediaElement } =
+      var { getParticipantMediaElement } =
         this.participantGridGenerator(participant);
       participant.setQuality('high');
       participant.on('stream-enabled', (stream: any) => {
@@ -383,7 +373,7 @@ export class AppComponent {
           stream,
           participant,
           false,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
       participant.on('stream-disabled', (stream: any) => {
@@ -391,7 +381,7 @@ export class AppComponent {
           stream,
           participant,
           false,
-          participantMediaElement
+          getParticipantMediaElement
         );
       });
     });
@@ -402,33 +392,25 @@ export class AppComponent {
     }
   }
 
-  enableWebcam() {
-    this.meeting.enableWebcam();
-    this.enableWebcamBtn = false;
-    this.disableWebcamBtn = true;
+  toogleWebcam() {
+    if (this.isWebcamOn) {
+      this.meeting.disableWebcam();
+    } else {
+      this.meeting.enableWebcam();
+    }
   }
 
-  muteMic() {
-    this.meeting.muteMic();
-    this.enableMicBtn = true;
-    this.disableMicBtn = false;
-  }
-
-  unmuteMic() {
-    this.meeting.unmuteMic();
-    this.enableMicBtn = false;
-    this.disableMicBtn = true;
+  toogleMic() {
+    if (this.isMicOn) {
+      this.meeting.muteMic();
+    } else {
+      this.meeting.unmuteMic();
+    }
   }
 
   leaveMeeting() {
     this.meeting.leave();
     this.showMeetingScreen = false;
     this.showJoinScreen = true;
-  }
-
-  disableWebcam() {
-    this.meeting.disableWebcam();
-    this.enableWebcamBtn = true;
-    this.disableWebcamBtn = false;
   }
 }
