@@ -19,54 +19,13 @@ let isWebCamOn = false;
 
 const Constants = VideoSDK.Constants;
 
-// Join Meeting As Host Button Event Listener
-joinHostButton.addEventListener("click", async () => {
-  document.getElementById("join-screen").style.display = "none";
-  textDiv.textContent = "Joining the meeting...";
-
-  roomId = document.getElementById("meetingIdTxt").value;
-  meetingId = roomId;
-
-  await initializeMeeting(Constants.modes.CONFERENCE);
-});
-
-// Join Meeting As Viewer Button Event Listener
-joinViewerButton.addEventListener("click", async () => {
-  document.getElementById("join-screen").style.display = "none";
-  textDiv.textContent = "Joining the meeting...";
-
-  roomId = document.getElementById("meetingIdTxt").value;
-  meetingId = roomId;
-
-  await initializeMeeting(Constants.modes.VIEWER);
-});
-
-// Create Meeting Button Event Listener
-createButton.addEventListener("click", async () => {
-  document.getElementById("join-screen").style.display = "none";
-  textDiv.textContent = "Please wait, we are joining the meeting";
-
-  const url = `https://api.videosdk.live/v2/rooms`;
-  const options = {
-    method: "POST",
-    headers: { Authorization: TOKEN, "Content-Type": "application/json" },
-  };
-
-  const { roomId } = await fetch(url, options)
-    .then((response) => response.json())
-    .catch((error) => alert("error", error));
-  meetingId = roomId;
-
-  await initializeMeeting(Constants.modes.CONFERENCE);
-});
-
 // Initialize meeting
-async function initializeMeeting(mode) {
+function initializeMeeting(mode) {
   window.VideoSDK.config(TOKEN);
 
   meeting = window.VideoSDK.initMeeting({
     meetingId: meetingId, // required
-    name: "Tirth", // required
+    name: "Thomas Edison", // required
     mode: mode,
   });
 
@@ -81,12 +40,14 @@ async function initializeMeeting(mode) {
     ).textContent = `Meeting Id: ${meetingId}`;
 
     if (meeting.hlsState === Constants.hlsEvents.HLS_STOPPED) {
-      hlsStatusHeading.textContent = "HLS Not Stared Yet";
+      hlsStatusHeading.textContent = "HLS has not stared yet";
     } else {
       hlsStatusHeading.textContent = `HLS Status: ${meeting.hlsState}`;
     }
 
     if (mode === Constants.modes.CONFERENCE) {
+      // we will pin the local participant if he joins in `CONFERENCE` mode
+      meeting.localParticipant.pin();
       document.getElementById("speakerView").style.display = "block";
     }
   });
@@ -105,6 +66,9 @@ async function initializeMeeting(mode) {
         const { downstreamUrl } = data;
         let video = document.createElement("video");
         video.setAttribute("width", "100%");
+        video.setAttribute("muted", "false");
+        // enableAutoPlay for browser auto play policy
+        video.setAttribute("autoplay", "true");
 
         if (Hls.isSupported()) {
           var hls = new Hls();
@@ -138,11 +102,9 @@ async function initializeMeeting(mode) {
       setTrack(stream, null, meeting.localParticipant, true);
     });
 
-    //  participant joined
+    // participant joined
     meeting.on("participant-joined", (participant) => {
       if (participant.mode === Constants.modes.CONFERENCE) {
-        participant.pin();
-
         let videoElement = createVideoElement(
           participant.id,
           participant.displayName
@@ -168,7 +130,6 @@ async function initializeMeeting(mode) {
     });
   }
 }
-
 // creating video element
 function createVideoElement(pId, name) {
   let videoFrame = document.createElement("div");
@@ -237,6 +198,47 @@ function setTrack(stream, audioElement, participant, isLocal) {
   }
 }
 
+// Join Meeting As Host Button Event Listener
+joinHostButton.addEventListener("click", async () => {
+  document.getElementById("join-screen").style.display = "none";
+  textDiv.textContent = "Joining the meeting...";
+
+  roomId = document.getElementById("meetingIdTxt").value;
+  meetingId = roomId;
+
+  initializeMeeting(Constants.modes.CONFERENCE);
+});
+
+// Join Meeting As Viewer Button Event Listener
+joinViewerButton.addEventListener("click", async () => {
+  document.getElementById("join-screen").style.display = "none";
+  textDiv.textContent = "Joining the meeting...";
+
+  roomId = document.getElementById("meetingIdTxt").value;
+  meetingId = roomId;
+
+  initializeMeeting(Constants.modes.VIEWER);
+});
+
+// Create Meeting Button Event Listener
+createButton.addEventListener("click", async () => {
+  document.getElementById("join-screen").style.display = "none";
+  textDiv.textContent = "Please wait, we are joining the meeting";
+
+  const url = `https://api.videosdk.live/v2/rooms`;
+  const options = {
+    method: "POST",
+    headers: { Authorization: TOKEN, "Content-Type": "application/json" },
+  };
+
+  const { roomId } = await fetch(url, options)
+    .then((response) => response.json())
+    .catch((error) => alert("error", error));
+  meetingId = roomId;
+
+  initializeMeeting(Constants.modes.CONFERENCE);
+});
+
 // leave Meeting Button Event Listener
 leaveButton.addEventListener("click", async () => {
   meeting?.leave();
@@ -280,7 +282,7 @@ startHlsButton.addEventListener("click", async () => {
     layout: {
       type: "SPOTLIGHT",
       priority: "PIN",
-      gridSize: "20",
+      gridSize: 4,
     },
     theme: "LIGHT",
     mode: "video-and-audio",
