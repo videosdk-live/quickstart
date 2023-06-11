@@ -20,3 +20,13 @@
 | [Flutter](https://github.com/videosdk-live/quickstart/tree/main/flutter-hls)           | [Quick Start Guide](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/quick-start-ILS)  |
 | [React Native](https://github.com/videosdk-live/quickstart/tree/main/react-native-hls) | [Quick Start Guide](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/quick-start-ILS) |
 | [Android](https://github.com/videosdk-live/quickstart/tree/main/android-hls) | [Quick Start Guide](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/quick-start-ILS) |
+
+
+## Examples for Template Manager
+
+| Sample Code                                                                        | Guide                                                                                                          |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [React Template Manager](https://github.com/videosdk-live/quickstart/tree/main/react-custom-template-manager)               | [Guide](https://docs.videosdk.live/react/guide/interactive-live-streaming/custom-template)  |
+| [Flutter Template Manager](https://github.com/videosdk-live/quickstart/tree/main/flutter-custom-template-manager)         | [Guide](https://docs.videosdk.live/flutter/guide/interactive-live-streaming/custom-template)  |
+| [Android Template Manager](https://github.com/videosdk-live/quickstart/tree/main/android-custom-template-manager) | [Guide](https://docs.videosdk.live/android/guide/interactive-live-streaming/custom-template) |
+
