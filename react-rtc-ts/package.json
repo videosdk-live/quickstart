@@ -5,7 +5,7 @@
   "dependencies": {
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.25",
-    "@types/react": "^18.2.0",
+    "@types/react": "^18.2.11",
     "@types/react-dom": "^18.2.1",
     "@videosdk.live/react-sdk": "^0.1.73",
     "react": "^18.2.0",
