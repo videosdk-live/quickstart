@@ -18,8 +18,8 @@ export class AppComponent {
   showTopBar: boolean = false;
   localParticipant: any;
   participants: any[] = [];
-  isWebcamOn: boolean = false;
-  isMicOn: boolean = false;
+  isWebcamOn: boolean = true;
+  isMicOn: boolean = true;
 
   participant: any;
 
@@ -208,7 +208,6 @@ export class AppComponent {
     participantMediaElement: any
   ) {
     if (stream.kind == 'video') {
-      this.isWebcamOn = true;
       var nameElement = document.getElementById(
         `name-container-${participant.id}`
       );
@@ -217,8 +216,6 @@ export class AppComponent {
     }
     if (!isLocal) {
       if (stream.kind == 'audio') {
-        this.isMicOn = true;
-        console.log('audio stream enabled');
         this.createAudioElement(stream, participant, participantMediaElement);
       }
     }
@@ -231,7 +228,6 @@ export class AppComponent {
     participantMediaElement: any
   ) {
     if (stream.kind == 'video') {
-      this.isWebcamOn = false;
       console.log('video stream disabled');
 
       var videoElement = document.getElementById(
@@ -244,8 +240,6 @@ export class AppComponent {
     }
     if (!isLocal) {
       if (stream.kind == 'audio') {
-        this.isMicOn = false;
-        console.log('audio stream disabled');
         var audioElement = document.getElementById(
           `audio-container-${participant.id}`
         );
@@ -398,6 +392,7 @@ export class AppComponent {
     } else {
       this.meeting.enableWebcam();
     }
+    this.isWebcamOn = !this.isWebcamOn;
   }
 
   toogleMic() {
@@ -406,6 +401,7 @@ export class AppComponent {
     } else {
       this.meeting.unmuteMic();
     }
+    this.isMicOn = !this.isMicOn;
   }
 
   leaveMeeting() {

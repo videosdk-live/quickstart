@@ -44,8 +44,8 @@ myApp.controller("myController", function ($scope, $http, ENV) {
   // variable initialization
   $scope.name = "Homi J. Bhabha";
   $scope.meetingId = "";
-  $scope.isWebcamOn = false;
-  $scope.isMicOn = false;
+  $scope.isWebcamOn = true;
+  $scope.isMicOn = true;
   $scope.showMeetingIdError = false;
   $scope.showMeetingScreen = false;
   $scope.showJoinScreen = true;
@@ -141,7 +141,6 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     participantMediaElement
   ) {
     if (stream.kind == "video") {
-      $scope.isWebcamOn = true;
       var nameElement = document.getElementById(
         `name-container-${participant.id}`
       );
@@ -150,8 +149,6 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     }
     if (!isLocal) {
       if (stream.kind == "audio") {
-        $scope.isMicOn = true;
-        console.log("audio stream enabled");
         $scope.createAudioElement(stream, participant, participantMediaElement);
       }
     }
@@ -164,7 +161,6 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     participantMediaElement
   ) {
     if (stream.kind == "video") {
-      $scope.isWebcamOn = false;
       var videoElement = document.getElementById(
         `video-container-${participant.id}`
       );
@@ -174,7 +170,6 @@ myApp.controller("myController", function ($scope, $http, ENV) {
     }
     if (!isLocal) {
       if (stream.kind == "audio") {
-        $scope.isMicOn = false;
         var audioElement = document.getElementById(
           `audio-container-${participant.id}`
         );
@@ -378,6 +373,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
       } else {
         $scope.meeting.enableWebcam();
       }
+      $scope.isWebcamOn = !$scope.isWebcamOn;
     };
 
     $scope.toggleMic = function () {
@@ -386,6 +382,7 @@ myApp.controller("myController", function ($scope, $http, ENV) {
       } else {
         $scope.meeting.unmuteMic();
       }
+      $scope.isMicOn = !$scope.isMicOn;
     };
 
     $scope.leaveMeeting = function () {
