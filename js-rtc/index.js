@@ -21,7 +21,7 @@ joinButton.addEventListener("click", async () => {
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  await initializeMeeting();
+  initializeMeeting();
 });
 
 // Create Meeting Button Event Listener
@@ -40,11 +40,11 @@ createButton.addEventListener("click", async () => {
     .catch((error) => alert("error", error));
   meetingId = roomId;
 
-  await initializeMeeting();
+  initializeMeeting();
 });
 
 // Initialize meeting
-async function initializeMeeting() {
+function initializeMeeting() {
   window.VideoSDK.config(TOKEN);
 
   meeting = window.VideoSDK.initMeeting({
