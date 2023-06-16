@@ -20,6 +20,8 @@ public class MeetingActivity extends AppCompatActivity {
     private boolean micEnabled = true;
     private boolean webcamEnabled = true;
 
+    private RecyclerView rvParticipants;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +49,7 @@ public class MeetingActivity extends AppCompatActivity {
         // actions
         setActionListeners();
 
-        final RecyclerView rvParticipants = findViewById(R.id.rvParticipants);
+        rvParticipants = findViewById(R.id.rvParticipants);
         rvParticipants.setLayoutManager(new GridLayoutManager(this, 2));
         rvParticipants.setAdapter(new ParticipantAdapter(meeting));
     }
@@ -111,5 +113,11 @@ public class MeetingActivity extends AppCompatActivity {
             // this will make the local participant leave the meeting
             meeting.leave();
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        rvParticipants.setAdapter(null);
+        super.onDestroy();
     }
 }

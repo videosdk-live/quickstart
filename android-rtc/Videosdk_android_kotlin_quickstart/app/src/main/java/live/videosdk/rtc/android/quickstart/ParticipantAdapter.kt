@@ -99,4 +99,9 @@ class ParticipantAdapter(meeting: Meeting) :
             participantView = view.findViewById(R.id.participantView)
         }
     }
+
+    override fun onViewRecycled(holder: PeerViewHolder) {
+        holder.participantView.releaseSurfaceViewRenderer();
+        super.onViewRecycled(holder)
+    }
 }

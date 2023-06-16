@@ -117,4 +117,10 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
             participantView = view.findViewById(R.id.participantView);
         }
     }
+
+    @Override
+    public void onViewRecycled(@NonNull PeerViewHolder holder) {
+        holder.participantView.releaseSurfaceViewRenderer();
+        super.onViewRecycled(holder);
+    }
 }

@@ -18,6 +18,8 @@ class MeetingActivity : AppCompatActivity() {
     private var meeting: Meeting? = null
     private var micEnabled = true
     private var webcamEnabled = true
+    private var rvParticipants: RecyclerView? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_meeting)
@@ -42,9 +44,9 @@ class MeetingActivity : AppCompatActivity() {
 
         // actions
         setActionListeners()
-        val rvParticipants = findViewById<RecyclerView>(R.id.rvParticipants)
-        rvParticipants.layoutManager = GridLayoutManager(this, 2)
-        rvParticipants.adapter = ParticipantAdapter(meeting!!)
+        rvParticipants = findViewById(R.id.rvParticipants)
+        rvParticipants!!.layoutManager = GridLayoutManager(this, 2)
+        rvParticipants!!.adapter = ParticipantAdapter(meeting!!)
     }
 
     // creating the MeetingEventListener
@@ -110,5 +112,10 @@ class MeetingActivity : AppCompatActivity() {
             // this will make the local participant leave the meeting
             meeting!!.leave()
         }
+    }
+
+    override fun onDestroy() {
+        rvParticipants!!.adapter = null
+        super.onDestroy()
     }
 }
