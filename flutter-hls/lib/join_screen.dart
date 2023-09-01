@@ -4,7 +4,7 @@ import 'ils_screen.dart';
 import 'package:videosdk/videosdk.dart';
 
 class JoinScreen extends StatelessWidget {
-  final _meetingIdController = TextEditingController(text: "s87z-lvsj-riwb");
+  final _meetingIdController = TextEditingController();
 
   JoinScreen({super.key});
 
