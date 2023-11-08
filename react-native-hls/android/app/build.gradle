@@ -160,7 +160,6 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
     implementation project(':rnwebrtc')
-    implementation project(':rnincallmanager')
     implementation project(':rnfgservice')
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")

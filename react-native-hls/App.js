@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, } from "react";
 import {
   SafeAreaView,
   TouchableOpacity,
@@ -172,9 +172,9 @@ function Controls() {
         backgroundColor={"#1178F8"}
       />
       {hlsState === "HLS_STARTED" ||
-      hlsState === "HLS_STOPPING" ||
-      hlsState === "HLS_STARTING" ||
-      hlsState === "HLS_PLAYABLE" ? (
+        hlsState === "HLS_STOPPING" ||
+        hlsState === "HLS_STARTING" ||
+        hlsState === "HLS_PLAYABLE" ? (
         <Button
           onPress={() => {
             _handleHLS();
@@ -183,10 +183,10 @@ function Controls() {
             hlsState === "HLS_STARTED"
               ? `Live Starting`
               : hlsState === "HLS_STOPPING"
-              ? `Live Stopping`
-              : hlsState === "HLS_PLAYABLE"
-              ? `Stop Live`
-              : `Go Live`
+                ? `Live Stopping`
+                : hlsState === "HLS_PLAYABLE"
+                  ? `Stop Live`
+                  : `Go Live`
           }
           backgroundColor={"#FF5D5D"}
         />
@@ -275,7 +275,7 @@ function HeaderView() {
 }
 
 // Responsible for Viewer side view, which contains video player for streaming HLS and managing HLS state (HLS_STARTED, HLS_STOPPING, HLS_STARTING, etc.)
-function ViewerView({}) {
+function ViewerView({ }) {
   const { hlsState, hlsUrls } = useMeeting();
 
   return (
