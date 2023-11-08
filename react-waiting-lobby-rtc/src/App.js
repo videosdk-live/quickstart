@@ -151,12 +151,6 @@ function MeetingView(props) {
       {joined && joined == "JOINED" ? (
         <div>
           <Controls />
-          {[...participants.keys()].map((participantId) => (
-            <ParticipantView
-              participantId={participantId}
-              key={participantId}
-            />
-          ))}
           {requestedEntries.map(({ participantId, name, allow, deny }) => {
             return (
               <>
@@ -168,6 +162,12 @@ function MeetingView(props) {
               </>
             );
           })}
+          {[...participants.keys()].map((participantId) => (
+            <ParticipantView
+              participantId={participantId}
+              key={participantId}
+            />
+          ))}
         </div>
       ) : joined && joined == "JOINING" ? (
         <p>Joining the meeting...</p>
