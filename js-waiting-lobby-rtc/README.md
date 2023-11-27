@@ -18,16 +18,16 @@ At Video SDK, we’re building tools to help companies create world-class collab
 
 ## Run the Sample App
 
-1. Clone the repository to your local environment.
+### Step 1: Clone the repository to your local environment.
 
-   ```js
-   git clone https://github.com/videosdk-live/quickstart.git
-   cd quickstart/js-waiting-lobby-rtc/
-   ```
+```js
+git clone https://github.com/videosdk-live/quickstart.git
+cd quickstart/js-waiting-lobby-rtc/
+```
 
-2. Create a new file config.js and Copy the config.example.js file's data to config.js file
+### Step 2: Create a new file config.js and Copy the config.example.js file's data to config.js file
 
-3. Update the `config.js` file with your Authentication Token generated from your backend.
+### Step 3: Update the `config.js` file with your Authentication Token generated from your backend.
 
 Generate one token with `allow_join` permission and paste that token in `HOST_TOKEN`.
 Generate another token with `ask_join` permission and paste that token in `GUEST_TOKEN`.
@@ -40,12 +40,12 @@ GUEST_TOKEN = "ASK_JOIN_PERMISSION_TOKEN";
 
 ```
 
-4. Run the app
+### Step 4: Run the app
 
-   ```sh
-   npm install -g live-server
-   live-server --port=8000
-   ```
+```sh
+npm install -g live-server
+live-server --port=8000
+```
 
 <br/>
 
