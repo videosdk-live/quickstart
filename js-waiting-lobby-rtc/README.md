@@ -37,7 +37,6 @@ Generate another token with `ask_join` permission and paste that token in `GUEST
 ```
 HOST_TOKEN = "ALLOW_JOIN_PERMISSION_TOKEN";
 GUEST_TOKEN = "ASK_JOIN_PERMISSION_TOKEN";
-
 ```
 
 ### Step 4: Run the app
