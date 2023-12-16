@@ -231,7 +231,7 @@ room.on(Events.participantLeft, (participantId) => {
 });
 room.on(Events.hlsStateChanged, (Map<String, dynamic> data) {
   // This event will be emitted whenever meeting HLS state changes.
-  // [data] : { state: String, downstreamUrl: String }
+  // [data] : { state: String, playbackHlsUrl: String }
 });
 ```
 
@@ -251,13 +251,14 @@ By registering callback handlers, VideoSDK sends callbacks to the client app whe
   });
 
 ```
+
 <br/>
 
 ## [Event associated with HLS](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events#hlsstatechanged)
 
 - `hlsStateChanged` - Whenever meeting HLS state changes, then `hlsStateChanged` event will trigger.
 
-- You can get the `downstreamUrl` of the HLS to play it on the Viewer side when the state changes to `HLS_PLAYABLE`
+- You can get the `playbackHlsUrl` of the HLS to play it on the Viewer side when the state changes to `HLS_PLAYABLE`
 
 ```js
 room.on(Events.hlsStateChanged, (Map<String, dynamic> data) {
@@ -268,7 +269,7 @@ room.on(Events.hlsStateChanged, (Map<String, dynamic> data) {
   //Status can be :: HLS_STOPPED
   log("Meeting HLS status : ${data['status']}");
   if (data['status'] == "HLS_PLAYABLE")
-    log("DOWNSTREAM URL -- " + data['downstreamUrl']);
+    log("PLAYBACKHLS URL -- " + data['playbackHlsUrl']);
 });
 ```
 

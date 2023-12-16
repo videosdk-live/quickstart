@@ -30,7 +30,7 @@ class ViewerFragment : Fragment() {
     private var player: ExoPlayer? = null
     private var dataSourceFactory: DefaultHttpDataSource.Factory? = null
     private val startAutoPlay = true
-    private var downStreamUrl: String? = ""
+    private var playbackHlsUrl: String? = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,8 +79,8 @@ class ViewerFragment : Fragment() {
         override fun onHlsStateChanged(HlsState: JSONObject) {
             if (HlsState.has("status")) {
                 try {
-                    if (HlsState.getString("status") == "HLS_PLAYABLE" && HlsState.has("downstreamUrl")) {
-                        downStreamUrl = HlsState.getString("downstreamUrl")
+                    if (HlsState.getString("status") == "HLS_PLAYABLE" && HlsState.has("playbackHlsUrl")) {
+                        playbackHlsUrl = HlsState.getString("playbackHlsUrl")
                         waitingLayout!!.visibility = View.GONE
                         playerView!!.visibility = View.VISIBLE
                         // initialize player
@@ -89,7 +89,7 @@ class ViewerFragment : Fragment() {
                     if (HlsState.getString("status") == "HLS_STOPPED") {
                         // release the player
                         releasePlayer()
-                        downStreamUrl = null
+                        playbackHlsUrl = null
                         waitingLayout!!.text = "Host has stopped \n the live streaming"
                         waitingLayout!!.visibility = View.VISIBLE
                         playerView!!.visibility = View.GONE
@@ -105,7 +105,7 @@ class ViewerFragment : Fragment() {
         if (player == null) {
             dataSourceFactory = DefaultHttpDataSource.Factory()
             val mediaSource = HlsMediaSource.Factory(dataSourceFactory!!).createMediaSource(
-                MediaItem.fromUri(Uri.parse(downStreamUrl))
+                MediaItem.fromUri(Uri.parse(playbackHlsUrl))
             )
             val playerBuilder = ExoPlayer.Builder( /* context = */mContext!!)
             player = playerBuilder.build()
@@ -132,7 +132,7 @@ class ViewerFragment : Fragment() {
     override fun onDestroy() {
         mContext = null
         mActivity = null
-        downStreamUrl = null
+        playbackHlsUrl = null
         releasePlayer()
         if (meeting != null) {
             meeting!!.removeAllListeners()

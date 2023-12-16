@@ -15,13 +15,13 @@ class ILSViewerView extends StatefulWidget {
 
 class _ILSViewerViewState extends State<ILSViewerView> {
   String hlsState = "HLS_STOPPED";
-  String? downstreamUrl;
+  String? playbackHlsUrl;
 
   @override
   void initState() {
     super.initState();
     hlsState = widget.room.hlsState;
-    downstreamUrl = widget.room.hlsDownstreamUrl;
+    playbackHlsUrl = widget.room.hlsPlaybackHlsUrl;
     setMeetingEventListener();
   }
 
@@ -54,8 +54,8 @@ class _ILSViewerViewState extends State<ILSViewerView> {
               ],
             ),
           ),
-          downstreamUrl != null
-              ? LivestreamPlayer(downstreamUrl: downstreamUrl!)
+          playbackHlsUrl != null
+              ? LivestreamPlayer(playbackHlsUrl: playbackHlsUrl!)
               : const Text("Host has not started the HLS",
                   style: TextStyle(color: Colors.white)),
         ],
@@ -74,7 +74,7 @@ class _ILSViewerViewState extends State<ILSViewerView> {
           setState(() {
             hlsState = status;
             if (status == "HLS_PLAYABLE" || status == "HLS_STOPPED") {
-              downstreamUrl = data['downstreamUrl'];
+              playbackHlsUrl = data['playbackHlsUrl'];
             }
           });
         }

@@ -163,7 +163,7 @@ class _ILSSpeakerViewState extends State<ILSSpeakerView> {
       body: body,
     );
 
-    log("response ${json.decode(httpResponse.body)}"); // result will have downstreamUrl
+    log("response ${json.decode(httpResponse.body)}"); // result will have playbackHlsUrl
   }
 
   // listening to meeting events
