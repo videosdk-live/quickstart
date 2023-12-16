@@ -10,7 +10,7 @@ import {
 } from "@videosdk.live/react-sdk";
 import Hls from "hls.js";
 
-import { authToken, createMeeting } from "./API";
+import { authToken, captureHLSThumbnail, createMeeting } from "./API";
 import ReactPlayer from "react-player";
 import FlyingEmojisOverlay from "./FlyingEmojisOverlay";
 
@@ -105,46 +105,89 @@ function ParticipantView(props) {
   );
 }
 
-function Controls() {
-  const { leave, toggleMic, toggleWebcam, startHls, stopHls } = useMeeting();
+function Controls(props) {
+  const { leave, toggleMic, toggleWebcam, startHls, stopHls, hlsState } =
+    useMeeting();
+  const [hlsThumbnailImage, setHlsThumbnailImage] = useState(null);
+
   return (
-    <div>
-      <button onClick={() => leave()}>Leave</button>
-      &emsp;|&emsp;
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
-      &emsp;|&emsp;
-      <button
-        onClick={() => {
-          startHls({
-            layout: {
-              type: "SPOTLIGHT",
-              priority: "PIN",
-              gridSize: "20",
-            },
-            theme: "DARK",
-            mode: "video-and-audio",
-            quality: "high",
-            orientation: "landscape",
-          });
-        }}
-      >
-        Start HLS
-      </button>
-      <button onClick={() => stopHls()}>Stop HLS</button>
-    </div>
+    <>
+      <div>
+        <button onClick={() => leave()}>Leave</button>
+        &emsp;|&emsp;
+        <button onClick={() => toggleMic()}>toggleMic</button>
+        <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+        &emsp;|&emsp;
+        <button
+          onClick={() => {
+            startHls({
+              layout: {
+                type: "SPOTLIGHT",
+                priority: "PIN",
+                gridSize: "20",
+              },
+              theme: "DARK",
+              mode: "video-and-audio",
+              quality: "high",
+              orientation: "landscape",
+            });
+          }}
+        >
+          Start HLS
+        </button>
+        <button onClick={() => stopHls()}>Stop HLS</button>
+        {(hlsState === "HLS_STARTED" || hlsState === "HLS_PLAYABLE") && (
+          <>
+            &emsp;|&emsp;
+            <button
+              onClick={async () => {
+                const { filePath, message } = await captureHLSThumbnail({
+                  roomId: props.meetingId,
+                });
+
+                setHlsThumbnailImage({
+                  imageLink: filePath,
+                  message: message,
+                });
+              }}
+            >
+              Capture HLS Thumbnail
+            </button>
+          </>
+        )}
+      </div>
+      {hlsThumbnailImage && hlsThumbnailImage?.imageLink ? (
+        <>
+          <p>Captured HLS Thumbnail</p>
+          <img
+            src={hlsThumbnailImage?.imageLink}
+            alt={"capture_image"}
+            height={200}
+            width={300}
+          />
+        </>
+      ) : (
+        hlsThumbnailImage && (
+          <>
+            <p>Error In Capture HLS Thumbnail</p>
+            <p>{hlsThumbnailImage?.message}</p>
+          </>
+        )
+      )}
+    </>
   );
 }
 
-function SpeakerView() {
+function SpeakerView(props) {
   const { participants, hlsState } = useMeeting();
   const speakers = [...participants.values()].filter((participant) => {
-    return participant.mode == Constants.modes.CONFERENCE;
+    return participant.mode === Constants.modes.CONFERENCE;
   });
+
   return (
     <div>
       <p>Current HLS State: {hlsState}</p>
-      <Controls />
+      <Controls meetingId={props.meetingId} />
       {speakers.map((participant) => (
         <ParticipantView participantId={participant.id} key={participant.id} />
       ))}
@@ -158,7 +201,7 @@ function ViewerList() {
 
   //Filtering only viewer participant
   const viewers = [...participants.values()].filter((participant) => {
-    return participant.mode == Constants.modes.VIEWER;
+    return participant.mode === Constants.modes.VIEWER;
   });
 
   return (
@@ -205,7 +248,7 @@ function ViewerView() {
     );
   }
   useEffect(() => {
-    if (hlsUrls.downstreamUrl && hlsState == "HLS_PLAYABLE") {
+    if (hlsUrls.downstreamUrl && hlsState === "HLS_PLAYABLE") {
       if (Hls.isSupported()) {
         const hls = new Hls({
           maxLoadingDelay: 1, // max video loading delay used in automatic start level selection
@@ -218,7 +261,7 @@ function ViewerView() {
           highBufferWatchdogPeriod: 0, // if media element is expected to play and if currentTime has not moved for more than highBufferWatchdogPeriod and if there are more than maxBufferHole seconds buffered upfront, hls.js will jump buffer gaps, or try to nudge playhead to recover playback.
           nudgeOffset: 0.05, // In case playback continues to stall after first playhead nudging, currentTime will be nudged evenmore following nudgeOffset to try to restore playback. media.currentTime += (nb nudge retry -1)*nudgeOffset
           nudgeMaxRetry: 1, // Max nb of nudge retries before hls.js raise a fatal BUFFER_STALLED_ERROR
-          maxFragLookUpTolerance: .1, // This tolerance factor is used during fragment lookup. 
+          maxFragLookUpTolerance: 0.1, // This tolerance factor is used during fragment lookup.
           liveSyncDurationCount: 1, // if set to 3, playback will start from fragment N-3, N being the last fragment of the live playlist
           abrEwmaFastLive: 1, // Fast bitrate Exponential moving average half-life, used to compute average bitrate for Live streams.
           abrEwmaSlowLive: 3, // Slow bitrate Exponential moving average half-life, used to compute average bitrate for Live streams.
@@ -261,12 +304,12 @@ function ViewerView() {
           Send 👏 Reaction
         </button>
       </div>
-      {hlsState != "HLS_PLAYABLE" ? (
+      {hlsState !== "HLS_PLAYABLE" ? (
         <div>
           <p>HLS has not started yet or is stopped</p>
         </div>
       ) : (
-        hlsState == "HLS_PLAYABLE" && (
+        hlsState === "HLS_PLAYABLE" && (
           <div>
             <video
               ref={playerRef}
@@ -291,10 +334,10 @@ function ViewerView() {
 
 function Container(props) {
   const [joined, setJoined] = useState(null);
-  const { join, localParticipant, changeMode } = useMeeting();
+  const { join, changeMode } = useMeeting();
   const mMeeting = useMeeting({
     onMeetingJoined: () => {
-      if (mMeetingRef.current.localParticipant.mode == "CONFERENCE") {
+      if (mMeetingRef.current.localParticipant.mode === "CONFERENCE") {
         mMeetingRef.current.localParticipant.pin();
       }
       setJoined("JOINED");
@@ -304,8 +347,8 @@ function Container(props) {
     },
     onParticipantModeChanged: (data) => {
       const localParticipant = mMeetingRef.current.localParticipant;
-      if (data.participantId == localParticipant.id) {
-        if (data.mode == Constants.modes.CONFERENCE) {
+      if (data.participantId === localParticipant.id) {
+        if (data.mode === Constants.modes.CONFERENCE) {
           localParticipant.pin();
         } else {
           localParticipant.unpin();
@@ -331,20 +374,14 @@ function Container(props) {
 
   const [joinLivestreamRequest, setJoinLivestreamRequest] = useState();
 
-  const pubsub = usePubSub(`CHANGE_MODE_${localParticipant?.id}`, {
-    onMessageReceived: (pubSubMessage) => {
-      setJoinLivestreamRequest(pubSubMessage);
-    },
-  });
-
   return (
     <div className="container">
       <FlyingEmojisOverlay />
       <h3>Meeting Id: {props.meetingId}</h3>
-      {joined && joined == "JOINED" ? (
-        mMeeting.localParticipant.mode == Constants.modes.CONFERENCE ? (
-          <SpeakerView />
-        ) : mMeeting.localParticipant.mode == Constants.modes.VIEWER ? (
+      {joined && joined === "JOINED" ? (
+        mMeeting.localParticipant.mode === Constants.modes.CONFERENCE ? (
+          <SpeakerView meetingId={props.meetingId} />
+        ) : mMeeting.localParticipant.mode === Constants.modes.VIEWER ? (
           <>
             {joinLivestreamRequest && (
               <div>
@@ -370,7 +407,7 @@ function Container(props) {
             <ViewerView />
           </>
         ) : null
-      ) : joined && joined == "JOINING" ? (
+      ) : joined && joined === "JOINING" ? (
         <p>Joining the meeting...</p>
       ) : (
         <button onClick={joinMeeting}>Join</button>
