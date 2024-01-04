@@ -49,7 +49,7 @@ function initializeMeeting() {
 
   meeting = window.VideoSDK.initMeeting({
     meetingId: meetingId, // required
-    name: "Tirth", // required
+    name: "C.V.Raman", // required
     micEnabled: true, // optional, default: true
     webcamEnabled: true, // optional, default: true
   });

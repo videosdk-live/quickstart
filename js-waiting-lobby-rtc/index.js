@@ -79,32 +79,6 @@ function manageRequestedEntries(entries = []) {
   return { entries, addEntry, removeEntry };
 }
 
-// function EntriesList({ manageRequestedEntries }) {
-//   const entries = manageRequestedEntries.entries;
-
-//   return (
-//     <div>
-//       {entries.map(({ participantId, name, allow, deny }) => (
-//         <>
-//           <p>{name} wants to join Meeting</p>
-//           <button
-//             onClick={() =>
-//               manageRequestedEntries.addEntry({ ...data, participantId })
-//             }
-//           >
-//             Allow
-//           </button>
-//           <button
-//             onClick={() => manageRequestedEntries.removeEntry(participantId)}
-//             style={{ marginLeft: 8 }}
-//           >
-//             Deny
-//           </button>
-//         </>
-//       ))}
-//     </div>
-//   );
-// }
 
 // Initialize meeting
 function initializeMeeting() {

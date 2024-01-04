@@ -46,8 +46,6 @@ function initializeMeeting(mode) {
     }
 
     if (mode === Constants.modes.CONFERENCE) {
-      // we will pin the local participant if he joins in `CONFERENCE` mode
-      meeting.localParticipant.pin();
       document.getElementById("speakerView").style.display = "block";
     }
   });
