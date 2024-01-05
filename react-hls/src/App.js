@@ -337,23 +337,13 @@ function Container(props) {
   const { join, changeMode } = useMeeting();
   const mMeeting = useMeeting({
     onMeetingJoined: () => {
-      if (mMeetingRef.current.localParticipant.mode === "CONFERENCE") {
-        mMeetingRef.current.localParticipant.pin();
-      }
       setJoined("JOINED");
     },
     onMeetingLeft: () => {
       props.onMeetingLeave();
     },
     onParticipantModeChanged: (data) => {
-      const localParticipant = mMeetingRef.current.localParticipant;
-      if (data.participantId === localParticipant.id) {
-        if (data.mode === Constants.modes.CONFERENCE) {
-          localParticipant.pin();
-        } else {
-          localParticipant.unpin();
-        }
-      }
+     console.log("participantModeChanged", data)
     },
     onError: (error) => {
       alert(error.message);
@@ -373,6 +363,12 @@ function Container(props) {
   }, [mMeeting]);
 
   const [joinLivestreamRequest, setJoinLivestreamRequest] = useState();
+
+  usePubSub(`CHANGE_MODE_${mMeeting.localParticipant?.id}`, {
+    onMessageReceived: (pubSubMessage) => {
+      setJoinLivestreamRequest(pubSubMessage);
+    },
+  });
 
   return (
     <div className="container">
