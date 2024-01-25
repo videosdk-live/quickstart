@@ -9,6 +9,9 @@ import { MeetingService } from './meeting.service';
 })
 export class AppComponent {
   @ViewChild('participantGridContainer') participantGridContainer: ElementRef;
+  @ViewChild('participantScreenShareContainer')
+  participantScreenShareContainer: ElementRef;
+
   title = 'videosdk_angular_2_quickstart';
   meeting: any;
   participantName: string = '';
@@ -20,6 +23,7 @@ export class AppComponent {
   participants: any[] = [];
   isWebcamOn: boolean = true;
   isMicOn: boolean = true;
+  isScreenShareOn: boolean = true;
 
   participant: any;
 
@@ -28,6 +32,7 @@ export class AppComponent {
     private meetingService: MeetingService
   ) {
     this.participantGridContainer = new ElementRef(null);
+    this.participantScreenShareContainer = new ElementRef(null);
     this.participantName = 'Homi J. Bhabha';
   }
 
@@ -201,6 +206,45 @@ export class AppComponent {
     return nameElement;
   }
 
+  createShareAudioElement(stream: any, participant: any) {
+    if (participant.pId == this.meeting.localParticipant.id) return;
+    const audio = this.renderer.createElement('audio');
+    const mediaStream = new MediaStream();
+
+    this.renderer.setAttribute(audio, 'id', `a-share-${participant.id}`);
+    this.renderer.setAttribute(audio, 'autoplay', 'true');
+    this.renderer.setAttribute(audio, 'playsinline', 'true');
+    this.renderer.setAttribute(audio, 'muted', 'true');
+    this.renderer.setProperty(audio, 'srcObject', mediaStream);
+    this.renderer.appendChild(
+      this.participantScreenShareContainer.nativeElement,
+      audio
+    );
+  }
+
+  createShareVideoElement(stream: any, participant: any) {
+    if (participant.id == this.meeting.localParticipant.id) return;
+
+    const video = this.renderer.createElement('video');
+    const mediaStream = new MediaStream();
+    mediaStream.addTrack(stream.track);
+    this.renderer.setAttribute(video, 'id', `v-share-${participant.id}`);
+    this.renderer.setAttribute(video, 'autoplay', 'true');
+    this.renderer.setAttribute(video, 'controls', 'false');
+
+    this.renderer.setAttribute(
+      video,
+      'style',
+      'width: 100%; height: 100%;object-fit: cover;background-color: red;'
+    );
+    this.renderer.setProperty(video, 'srcObject', mediaStream);
+
+    this.renderer.appendChild(
+      this.participantScreenShareContainer.nativeElement,
+      video
+    );
+  }
+
   handleStreamEnabled(
     stream: any,
     participant: any,
@@ -217,6 +261,18 @@ export class AppComponent {
     if (!isLocal) {
       if (stream.kind == 'audio') {
         this.createAudioElement(stream, participant, participantMediaElement);
+      }
+    }
+  }
+
+  handleScreenShareStreamEnabled(stream: any, participant: any, isLocal: any) {
+    if (stream.kind == 'share') {
+      this.createShareVideoElement(stream, participant);
+    }
+    if (!isLocal) {
+      if (stream.kind == 'audio') {
+        console.log('audio stream enabled');
+        this.createShareAudioElement(stream, participant);
       }
     }
   }
@@ -244,6 +300,25 @@ export class AppComponent {
           `audio-container-${participant.id}`
         );
         this.renderer.removeChild(participantMediaElement, audioElement);
+      }
+    }
+  }
+
+  handleScreenShareStreamDisabled(stream: any, participant: any, isLocal: any) {
+    if (stream.kind == 'share') {
+      var videoElement = document.getElementById(`v-share-${participant.id}`);
+      this.renderer.removeChild(
+        this.participantScreenShareContainer.nativeElement,
+        videoElement
+      );
+    }
+    if (!isLocal) {
+      if (stream.kind == 'audio') {
+        var audioElement = document.getElementById(`a-share-${participant.id}`);
+        this.renderer.removeChild(
+          this.participantScreenShareContainer.nativeElement,
+          audioElement
+        );
       }
     }
   }
@@ -280,14 +355,16 @@ export class AppComponent {
     this.renderer.setStyle(participantMediaElement, 'display', 'flex');
     this.renderer.setStyle(participantMediaElement, 'alignItems', 'center');
     this.renderer.setStyle(participantMediaElement, 'justifyContent', 'center');
-
     var nameElement = this.createNameElemeent(participant);
     this.renderer.appendChild(
       this.participantGridContainer.nativeElement,
       participantGridItem
     );
+
     this.renderer.appendChild(participantGridItem, participantMediaElement);
     this.renderer.appendChild(participantMediaElement, nameElement);
+    this.renderer.setStyle(this.participantScreenShareContainer.nativeElement, 'display', 'block');
+
 
     var getParticipantMediaElement = document.getElementById(
       `participant-media-container-${participant.id}`
@@ -329,6 +406,9 @@ export class AppComponent {
           true,
           getParticipantMediaElement
         );
+        if (stream.kind === 'share') {
+          this.isScreenShareOn = !this.isScreenShareOn;
+        }
       });
     });
 
@@ -369,6 +449,9 @@ export class AppComponent {
           false,
           getParticipantMediaElement
         );
+        if (stream.kind === 'share') {
+          this.handleScreenShareStreamEnabled(stream, participant, false);
+        }
       });
       participant.on('stream-disabled', (stream: any) => {
         this.handleStreamDisabled(
@@ -377,6 +460,10 @@ export class AppComponent {
           false,
           getParticipantMediaElement
         );
+        if (stream.kind === 'share') {
+          this.handleScreenShareStreamDisabled(stream, participant, false);
+          this.isScreenShareOn = !this.isScreenShareOn;
+        }
       });
     });
 
@@ -402,6 +489,15 @@ export class AppComponent {
       this.meeting.unmuteMic();
     }
     this.isMicOn = !this.isMicOn;
+  }
+
+  toggleScreenShare() {
+    if (this.isScreenShareOn) {
+      this.meeting.enableScreenShare();
+    } else {
+      this.meeting.disableScreenShare();
+    }
+    this.isScreenShareOn = !this.isScreenShareOn;
   }
 
   leaveMeeting() {

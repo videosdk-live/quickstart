@@ -8,6 +8,7 @@ export class TopBarComponent {
   @Input() showTopBar: boolean = false;
   @Output() toogleWebcam = new EventEmitter();
   @Output() toogleMic = new EventEmitter();
+  @Output() toggleScreenShare = new EventEmitter();
   @Output() leaveMeeting = new EventEmitter();
   @Input() meetingId: string = '';
 
@@ -19,6 +20,10 @@ export class TopBarComponent {
 
   fireToggleMic() {
     this.toogleMic.emit();
+  }
+
+  fireToggleScreenShare() {
+    this.toggleScreenShare.emit();
   }
 
   fireLeaveMeeting() {

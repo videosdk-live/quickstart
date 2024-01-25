@@ -11,6 +11,7 @@
     [showTopBar]="showTopBar"
     (toogleWebcam)="toogleWebcam()"
     (toogleMic)="toogleMic()"
+    (toggleScreenShare)="toggleScreenShare()"
     (leaveMeeting)="leaveMeeting()"
   ></app-top-bar>
   <!-- topbar End -->
@@ -29,6 +30,11 @@
         #participantGridContainer
         id="participant-grid-container"
         class="row"
+      ></div>
+      <div
+      #participantScreenShareContainer
+      id="participant-screen-container"
+      style="width:360px;aspect-ratio: 16/9;border-radius: 10px;display: none;"
       ></div>
     </div>
   </div>
