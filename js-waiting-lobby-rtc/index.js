@@ -51,7 +51,7 @@ createButton.addEventListener("click", async () => {
   const options = {
     method: "POST",
     headers: {
-      Authorization: HOST_TOKEN,
+      Authorization: TOKEN,
       "Content-Type": "application/json",
     },
   };

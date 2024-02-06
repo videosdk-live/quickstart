@@ -29,12 +29,14 @@ cd quickstart/js-waiting-lobby-rtc/
 
 ### Step 3: Update the `config.js` file with your Authentication Token generated from your backend.
 
+Generate token with `crawler` roles and paste that token in `TOKEN`
 Generate one token with `allow_join` permission and paste that token in `HOST_TOKEN`.
 Generate another token with `ask_join` permission and paste that token in `GUEST_TOKEN`.
 
 - To learn more about Authentication and token in detail you can follow this [guide](https://docs.videosdk.live/javascript/guide/video-and-audio-calling-api-sdk/authentication-and-token).
 
 ```
+TOKEN = "CRAWLER_ROLE_TOKEN";
 HOST_TOKEN = "ALLOW_JOIN_PERMISSION_TOKEN";
 GUEST_TOKEN = "ASK_JOIN_PERMISSION_TOKEN";
 ```
