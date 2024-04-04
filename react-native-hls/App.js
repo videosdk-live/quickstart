@@ -285,11 +285,11 @@ function ViewerView({}) {
           {/* Render Header for copy meetingId and leave meeting*/}
           <HeaderView />
 
-          {/* Render VideoPlayer that will play `downstreamUrl`*/}
+          {/* Render VideoPlayer that will play `playbackHlsUrl`*/}
           <Video
             controls={true}
             source={{
-              uri: hlsUrls.downstreamUrl,
+              uri: hlsUrls.playbackHlsUrl,
             }}
             resizeMode={"stretch"}
             style={{

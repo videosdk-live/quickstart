@@ -221,7 +221,7 @@ class SpeakerFragment : Fragment() {
                                 Log.d(
                                     "TAG",
                                     "onResponse: $response"
-                                ) // result will have downstreamUrl
+                                ) // result will have playbackHlsUrl
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }

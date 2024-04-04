@@ -11,7 +11,7 @@
 At Video SDK, we’re building tools to help companies create world-class collaborative products with capabilities of live audio/videos, compose cloud recordings/rtmp/hls and interaction APIs.
 
 ## Interactive Livestream (HLS)
-    
+
 - Interactive live stream (HLS) is a media streaming protocol for delivering visual and audio media to viewers over the internet.
 - Interactive live stream (HLS) allows you to distribute content and ensure excellent viewing experiences across devices, playback platforms, and network conditions. It is the ideal protocol for streaming video to large audiences scattered across geographies.
 
@@ -30,6 +30,7 @@ At Video SDK, we’re building tools to help companies create world-class collab
 <br/>
 
 ## Setup Guide
+
 - Sign up on [VideoSDK](https://app.videosdk.live) and visit [API Keys](https://app.videosdk.live/api-keys) section to get your API key and Secret key.
 
 - Get familiarized with [API key and Secret key](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/signup-and-create-api).
@@ -39,6 +40,7 @@ At Video SDK, we’re building tools to help companies create world-class collab
 <br/>
 
 ## Prerequisites
+
 - Development environment requirements:
   - [Java Development Kit](https://www.oracle.com/java/technologies/downloads/)
   - Android Studio 3.0 or later
@@ -48,6 +50,7 @@ At Video SDK, we’re building tools to help companies create world-class collab
 <br/>
 
 ## Run the Sample Project
+
 ### 1. Clone the sample project
 
 Clone the repository to your local environment.
@@ -84,8 +87,8 @@ Run the android app with **Shift+F10** or the **▶ Run** from toolbar.
 - `Stream` - Stream means video or audio media content that is either published
   by `local participant` or `remote participants`.
 - `Mode` - There are 2 types of modes:
-    1. `CONFERENCE`: Both audio and video streams will be produced and consumed in this mode.
-    2. `VIEWER`: Audio and video streams will not be produced or consumed in this mode.
+  1. `CONFERENCE`: Both audio and video streams will be produced and consumed in this mode.
+  2. `VIEWER`: Audio and video streams will not be produced or consumed in this mode.
 
 <br/>
 
@@ -103,6 +106,7 @@ Add all the following permissions to AndroidManifest.xml file.
 <br/>
 
 ## Token Generation
+
 Token is used to create and validate a meeting using API and also initialise a meeting.
 
 🛠️ `Development Environment`:
@@ -116,12 +120,14 @@ Token is used to create and validate a meeting using API and also initialise a m
 <br/>
 
 ## API: Create and Validate meeting
+
 - `create meeting` - Please refer this [documentation](https://docs.videosdk.live/api-reference/realtime-communication/create-room) to create meeting.
 - `validate meeting`- Please refer this [documentation](https://docs.videosdk.live/api-reference/realtime-communication/validate-room) to validate the meetingId.
 
 <br/>
 
 ## [Initialize a Meeting](https://docs.videosdk.live/android/api/sdk-reference/initMeeting)
+
 1. For meeting initialization, you have to first initialize the `VideoSDK`. You can initialize the `VideoSDK` using `initialize()` method.
 
 ```js
@@ -144,16 +150,18 @@ Token is used to create and validate a meeting using API and also initialise a m
                        boolean micEnabled,
                        boolean webcamEnabled,
                        String participantId,
-                       String mode, 
+                       String mode,
                        Map<String, CustomStreamTrack> customTracks)
 ```
 
 ## [Join Meeting](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/start-join-meeting)
+
 ```js
-meeting.join()
+meeting.join();
 ```
 
 ## [Leave or End Meeting](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/leave-end-meeting)
+
 ```js
 // Only one participant will leave/exit the meeting; the rest of the participants will remain.
 meeting.leave();
@@ -163,6 +171,7 @@ meeting.end();
 ```
 
 ## [Setup MeetingEventListener](https://docs.videosdk.live/android/api/sdk-reference/meeting-class/meeting-event-listener-class)
+
 By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client app whenever there is a change or update in the meeting after a user joins.
 
 ```js
@@ -188,13 +197,13 @@ By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client a
            // This event will be emitted when a joined participant left the meeting.
            // [participant]: participant who left the meeting
         }
-        
+
         @Override
         public void onHlsStateChanged(JSONObject HlsState) {
            // This event will be emitted whenever meeting HLS state changes.
            // [HlsState] : state of HLS
         }
-        
+
      };
 ```
 
@@ -204,7 +213,7 @@ By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client a
 
 - **onHlsStateChanged** - Whenever meeting HLS state changes, then `onHlsStateChanged` event will trigger.
 
-- You can get the **`downstreamUrl`** of the HLS to play it on the Viewer side when the state changes to **`HLS_PLAYABLE`**.
+- You can get the **`playbaclHlsUrl`** and **`livestreamUrl`** of the HLS to play it on the Viewer side when the state changes to **`HLS_PLAYABLE`**.
 
 ```js
 private final MeetingEventListener meetingEventListener = new MeetingEventListener() {
@@ -220,8 +229,8 @@ private final MeetingEventListener meetingEventListener = new MeetingEventListen
               break;
           case "HLS_PLAYABLE":
               Log.d("onHlsStateChanged", "Meeting hls is playable now");
-              // on hls playable you will receive downstreamUrl
-              String downStreamUrl = HlsState.getString("downstreamUrl");
+              // on hls playable you will receive playbackHlsUrl
+              String playbackHlsUrl = HlsState.getString("playbackHlsUrl");
               break;
           case "HLS_STOPPING":
               Log.d("onHlsStateChanged", "Meeting hls is stopping");
@@ -231,13 +240,14 @@ private final MeetingEventListener meetingEventListener = new MeetingEventListen
               break;
       }
   }
-  
+
 }
 ```
 
 ## Methods and Listeners for Conference(Speaker) mode
 
 ## [Mute/Unmute Local Audio](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/mic-controls)
+
 ```js
 // unmute mic
 meeting.unmuteMic();
@@ -247,6 +257,7 @@ meeting.muteMic();
 ```
 
 ## [Enable/Disable Local Webcam](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/camera-controls)
+
 ```js
 // enable webcam
 meeting.enableWebcam();
@@ -256,12 +267,14 @@ meeting.disableWebcam();
 ```
 
 ## [Switch Local Webcam](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/camera-controls)
+
 ```js
 // switch webcam
 meeting.changeWebcam();
 ```
 
 ## [Start/Stop HLS]()
+
 ```js
 // start HLS
 meeting.startHls(JSONObject config);
@@ -271,6 +284,7 @@ meeting.stopHls();
 ```
 
 ## [Pin/Unpin Participant]()
+
 ```js
 // pin local participant
 meeting.getLocalParticipant().pin(String type);
@@ -280,6 +294,7 @@ meeting.getLocalParticipant().unpin(String type);
 ```
 
 ## [Setup ParticipantEventListener](https://docs.videosdk.live/android/api/sdk-reference/participant-class/participant-event-listener-class)
+
 By implementing `ParticipantEventListener`, VideoSDK sends callbacks to the client app whenever a participant's video, audio, or screen share stream is enabled or disabled.
 
 ```js
@@ -308,6 +323,7 @@ If you want to learn more about, read the complete documentation of [Android Vid
 <br/>
 
 ## Examples
+
 - [Prebuilt SDK Examples](https://github.com/videosdk-live/videosdk-rtc-prebuilt-examples)
 - [JavaScript SDK Example](https://github.com/videosdk-live/videosdk-rtc-javascript-sdk-example)
 - [React JS SDK Example](https://github.com/videosdk-live/videosdk-rtc-react-sdk-example)
@@ -319,10 +335,12 @@ If you want to learn more about, read the complete documentation of [Android Vid
 <br/>
 
 ## Documentation
+
 [Read the documentation](https://docs.videosdk.live/) to start using Video SDK.
 
 <br/>
 
 ## Community
+
 - [Discord](https://discord.gg/Gpmj6eCq5u) - To get involved with the Video SDK community, ask questions and share tips.
 - [Twitter](https://twitter.com/video_sdk) - To receive updates, announcements, blog posts, and general Video SDK tips.

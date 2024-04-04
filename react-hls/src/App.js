@@ -248,7 +248,7 @@ function ViewerView() {
     );
   }
   useEffect(() => {
-    if (hlsUrls.downstreamUrl && hlsState === "HLS_PLAYABLE") {
+    if (hlsUrls.playbackHlsUrl && hlsState === "HLS_PLAYABLE") {
       if (Hls.isSupported()) {
         const hls = new Hls({
           maxLoadingDelay: 1, // max video loading delay used in automatic start level selection
@@ -272,11 +272,11 @@ function ViewerView() {
 
         let player = document.querySelector("#hlsPlayer");
 
-        hls.loadSource(hlsUrls.downstreamUrl);
+        hls.loadSource(hlsUrls.playbackHlsUrl);
         hls.attachMedia(player);
       } else {
         if (typeof playerRef.current?.play === "function") {
-          playerRef.current.src = hlsUrls.downstreamUrl;
+          playerRef.current.src = hlsUrls.playbackHlsUrl;
           playerRef.current.play();
         }
       }
