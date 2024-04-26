@@ -48,7 +48,7 @@ npm install
 - Update the TOKEN in `enviroment.ts` file.Token would be generated from dashboard `https://app.videosdk.live/dashboard`
 
   ```js
-  token: YOUR_TOKEN,
+  token: YOUR_TOKEN
   ```
 
 ### 4. Run the sample app
@@ -59,14 +59,14 @@ npm install
   Ionic serve
   ```
 ## Ionic For Android
-Running 'npm install -g @ionic/cli' installs the Ionic CLI globally on your system using Node Package Manager.
+Running `npm install -g @ionic/cli` installs the Ionic CLI globally on your system using Node Package Manager.
  ```js
-  npm install -g @ionic/cli  # Installs both Ionic CLI and Capacitor
+npm install -g @ionic/cli  # Installs both Ionic CLI and Capacitor
   ```
 If the Ionic CLI and Capacitor are already installed, you'll need to update them if any errors occur.
   
    ```js
-  npm update -g @ionic/cli 
+npm update -g @ionic/cli 
   ```
   
 In summary, 'ionic capacitor link' android is a command used to establish the necessary connections and configurations between your Ionic project and the Android platform
