@@ -1,0 +1,55 @@
+<ion-content>
+  <div *ngIf="showJoinScreen">
+    <app-home
+      [participantName]="participantName"
+      [meetingId]="meetingId"
+      [isCreatedMeetingClicked]="isCreatedMeetingClicked"
+      [isJoinedMeetingClicked]="isJoinedMeetingClicked"
+      [showMeetingIdError]="showMeetingIdError"
+      [showParticipantNameError]="showParticipantNameError"
+      (createMeeting)="createMeeting()"
+      (joinMeeting)="joinMeeting()"
+      (startMeeting)="startMeeting()"
+      (changeName)="changeName($event)"
+      (validateMeeting)="validateMeeting($event)"
+    ></app-home>
+  </div>
+
+  <div *ngIf="showMeetingScreen">
+    <!-- topbar Start -->
+    <app-top-bar
+      [meetingId]="meetingId"
+      [showTopBar]="showTopBar"
+      [disableWebcamBtn]="disableWebcamBtn"
+      [enableWebcamBtn]="enableWebcamBtn"
+      [disableMicBtn]="disableMicBtn"
+      [enableMicBtn]="enableMicBtn"
+      (disableWebcam)="disableWebcam()"
+      (enableWebcam)="enableWebcam()"
+      (muteMic)="muteMic()"
+      (unmuteMic)="unmuteMic()"
+      (leaveMeeting)="leaveMeeting()"
+    ></app-top-bar>
+    <!-- topbar End -->
+
+    <!-- Meeting Container -->
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        max-height: calc(100vh - 80px);
+      "
+    >
+      <div class="container">
+        <div
+          #participantGridContainer
+          id="participant-grid-container"
+          class="row"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <router-outlet></router-outlet>
+</ion-content>

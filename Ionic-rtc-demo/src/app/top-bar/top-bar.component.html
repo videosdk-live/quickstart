@@ -1,0 +1,42 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title class="title_logo">
+      <img alt="logo" height="80px"  src="../assets/Video_SDK_logo.png" >
+     
+    </ion-title>
+    <!-- <ion-text>
+    
+    </ion-text>  -->
+  </ion-toolbar>
+ 
+</ion-header>
+
+<ion-content *ngIf="showTopBar" style="height: 15%; display: flex; background-color: lightgray; ">  
+
+<ion-content id="button-div" >
+
+    <ion-button *ngIf="disableWebcamBtn" fill="outline" (click)="fireDisableWebcam()" size="small">
+       Webcam off
+    </ion-button>
+    <ion-button *ngIf="enableWebcamBtn" (click)="fireEnableWebcam()" size="small">
+      Webcam on
+    </ion-button>
+    <ion-button *ngIf="disableMicBtn" fill="outline" (click)="fireMuteMic()" size="small">
+      Mic off
+    </ion-button><ion-button *ngIf="enableMicBtn" (click)="fireUnmuteMic()" size="small">
+    Mic On
+    </ion-button><ion-button (click)="fireLeaveMeeting()" fill="outline" color="danger" size="small">
+      End
+    </ion-button>
+  </ion-content>
+
+</ion-content>
+<ion-label>
+MeetingId: {{ meetingId }}
+</ion-label>
+
+<ion-footer >
+<ion-toolbar>
+  <ion-title>Developed by Video SDK</ion-title>
+</ion-toolbar>
+</ion-footer>
