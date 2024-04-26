@@ -1,0 +1,26 @@
+ion-header {
+    height: 60px;
+    background-color: lightgray;
+    position: fixed;  
+   
+      }
+   
+      #button-div{
+        margin-top: auto;
+        position: absolute;
+        align-items: center;
+      }
+      ion-button {
+        margin: 80px 0 1px 1px;
+        min-width: 20px; /* Adjust width as needed */
+        height: 20px; /* Adjust height as needed */
+        
+      }
+
+  ion-footer {
+    position: fixed; /* Fix the footer position */
+    bottom: 0; /* Align the footer at the bottom of the viewport */
+    width: 100%; /* Take full width of the viewport */
+    z-index: 999; /* Optional: Adjust the z-index as needed */
+  }
+ 

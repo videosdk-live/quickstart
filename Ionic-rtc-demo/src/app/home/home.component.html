@@ -1,0 +1,98 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title class="title_logo">
+      <img alt="logo" height="80px"  src="../assets/Video_SDK_logo.png" >
+  
+    </ion-title>
+  </ion-toolbar>
+ 
+</ion-header>
+ <ion-content id="joinPage" class="main-bg" >
+  <ion-row style="height: 100%;">
+    <ion-col size="12" style="display: flex; justify-content: center; align-items: center;">
+      <ion-row>
+      
+        <video
+        style="
+        margin:  auto;
+          width: 400px;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 10px;
+          background-color: lightgray;
+          aspect-ratio: 1.43/1;
+        "
+        autoplay
+        muted
+        [playsInline]="true"
+        #videoPlayer
+      ></video>
+       
+
+        <ion-col size="12" style="width: 70%;">
+          <!-- Form -->
+          
+          <h1 style="text-align: center">Ionic quickstart with Videosdk</h1>
+         
+          <form #myForm="ngForm">
+            <ion-row style="display: flex; flex-direction: column;">
+              <!-- Participant Name -->
+              <ion-item *ngIf="isCreatedMeetingClicked || isJoinedMeetingClicked">
+                <ion-label position="floating">Enter Your Name</ion-label>
+                <ion-input
+                  class="join-screen-input"
+                  name="participantName"
+                  type="text"
+                  [(ngModel)]="participantName"
+                  (ngModelChange)="fireChangeName()"
+                ></ion-input>
+              </ion-item>
+              <ion-note *ngIf="showParticipantNameError" color="danger" class="ion-padding-start">Please enter at least 3 characters</ion-note>
+
+              <!-- Meeting ID (for joining) -->
+              <ion-item *ngIf="isJoinedMeetingClicked" >
+                <ion-label position="floating">Meeting ID</ion-label>
+                <ion-input
+                  class="join-screen-input"
+                  name="meetingId"
+                  type="text"
+                  [(ngModel)]="meetingId"
+                  (ngModelChange)="fireChangeName()"
+                ></ion-input>
+              </ion-item>
+              <ion-note *ngIf="showMeetingIdError" color="danger" class="ion-padding-start">Please enter a valid meeting ID</ion-note>
+
+              <!-- Display Meeting ID (for created meeting) -->
+              <ion-item *ngIf="isCreatedMeetingClicked" style="margin-top: 10px;">
+                <ion-label>Meeting ID: {{ meetingId }}</ion-label>
+                <!-- <ion-text></ion-text> -->
+              </ion-item>
+
+              <!-- Buttons -->
+              <ion-row *ngIf="!isCreatedMeetingClicked && !isJoinedMeetingClicked" style="justify-content: center;">
+                <ion-col>
+                  <ion-button expand="block" id="new_meeting"  (click)="fireCreateMeeting()">Create a Meeting</ion-button>
+                </ion-col>
+                <ion-col>
+                  <ion-button expand="block" (click)="fireJoinMeeting()" fill="outline">Join a Meeting</ion-button>
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="isCreatedMeetingClicked || isJoinedMeetingClicked" style="justify-content: center;">
+                <ion-col>
+                  <ion-button expand="block" (click)="isCreatedMeetingClicked ? fireStartMeeting() : fireValidateMeeting()">
+                    {{ isCreatedMeetingClicked ? 'Start a Meeting' : 'Join a Meeting' }}
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-row>
+          </form>
+        </ion-col>
+      </ion-row>
+    </ion-col>
+  </ion-row>
+</ion-content>
+<ion-footer >
+  <ion-toolbar>
+    <ion-title>Developed by Video SDK</ion-title>
+  </ion-toolbar>
+</ion-footer>
