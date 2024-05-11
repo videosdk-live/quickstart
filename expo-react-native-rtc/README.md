@@ -47,15 +47,12 @@ Install all the dependecies to run the project.
 npm install
 ```
 
-for iOS
-```js
-cd ios && pod install
-```
+### Step 4: Create Native Directories
 
+Run below command for the same.
 
-### Step 4: Start Metro Server
 ```js
-npm run start
+npx expo prebuild
 ```
 
 ### Step 5: Run the App
@@ -63,8 +60,7 @@ npm run start
 Bingo, it's time to push the launch button.
 
 ```js
-npm run android
-npm run ios
+npx expo run
 ```
 
 <br/>
@@ -188,7 +184,8 @@ If you want to learn more about the SDK, read the Complete Documentation of [Rea
 
 <br/>
 
-## Examples 
+## Examples
+
 ### Examples for Conference
 
 - [videosdk-rtc-prebuilt-examples](https://github.com/videosdk-live/videosdk-rtc-prebuilt-examples)
