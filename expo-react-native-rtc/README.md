@@ -47,20 +47,14 @@ Install all the dependecies to run the project.
 npm install
 ```
 
-### Step 4: Create Native Directories
-
-Run below command for the same.
-
-```js
-npx expo prebuild
-```
-
-### Step 5: Run the App
+### Step 4: Run the App
 
 Bingo, it's time to push the launch button.
 
 ```js
-npx expo run
+npx expo run:android // run for android
+
+npx expo run:ios // run for android
 ```
 
 <br/>
