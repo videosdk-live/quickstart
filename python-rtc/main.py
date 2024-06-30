@@ -1,20 +1,24 @@
 import asyncio
+import os
 from videosdk import MeetingConfig, VideoSDK
 from meeting_events import MyMeetingEventHandler
+import dotenv
+dotenv.load_dotenv()
 
-
-VIDEOSDK_TOKEN="<TOKEN>"
-MEETING_ID="<MEETING_ID>"
-NAME="Dr. A. P. J. Abdul Kalam"
+VIDEOSDK_TOKEN = os.getenv("VIDEOSDK_TOKEN")
+MEETING_ID = os.getenv("MEETING_ID")
+NAME = "VideoSDK Python"
 
 loop = asyncio.get_event_loop()
 
+
 def main():
-  try:
-    meeting_config = MeetingConfig(meeting_id=MEETING_ID, name=NAME, mic_enabled=True, webcam_enabled=True, token=VIDEOSDK_TOKEN)
+
+    meeting_config = MeetingConfig(
+        meeting_id=MEETING_ID, name=NAME, mic_enabled=True, webcam_enabled=True, token=VIDEOSDK_TOKEN)
 
     meeting = VideoSDK.init_meeting(**meeting_config)
-    
+
     meeting.add_event_listener(MyMeetingEventHandler())
 
     print("joining into meeting...")
@@ -22,10 +26,8 @@ def main():
     meeting.join()
 
     print("joined successfully")
-  except KeyboardInterrupt:
-    print("releasing meeting instance")
-    meeting.release()
+
 
 if __name__ == '__main__':
-  main()
-  loop.run_forever()
+    main()
+    loop.run_forever()

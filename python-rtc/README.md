@@ -20,15 +20,16 @@ At Video SDK, we’re building tools to help companies create world-class collab
 
 ### Step 1: Clone the repository to your local environment.
 
-```js
+```bash
 git clone https://github.com/videosdk-live/quickstart.git
 cd quickstart/python-rtc/
+cp .env.example .env
 ```
 
 ### Step 2: install videosdk
 
 ```sh
-pip install videosdk
+pip install videosdk python-dotenv
 ```
 
 OR
@@ -47,7 +48,7 @@ pip install -U videosdk
 python api.py
 ```
 
-### Step 5: change your token and meetingId in `main.py`
+### Step 5: change your token and meetingId in `.env`
 
 ```
 VIDEOSDK_TOKEN="<YOUR_TOKEN>"
