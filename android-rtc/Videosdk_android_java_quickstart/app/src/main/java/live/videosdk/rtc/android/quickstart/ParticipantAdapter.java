@@ -1,5 +1,6 @@
 package live.videosdk.rtc.android.quickstart;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +25,23 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
 
     private final List<Participant> participants = new ArrayList<>();
 
+    private PeerViewHolder viewHolder;
+
     public ParticipantAdapter(Meeting meeting) {
         // adding the local participant(You) to the list
-        participants.add(meeting.getLocalParticipant());
+
 
         // adding Meeting Event listener to get the participant join/leave event in the meeting.
         meeting.addEventListener(new MeetingEventListener() {
+
+            @Override
+            public void onMeetingJoined() {
+                participants.clear();
+                participants.add(meeting.getLocalParticipant());
+                notifyDataSetChanged();
+                super.onMeetingJoined();
+            }
+
             @Override
             public void onParticipantJoined(Participant participant) {
                 // add participant to the list
@@ -53,6 +65,17 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
                     notifyItemRemoved(pos);
                 }
             }
+
+            @Override
+            public void onMeetingStateChanged(String state) {
+                Log.d("TAG", "onMeetingStateChanged: particiapantAdapter");
+                if(state.equals("FAILED")){
+                    viewHolder.participantView.clearImage();
+                    viewHolder.participantView.removeTrack();
+                    viewHolder.participantView.releaseSurfaceViewRenderer();
+                }
+                super.onMeetingStateChanged(state);
+            }
         });
     }
 
@@ -64,6 +87,7 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull PeerViewHolder holder, int position) {
+        viewHolder = holder;
         Participant participant = participants.get(position);
 
         holder.tvName.setText(participant.getDisplayName());
