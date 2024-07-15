@@ -1,9 +1,10 @@
-rootProject.name = 'VideoSDKTypescriptExample'
+rootProject.name = 'LatestReactNative'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
-include ':app'
-includeBuild('../node_modules/react-native-gradle-plugin')
 include ':rnwebrtc'
 project(':rnwebrtc').projectDir = new File(rootProject.projectDir, '../node_modules/@videosdk.live/react-native-webrtc/android')
 
 include ':rnfgservice'
 project(':rnfgservice').projectDir = new File(rootProject.projectDir, '../node_modules/@videosdk.live/react-native-foreground-service/android')
+
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')

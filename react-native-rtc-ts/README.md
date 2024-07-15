@@ -31,7 +31,7 @@ Clone the repository to your local environment.
 
 ```js
 git clone https://github.com/videosdk-live/quickstart.git
-cd quickstart/react-native
+cd quickstart/react-native-rtc-ts
 ```
 
 ### Step 2: Update the `api.js` file.
@@ -109,13 +109,12 @@ Token is used to create and validate a meeting using API and also initialise a m
 ```js
 <MeetingProvider
   config={{
-    meetingId: "meeting-id",
+    meetingId: 'meeting-id',
     micEnabled: true,
     webcamEnabled: true,
-    name: "Participant Name",
+    name: 'Participant Name',
   }}
-  token={"token"}
-></MeetingProvider>
+  token={'token'}></MeetingProvider>
 ```
 
 <br/>
@@ -123,7 +122,7 @@ Token is used to create and validate a meeting using API and also initialise a m
 ## [Enable/Disable Local Webcam](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/handling-media/on-off-camera)
 
 ```js
-const { toggleWebcam } = useMeeting();
+const {toggleWebcam} = useMeeting();
 
 const onPress = () => {
   // Enable/Disable Webcam in Meeting
@@ -136,7 +135,7 @@ const onPress = () => {
 ## [Mute/Unmute Local Audio](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/handling-media/mute-unmute-mic)
 
 ```js
-const { toggleMic } = useMeeting();
+const {toggleMic} = useMeeting();
 
 const onPress = () => {
   // Enable/Disable Mic in Meeting
@@ -149,7 +148,7 @@ const onPress = () => {
 ## [Leave or End Meeting](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/setup-call/leave-end-meeting)
 
 ```js
-const { leave, end } = useMeeting();
+const {leave, end} = useMeeting();
 
 const onPress = () => {
   // Leave Meeting
@@ -169,14 +168,14 @@ By registering callback handlers, VideoSDK sends callbacks to the client app whe
 ```js
 function onMeetingJoined() {
   // This event will be emitted when a localParticipant(you) successfully joined the meeting.
-  console.log("onMeetingJoined");
+  console.log('onMeetingJoined');
 }
 function onMeetingLeft() {
   // This event will be emitted when a localParticipant(you) left the meeting.
-  console.log("onMeetingLeft");
+  console.log('onMeetingLeft');
 }
 
-const { meetingId, meeting, localParticipant } = useMeeting({
+const {meetingId, meeting, localParticipant} = useMeeting({
   onMeetingJoined,
   onMeetingLeft,
 });

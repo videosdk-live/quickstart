@@ -7,11 +7,11 @@
 #define TIMEOUT_SECONDS 600
 #define TEXT_TO_LOOK_FOR @"Welcome to React"
 
-@interface VideoSDKTypescriptExampleTests : XCTestCase
+@interface LatestReactNativeTests : XCTestCase
 
 @end
 
-@implementation VideoSDKTypescriptExampleTests
+@implementation LatestReactNativeTests
 
 - (BOOL)findSubviewInView:(UIView *)view matching:(BOOL (^)(UIView *view))test
 {
