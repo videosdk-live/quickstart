@@ -8,9 +8,9 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
-.DS__Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+**.DS_STORE
