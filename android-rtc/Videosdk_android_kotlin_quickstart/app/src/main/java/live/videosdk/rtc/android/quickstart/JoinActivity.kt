@@ -35,7 +35,7 @@ class JoinActivity : AppCompatActivity() {
             )
         }
         btnJoin.setOnClickListener { v: View? ->
-            val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
+            val intent = Intent(this, MeetingActivity::class.java)
             intent.putExtra("token", sampleToken)
             intent.putExtra("meetingId", etMeetingId.text.toString())
             startActivity(intent)

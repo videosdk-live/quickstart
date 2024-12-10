@@ -1,0 +1,35 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="?android:attr/windowBackground">
+
+    <EditText
+        android:id="@+id/caller_id_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Meeting ID"
+        android:padding="16dp"
+        android:layout_marginBottom="20dp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="10dp" />
+
+    <Button
+        android:id="@+id/call_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Call"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="20dp" />
+
+</LinearLayout>
