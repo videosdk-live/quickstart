@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.ui.theme.navigation
+package live.videosdk.rtc.android.quickstart.navigation
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -7,8 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
-import live.videosdk.rtc.android.quickstart.ui.theme.screens.JoinScreen
-import live.videosdk.rtc.android.quickstart.ui.theme.screens.MeetingScreen
+import live.videosdk.rtc.android.quickstart.screens.JoinScreen
+import live.videosdk.rtc.android.quickstart.screens.MeetingScreen
 
 
 @Composable
@@ -18,8 +18,10 @@ fun NavigationGraph(navController: NavHostController = rememberNavController(),c
             JoinScreen(navController,context)
         }
         composable("meeting_screen?meetingId={meetingId}") { backStackEntry ->
-            val meetingId = backStackEntry.arguments?.getString("meetingId") ?: "N/A"
-            MeetingScreen(viewModel = MeetingViewModel(),navController, meetingId, context)
+            val meetingId = backStackEntry.arguments?.getString("meetingId")
+            meetingId?.let {
+                MeetingScreen(viewModel = MeetingViewModel(),navController, meetingId, context)
+            }
         }
     }
 }

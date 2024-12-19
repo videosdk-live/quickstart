@@ -22,12 +22,11 @@ class MeetingViewModel : ViewModel() {
     var isMeetingLeft by mutableStateOf(false)
         private set
 
-    fun initMeeting(context: Context, token: String, meetingId: String, ) {
-        Log.d("TAG", "initMeeting: $meetingId")
-            VideoSDK.config(token)
+    fun initMeeting(context: Context, token: String, meetingId: String ) {
+        VideoSDK.config(token)
         if(meeting==null){
             meeting = VideoSDK.initMeeting(
-                context, meetingId, "Dhiraj",
+                context, meetingId, "John Doe",
                 micEnabled, webcamEnabled, null, null, true, null, null
             )
         }

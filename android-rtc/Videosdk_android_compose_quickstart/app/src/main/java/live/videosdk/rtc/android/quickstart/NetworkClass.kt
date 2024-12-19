@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.model
+package live.videosdk.rtc.android.quickstart
 
 import android.util.Log
 import com.androidnetworking.AndroidNetworking
@@ -7,8 +7,8 @@ import com.androidnetworking.interfaces.JSONObjectRequestListener
 import org.json.JSONException
 import org.json.JSONObject
 
-class MeetingHelper {
-    fun createMeeting(token: String, onMeetingCreated: (String) -> Unit) {
+object NetworkManager {
+    fun createMeetingId(token: String, onMeetingIdCreated: (String) -> Unit) {
         AndroidNetworking.post("https://api.videosdk.live/v2/rooms")
             .addHeaders("Authorization", token)
             .build()
@@ -16,7 +16,7 @@ class MeetingHelper {
                 override fun onResponse(response: JSONObject) {
                     try {
                         val meetingId = response.getString("roomId")
-                        onMeetingCreated(meetingId)
+                        onMeetingIdCreated(meetingId)
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
@@ -26,7 +26,6 @@ class MeetingHelper {
                     anError.printStackTrace()
                     Log.d("TAG", "onError: $anError")
                 }
-            }
-        )
+            })
     }
 }
