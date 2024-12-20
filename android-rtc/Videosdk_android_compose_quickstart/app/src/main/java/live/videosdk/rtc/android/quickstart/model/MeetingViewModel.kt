@@ -48,22 +48,7 @@ class MeetingViewModel : ViewModel() {
         }
 
         override fun onParticipantJoined(participant: Participant) {
-            var existingParticipantIndex = -1
-
-            for (i in participants.indices) {
-                if (participants[i].id == participant.id) {
-                    existingParticipantIndex = i
-                    break
-                }
-            }
-
-            if (existingParticipantIndex >= 0) {
-                participants[existingParticipantIndex] = participant
-            }
-            else {
-                participants.add(participant)
-                Log.d("TAG", "participant added: ")
-            }
+            participants.add(participant)
         }
 
         override fun onParticipantLeft(participant: Participant) {
