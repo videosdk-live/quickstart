@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.ui.theme.components
+package live.videosdk.rtc.android.quickstart.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
@@ -42,12 +42,5 @@ fun MyText(text: String, fontSize: TextUnit = 23.sp) {
         modifier = Modifier.padding(4.dp),
         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-    )
-}
-
-@Composable
-fun MyText(text: String) {
-    Text(
-        text = text
     )
 }

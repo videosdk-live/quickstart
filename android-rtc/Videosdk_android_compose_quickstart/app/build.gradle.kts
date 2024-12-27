@@ -50,8 +50,8 @@ android {
 }
 
 dependencies {
-    implementation ("live.videosdk:rtc-android-sdk:0.1.37")
-    implementation ("com.amitshekhar.android:android-networking:1.0.2")
+    implementation (libs.rtc.android.sdk)
+    implementation (libs.android.networking)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

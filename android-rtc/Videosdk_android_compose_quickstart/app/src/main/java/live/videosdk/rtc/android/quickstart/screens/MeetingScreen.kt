@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.ui.theme.screens
+package live.videosdk.rtc.android.quickstart.screens
 
 import android.content.Context
 import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import live.videosdk.rtc.android.quickstart.MainApplication
-import live.videosdk.rtc.android.quickstart.ui.theme.components.MyAppButton
-import live.videosdk.rtc.android.quickstart.ui.theme.components.MySpacer
-import live.videosdk.rtc.android.quickstart.ui.theme.components.MyText
-import live.videosdk.rtc.android.quickstart.ui.theme.components.ParticipantsGrid
+import live.videosdk.rtc.android.quickstart.components.MyAppButton
+import live.videosdk.rtc.android.quickstart.components.MySpacer
+import live.videosdk.rtc.android.quickstart.components.MyText
+import live.videosdk.rtc.android.quickstart.components.ParticipantsGrid
 
 @Composable
 fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, meetingId: String, context: Context) {
@@ -29,25 +29,25 @@ fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, mee
     val app = context.applicationContext as MainApplication
     val isMeetingLeft = viewModel.isMeetingLeft
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LaunchedEffect(isMeetingLeft) {
-            if (isMeetingLeft) {
-                navController.navigate("join_screen")
-            }
+    LaunchedEffect(isMeetingLeft) {
+        if (isMeetingLeft) {
+            navController.navigate("join_screen")
         }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
         Header(meetingId)
         MySpacer()
         ParticipantsGrid(viewModel.participants, Modifier.weight(1f))
         MySpacer()
         MediaControlButtons(
+            onJoinClick = {
+                viewModel.initMeeting(context, app.sampleToken, meetingId)
+            },
             onMicClick = { viewModel.toggleMic() },
             onCamClick = { viewModel.toggleWebcam() },
             onLeaveClick = {
                 viewModel.leaveMeeting()
-                navController.navigate("join_screen")
-            },
-            onJoinClick = {
-                viewModel.initMeeting(context, app.sampleToken, meetingId)
             }
         )
     }
@@ -55,7 +55,6 @@ fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, mee
 
 @Composable
 fun Header(meetingId: String) {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -70,7 +69,7 @@ fun Header(meetingId: String) {
 }
 
 @Composable
-fun MediaControlButtons(onMicClick: () -> Unit, onCamClick: () -> Unit, onLeaveClick: () -> Unit,onJoinClick:()->Unit) {
+fun MediaControlButtons(onJoinClick:()->Unit,onMicClick: () -> Unit, onCamClick: () -> Unit, onLeaveClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

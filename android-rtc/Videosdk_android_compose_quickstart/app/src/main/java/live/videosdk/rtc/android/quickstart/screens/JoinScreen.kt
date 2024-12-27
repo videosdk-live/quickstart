@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.ui.theme.screens
+package live.videosdk.rtc.android.quickstart.screens
 
 
 import android.content.Context
@@ -18,17 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import live.videosdk.rtc.android.quickstart.MainApplication
-import live.videosdk.rtc.android.quickstart.model.MeetingHelper
-import live.videosdk.rtc.android.quickstart.ui.theme.components.MyAppButton
-import live.videosdk.rtc.android.quickstart.ui.theme.components.MyText
-
+import live.videosdk.rtc.android.quickstart.NetworkManager
+import live.videosdk.rtc.android.quickstart.components.MyAppButton
 
 @Composable
-fun JoinScreen(navController: NavController, context: Context
+fun JoinScreen(
+    navController: NavController, context: Context
 ) {
     val app = context.applicationContext as MainApplication
     val token = app.sampleToken
@@ -44,25 +40,23 @@ fun JoinScreen(navController: NavController, context: Context
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             var input by rememberSaveable { mutableStateOf("") }
-            CreateMeetingBtn(navController,app.meetingHelper,token)
-            MyText("OR")
-            InputMeetingId(input){updateInput->
+            CreateMeetingBtn(navController, token)
+            Text(text = "OR")
+            InputMeetingId(input) { updateInput ->
                 input = updateInput
             }
-            JoinMeetingBtn(navController,input)
+            JoinMeetingBtn(navController, input)
         }
     }
 }
 
 @Composable
-fun CreateMeetingBtn(navController: NavController, meetingService: MeetingHelper, token: String) {
-
-    MyAppButton({meetingService.createMeeting(token) { meetingId ->
-        CoroutineScope(Dispatchers.Main).launch {
+fun CreateMeetingBtn(navController: NavController, token: String) {
+    MyAppButton({
+        NetworkManager.createMeetingId(token) { meetingId ->
             navController.navigate("meeting_screen?meetingId=$meetingId")
         }
-    }
-    },"Create Meeting")
+    }, "Create Meeting")
 }
 
 
@@ -74,9 +68,10 @@ fun InputMeetingId(input: String, onInputChange: (String) -> Unit) {
 }
 
 @Composable
-fun JoinMeetingBtn(navController: NavController,meetingId:String) {
+fun JoinMeetingBtn(navController: NavController, meetingId: String) {
     MyAppButton({
-        if(meetingId.isNotEmpty()){
+        if (meetingId.isNotEmpty()) {
             navController.navigate("meeting_screen?meetingId=$meetingId")
-        }},"Join Meeting")
+        }
+    }, "Join Meeting")
 }

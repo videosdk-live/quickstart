@@ -22,12 +22,11 @@ class MeetingViewModel : ViewModel() {
     var isMeetingLeft by mutableStateOf(false)
         private set
 
-    fun initMeeting(context: Context, token: String, meetingId: String, ) {
-        Log.d("TAG", "initMeeting: $meetingId")
-            VideoSDK.config(token)
+    fun initMeeting(context: Context, token: String, meetingId: String ) {
+        VideoSDK.config(token)
         if(meeting==null){
             meeting = VideoSDK.initMeeting(
-                context, meetingId, "Dhiraj",
+                context, meetingId, "John Doe",
                 micEnabled, webcamEnabled, null, null, true, null, null
             )
         }
@@ -49,22 +48,7 @@ class MeetingViewModel : ViewModel() {
         }
 
         override fun onParticipantJoined(participant: Participant) {
-            var existingParticipantIndex = -1
-
-            for (i in participants.indices) {
-                if (participants[i].id == participant.id) {
-                    existingParticipantIndex = i
-                    break
-                }
-            }
-
-            if (existingParticipantIndex >= 0) {
-                participants[existingParticipantIndex] = participant
-            }
-            else {
-                participants.add(participant)
-                Log.d("TAG", "participant added: ")
-            }
+            participants.add(participant)
         }
 
         override fun onParticipantLeft(participant: Participant) {

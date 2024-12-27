@@ -9,7 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import live.videosdk.rtc.android.quickstart.ui.theme.navigation.NavigationGraph
+import live.videosdk.rtc.android.quickstart.navigation.NavigationGraph
 import live.videosdk.rtc.android.quickstart.ui.theme.Videosdk_android_compose_quickstartTheme
 
 class MainActivity : ComponentActivity() {
