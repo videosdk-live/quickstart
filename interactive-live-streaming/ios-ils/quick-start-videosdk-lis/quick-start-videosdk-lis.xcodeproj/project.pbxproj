@@ -7,14 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A34A0C99BCD8DD47DEB22CDA /* Pods_quick_start_videosdk_lis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5888D523DEB5D1140E8A5BA8 /* Pods_quick_start_videosdk_lis.framework */; };
+		2C9F93282D3FFF6F00FB0032 /* VideoSDKRTCSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2C9F93272D3FFF6F00FB0032 /* VideoSDKRTCSwift */; };
+		2C9F93692D40028700FB0032 /* VideoSDKRTCSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2C9F93682D40028700FB0032 /* VideoSDKRTCSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		2CD120CE2D23C9AB00EF02CA /* quick-start-videosdk-lis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "quick-start-videosdk-lis.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5888D523DEB5D1140E8A5BA8 /* Pods_quick_start_videosdk_lis.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_quick_start_videosdk_lis.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A46AB5BCB2EFC8DE9FFC88EB /* Pods-quick-start-videosdk-lis.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-quick-start-videosdk-lis.release.xcconfig"; path = "Target Support Files/Pods-quick-start-videosdk-lis/Pods-quick-start-videosdk-lis.release.xcconfig"; sourceTree = "<group>"; };
-		BF962A254D50417E705681A9 /* Pods-quick-start-videosdk-lis.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-quick-start-videosdk-lis.debug.xcconfig"; path = "Target Support Files/Pods-quick-start-videosdk-lis/Pods-quick-start-videosdk-lis.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -43,7 +41,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A34A0C99BCD8DD47DEB22CDA /* Pods_quick_start_videosdk_lis.framework in Frameworks */,
+				2C9F93282D3FFF6F00FB0032 /* VideoSDKRTCSwift in Frameworks */,
+				2C9F93692D40028700FB0032 /* VideoSDKRTCSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,8 +54,6 @@
 			children = (
 				2CD120D02D23C9AB00EF02CA /* quick-start-videosdk-lis */,
 				2CD120CF2D23C9AB00EF02CA /* Products */,
-				AA9C7E964A29E7F901134B9E /* Pods */,
-				3E1BE84EC8718A8A62437A81 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -68,23 +65,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		3E1BE84EC8718A8A62437A81 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				5888D523DEB5D1140E8A5BA8 /* Pods_quick_start_videosdk_lis.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		AA9C7E964A29E7F901134B9E /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				BF962A254D50417E705681A9 /* Pods-quick-start-videosdk-lis.debug.xcconfig */,
-				A46AB5BCB2EFC8DE9FFC88EB /* Pods-quick-start-videosdk-lis.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -92,11 +72,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2CD120DC2D23C9AC00EF02CA /* Build configuration list for PBXNativeTarget "quick-start-videosdk-lis" */;
 			buildPhases = (
-				30F35B31FA4842F179DB9802 /* [CP] Check Pods Manifest.lock */,
 				2CD120CA2D23C9AB00EF02CA /* Sources */,
 				2CD120CB2D23C9AB00EF02CA /* Frameworks */,
 				2CD120CC2D23C9AB00EF02CA /* Resources */,
-				21E2865D13614B8D5FE3574E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -134,6 +112,9 @@
 			);
 			mainGroup = 2CD120C52D23C9AB00EF02CA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2C9F93672D40028700FB0032 /* XCRemoteSwiftPackageReference "videosdk-rtc-ios-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2CD120CF2D23C9AB00EF02CA /* Products */;
 			projectDirPath = "";
@@ -153,48 +134,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		21E2865D13614B8D5FE3574E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-quick-start-videosdk-lis/Pods-quick-start-videosdk-lis-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-quick-start-videosdk-lis/Pods-quick-start-videosdk-lis-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-quick-start-videosdk-lis/Pods-quick-start-videosdk-lis-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		30F35B31FA4842F179DB9802 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-quick-start-videosdk-lis-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2CD120CA2D23C9AB00EF02CA /* Sources */ = {
@@ -328,7 +267,6 @@
 		};
 		2CD120DD2D23C9AC00EF02CA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF962A254D50417E705681A9 /* Pods-quick-start-videosdk-lis.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -363,7 +301,6 @@
 		};
 		2CD120DE2D23C9AC00EF02CA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A46AB5BCB2EFC8DE9FFC88EB /* Pods-quick-start-videosdk-lis.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -418,6 +355,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2C9F93262D3FFF6F00FB0032 /* XCRemoteSwiftPackageReference "videosdk-rtc-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/videosdk-live/videosdk-rtc-ios-spm";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		2C9F93672D40028700FB0032 /* XCRemoteSwiftPackageReference "videosdk-rtc-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/videosdk-live/videosdk-rtc-ios-spm";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2C9F93272D3FFF6F00FB0032 /* VideoSDKRTCSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2C9F93262D3FFF6F00FB0032 /* XCRemoteSwiftPackageReference "videosdk-rtc-ios-spm" */;
+			productName = VideoSDKRTCSwift;
+		};
+		2C9F93682D40028700FB0032 /* VideoSDKRTCSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2C9F93672D40028700FB0032 /* XCRemoteSwiftPackageReference "videosdk-rtc-ios-spm" */;
+			productName = VideoSDKRTCSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2CD120C62D23C9AB00EF02CA /* Project object */;
 }

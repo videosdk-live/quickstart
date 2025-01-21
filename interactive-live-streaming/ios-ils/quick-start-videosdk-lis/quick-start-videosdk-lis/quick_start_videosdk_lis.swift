@@ -11,7 +11,7 @@ import SwiftUI
 struct quick_start_videosdk_lis: App {
     var body: some Scene {
         WindowGroup {
-            JoinStreamView(streamId: "54dr-h8c5-hsif", name: "Deep")
+            JoinStreamView(streamId: "", name: "")
         }
     } 
 }
