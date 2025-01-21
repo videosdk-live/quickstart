@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        /* Basic body styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #fff;
+        }
+
+        /* Styles for the main screens */
+        #join-screen,
+        #grid-screen {
+            background: #e9e9e9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        /* Common styles for buttons and input fields */
+        button,
+        input[type="text"] {
+            margin: 5px;
+        }
+
+        /* Button styles */
+        button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        /* Button hover effect */
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* Input field styles */
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #aaa;
+            width: calc(100% - 16px);
+        }
+
+        /* Control button layout */
+        #controls {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Join screen for creating or joining live streams -->
+    <div id="join-screen">
+        <button id="createLiveStreamBtn">Create Live Stream As Host</button>
+        <div><span>OR</span></div>
+        <input type="text" id="meetingIdTxt" placeholder="Enter Stream Id" />
+        <div>
+            <button id="joinHostBtn">Join As Host</button>
+            <button id="joinAudienceBtn">Join As Audience</button>
+        </div>
+    </div>
+
+    <!-- Placeholder for text messages -->
+    <div id="textDiv"></div>
+
+    <!-- Grid screen for video and controls, hidden by default -->
+    <div id="grid-screen" style="display: none">
+        <h3 id="heading"></h3>
+        <div id="controls">
+            <button id="leaveBtn">Leave</button>
+            <button id="toggleMicBtn" style="display: none">Toggle Mic</button>
+            <button id="toggleWebCamBtn" style="display: none">Toggle Cam</button>
+            <button id="switchModeBtn"></button>
+        </div>
+        <div id="videoContainer"></div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="https://sdk.videosdk.live/js-sdk/0.1.4/videosdk.js"></script>
+    <script src="config.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
