@@ -1,6 +1,3 @@
-// metro.config.js
-
-// Learn more https://docs.expo.io/guides/customizing-metro
 const { getDefaultConfig } = require("expo/metro-config");
 const resolveFrom = require("resolve-from");
 
@@ -16,6 +13,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     const updatedModuleName = moduleName.endsWith("/index")
       ? moduleName.replace("/index", "")
       : moduleName;
+
     // Resolve event-target-shim relative to the react-native-webrtc package to use v6.
     // React Native requires v5 which is not compatible with react-native-webrtc.
     const eventTargetShimPath = resolveFrom(

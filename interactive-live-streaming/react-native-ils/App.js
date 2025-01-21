@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -35,7 +35,7 @@ function JoinView({ initializeStream, setMode }) {
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleAction(Constants.modes.CONFERENCE)}
+        onPress={() => handleAction(Constants.modes.SEND_AND_RECV)}
       >
         <Text style={styles.buttonText}>Create Live Stream as Host</Text>
       </TouchableOpacity>
@@ -47,13 +47,13 @@ function JoinView({ initializeStream, setMode }) {
       />
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleAction(Constants.modes.CONFERENCE)}
+        onPress={() => handleAction(Constants.modes.SEND_AND_RECV)}
       >
         <Text style={styles.buttonText}>Join as Host</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleAction(Constants.modes.VIEWER)}
+        onPress={() => handleAction(Constants.modes.RECV_ONLY)}
       >
         <Text style={styles.buttonText}>Join as Audience</Text>
       </TouchableOpacity>
@@ -91,7 +91,12 @@ function LSContainer({ streamId, onLeave }) {
 // Component to display the live stream view
 function StreamView() {
   const { participants } = useMeeting(); // Access participants using the VideoSDK useMeeting hook
-  const participantsArrId = [...participants.keys()];
+  const participantsArrId = Array.from(participants.entries())
+    .filter(
+      ([_, participant]) => participant.mode === Constants.modes.SEND_AND_RECV
+    )
+    .map(([key]) => key);
+
   return (
     <View style={{ flex: 1 }}>
       <FlatList
@@ -100,7 +105,7 @@ function StreamView() {
           return <Participant participantId={item} />;
         }}
       />
-      <LSControls /> {/* Render live stream controls */}
+      <LSControls />
     </View>
   );
 }
@@ -126,8 +131,45 @@ function Participant({ participantId }) {
   );
 }
 
+// Component for managing stream controls
 function LSControls() {
-  return null;
+  const { leave, toggleMic, toggleWebcam, changeMode, meeting } = useMeeting(); // Access methods
+
+  const currentMode = meeting.localParticipant.mode; // Get the current participant's mode
+
+  return (
+    <View style={styles.controls}>
+      <TouchableOpacity style={styles.button} onPress={leave}>
+        <Text style={styles.buttonText}>Leave</Text>
+      </TouchableOpacity>
+      {currentMode === Constants.modes.SEND_AND_RECV && (
+        <>
+          <TouchableOpacity style={styles.button} onPress={toggleMic}>
+            <Text style={styles.buttonText}>Toggle Mic</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={toggleWebcam}>
+            <Text style={styles.buttonText}>Toggle Camera</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          changeMode(
+            currentMode === Constants.modes.SEND_AND_RECV
+              ? Constants.modes.RECV_ONLY
+              : Constants.modes.SEND_AND_RECV
+          )
+        }
+      >
+        <Text style={styles.buttonText}>
+          {currentMode === Constants.modes.SEND_AND_RECV
+            ? "Switch to Audience"
+            : "Switch to Host"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 // Main App Component - Handles the app flow and stream lifecycle

@@ -1,7 +1,8 @@
 {
-  "name": "videosdk-expo-app",
+  "name": "ils-react-native",
+  "license": "0BSD",
   "version": "1.0.0",
-  "main": "expo/AppEntry.js",
+  "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -9,16 +10,16 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@config-plugins/react-native-webrtc": "^9.0.0",
+    "@config-plugins/react-native-webrtc": "^10.0.0",
     "@videosdk.live/expo-config-plugin": "^0.0.2",
-    "@videosdk.live/react-native-foreground-service": "^0.0.3",
+    "@videosdk.live/react-native-foreground-service": "^0.0.4",
     "@videosdk.live/react-native-incallmanager": "^0.1.3",
     "@videosdk.live/react-native-sdk": "^0.2.0",
     "@videosdk.live/react-native-webrtc": "^0.0.16",
-    "expo": "~51.0.2",
-    "expo-status-bar": "~1.12.1",
-    "react": "18.2.0",
-    "react-native": "0.74.1"
+    "expo": "~52.0.27",
+    "expo-status-bar": "~2.0.1",
+    "react": "18.3.1",
+    "react-native": "0.76.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
