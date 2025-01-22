@@ -1,0 +1,21 @@
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.metadata
+
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build
+/captures/
+
+# Discard analysis_options.yaml
+analysis_options.yaml
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
