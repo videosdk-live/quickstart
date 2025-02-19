@@ -9,7 +9,7 @@ import org.json.JSONObject
 
 object NetworkManager {
     fun createStreamId(token: String, onStreamIdCreated: (String) -> Unit) {
-        AndroidNetworking.post("https://dev-api.videosdk.live/v2/rooms")
+        AndroidNetworking.post("https://api.videosdk.live/v2/rooms")
             .addHeaders("Authorization", token)
             .build()
             .getAsJSONObject(object : JSONObjectRequestListener {
