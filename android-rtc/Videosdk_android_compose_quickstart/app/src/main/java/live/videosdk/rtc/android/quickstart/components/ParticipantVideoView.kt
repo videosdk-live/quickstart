@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -114,21 +115,24 @@ fun ParticipantVideoView(
 
 @Composable
 fun ParticipantsGrid(
+    gridCells: GridCells,
     participants: List<Participant>,
     modifier: Modifier = Modifier
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        items(participants.size) { index ->
-            ParticipantVideoView(
-                participant = participants[index],
-            )
+    key(participants) {
+        LazyVerticalGrid(
+            columns = gridCells,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            items(participants.size) { index ->
+                ParticipantVideoView(
+                    participant = participants[index],
+                )
+            }
         }
     }
 }

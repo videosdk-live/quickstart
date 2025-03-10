@@ -1,44 +1,39 @@
 package live.videosdk.rtc.android.quickstart.screens
 
 import android.content.Context
-import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import live.videosdk.rtc.android.quickstart.MainApplication
-import live.videosdk.rtc.android.quickstart.components.MyAppButton
-import live.videosdk.rtc.android.quickstart.components.MySpacer
-import live.videosdk.rtc.android.quickstart.components.MyText
-import live.videosdk.rtc.android.quickstart.components.ParticipantsGrid
+import live.videosdk.rtc.android.quickstart.components.*
+import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, meetingId: String, context: Context) {
-
+fun MeetingScreen(
+    viewModel: MeetingViewModel, navController: NavController, meetingId: String, context: Context
+) {
     val app = context.applicationContext as MainApplication
     val isMeetingLeft = viewModel.isMeetingLeft
 
     LaunchedEffect(isMeetingLeft) {
         if (isMeetingLeft) {
             navController.navigate("join_screen")
+            viewModel.reset()
         }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Header(meetingId)
         MySpacer()
-        ParticipantsGrid(viewModel.participants, Modifier.weight(1f))
+        ParticipantsGrid(gridCells = GridCells.Fixed(2),viewModel.participants, Modifier.weight(1f))
         MySpacer()
         MediaControlButtons(
             onJoinClick = {
@@ -69,17 +64,34 @@ fun Header(meetingId: String) {
 }
 
 @Composable
-fun MediaControlButtons(onJoinClick:()->Unit,onMicClick: () -> Unit, onCamClick: () -> Unit, onLeaveClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
+fun MediaControlButtons(
+    onJoinClick: () -> Unit,
+    onMicClick: () -> Unit,
+    onCamClick: () -> Unit,
+    onLeaveClick: () -> Unit,
+
     ) {
-        MyAppButton(onJoinClick,"Join")
-        MyAppButton(onMicClick,"ToggleMic")
-        MyAppButton(onCamClick,"ToggleCam")
-        MyAppButton(onLeaveClick,"Leave")
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            MyAppButton(onJoinClick, "Join")
+            MyAppButton(onMicClick, "Toggle Mic")
+
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            MyAppButton(onCamClick, "Toggle Cam")
+            MyAppButton(onLeaveClick, "Leave")
+        }
     }
 }
