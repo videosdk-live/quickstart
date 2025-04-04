@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'meeting_controls.dart';
+import 'participant_tile.dart';
 import 'package:videosdk/videosdk.dart';
-import 'package:videosdk_flutter_quickstart/meeting_controls.dart';
-import 'package:videosdk_flutter_quickstart/participant_tile.dart';
 
 class ILSSpeakerView extends StatefulWidget {
   final Room room;
