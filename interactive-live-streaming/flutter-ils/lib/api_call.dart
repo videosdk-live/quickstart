@@ -7,7 +7,7 @@ String token = dotenv.env['AUTH_TOKEN']!;
 // API call to create livestream
 Future<String> createLivestream() async {
   final Uri getlivestreamIdUrl =
-      Uri.parse('https://dev-api.videosdk.live/v2/rooms');
+      Uri.parse('https://api.videosdk.live/v2/rooms');
   final http.Response liveStreamIdResponse =
       await http.post(getlivestreamIdUrl, headers: {
     "Authorization": token,
