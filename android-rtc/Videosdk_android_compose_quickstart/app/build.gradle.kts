@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "live.videosdk.rtc.android.quickstart"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

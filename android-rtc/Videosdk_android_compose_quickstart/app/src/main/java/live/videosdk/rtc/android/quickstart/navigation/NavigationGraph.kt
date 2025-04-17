@@ -12,7 +12,7 @@ import live.videosdk.rtc.android.quickstart.screens.MeetingScreen
 
 
 @Composable
-fun NavigationGraph(navController: NavHostController = rememberNavController(),context: Context) {
+fun NavigationGraph(navController: NavHostController = rememberNavController(),context: Context, meetingViewModel: MeetingViewModel) {
     NavHost(navController = navController, startDestination = "join_screen") {
         composable("join_screen") {
             JoinScreen(navController,context)
@@ -20,7 +20,7 @@ fun NavigationGraph(navController: NavHostController = rememberNavController(),c
         composable("meeting_screen?meetingId={meetingId}") { backStackEntry ->
             val meetingId = backStackEntry.arguments?.getString("meetingId")
             meetingId?.let {
-                MeetingScreen(viewModel = MeetingViewModel(),navController, meetingId, context)
+                MeetingScreen(viewModel = meetingViewModel,navController, meetingId, context)
             }
         }
     }

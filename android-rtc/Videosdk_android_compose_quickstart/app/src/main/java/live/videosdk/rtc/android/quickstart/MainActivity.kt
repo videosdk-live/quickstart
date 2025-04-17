@@ -9,18 +9,27 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
 import live.videosdk.rtc.android.quickstart.navigation.NavigationGraph
 import live.videosdk.rtc.android.quickstart.ui.theme.Videosdk_android_compose_quickstartTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var viewModel: MeetingViewModel
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel = ViewModelProvider(this)[MeetingViewModel::class.java]
+
         checkSelfPermission(REQUESTED_PERMISSIONS[0], PERMISSION_REQ_ID)
         checkSelfPermission(REQUESTED_PERMISSIONS[1], PERMISSION_REQ_ID)
 
         setContent {
             Videosdk_android_compose_quickstartTheme {
-                MyApp(this)
+                MyApp(this, viewModel)
             }
         }
     }
@@ -46,9 +55,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(context: Context) {
-    NavigationGraph(context = context)
+fun MyApp(context: Context, viewModel: MeetingViewModel) {
+    NavigationGraph(context = context, meetingViewModel = viewModel)
 }
-
-
-

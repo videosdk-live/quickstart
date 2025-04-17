@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun MyAppButton(task: () -> Unit, buttonName: String) {
-    Button(onClick = task) {
-        Text(text = buttonName)
+fun MyAppButton(onClick: () -> Unit, label: String, enabled: Boolean = true) {
+    Button(onClick = onClick, enabled = enabled) {
+        Text(text = label)
     }
 }
 

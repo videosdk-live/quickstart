@@ -22,9 +22,19 @@ class MeetingViewModel : ViewModel() {
     var isMeetingLeft by mutableStateOf(false)
         private set
 
-    fun initMeeting(context: Context, token: String, meetingId: String ) {
+
+    fun reset() {
+        meeting?.removeAllListeners()
+        meeting = null
+        micEnabled = true
+        webcamEnabled = true
+        participants.clear()
+        isMeetingLeft = false
+    }
+
+    fun initMeeting(context: Context, token: String, meetingId: String) {
         VideoSDK.config(token)
-        if(meeting==null){
+        if (meeting == null) {
             meeting = VideoSDK.initMeeting(
                 context, meetingId, "John Doe",
                 micEnabled, webcamEnabled, null, null, true, null, null
@@ -43,7 +53,6 @@ class MeetingViewModel : ViewModel() {
 
         override fun onMeetingLeft() {
             Log.d("#meeting", "onMeetingLeft()")
-            meeting = null
             isMeetingLeft = true
         }
 
