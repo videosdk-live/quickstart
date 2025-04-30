@@ -8,8 +8,12 @@ class ILSView extends StatefulWidget {
   final Room room;
   final Mode mode;
   final bool bar;
-  const ILSView(
-      {super.key, required this.room, required this.bar, required this.mode});
+  const ILSView({
+    super.key,
+    required this.room,
+    required this.bar,
+    required this.mode,
+  });
 
   @override
   State<ILSView> createState() => _ILSViewState();
@@ -28,7 +32,9 @@ class _ILSViewState extends State<ILSView> {
     //Setting up the event listeners and initializing the participants and hls state
     setlivestreamEventListener();
     participants.putIfAbsent(
-        widget.room.localParticipant.id, () => widget.room.localParticipant);
+      widget.room.localParticipant.id,
+      () => widget.room.localParticipant,
+    );
     //filtering the CONFERENCE participants to be shown in the grid
     widget.room.participants.values.forEach((participant) {
       if (participant.mode == Mode.SEND_AND_RECV) {
@@ -56,31 +62,24 @@ class _ILSViewState extends State<ILSView> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () => {
-                  Clipboard.setData(ClipboardData(text: widget.room.id)),
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Livestream Id Copied"),
-                    ),
-                  ),
-                },
+                onPressed:
+                    () => {
+                      Clipboard.setData(ClipboardData(text: widget.room.id)),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Livestream Id Copied")),
+                      ),
+                    },
                 child: const Text("Copy Livestream Id"),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () => widget.room.leave(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text("Leave"),
               ),
             ],
           ),
-          Expanded(
-            child: ParticipantTile(
-              participant: widget.room.localParticipant,
-            ),
-          ),
+          Expanded(child: ParticipantTile(room: widget.room)),
           _buildLivestreamControls(),
         ],
       ),
@@ -149,23 +148,18 @@ class _ILSViewState extends State<ILSView> {
 
   // listening to room events for participants join, left and hls state changes
   void setlivestreamEventListener() {
-    widget.room.on(
-      Events.participantJoined,
-      (Participant participant) {
-        //Adding only Conference participant to show in grid
-        if (participant.mode == Mode.SEND_AND_RECV) {
-          setState(
-            () => participants.putIfAbsent(participant.id, () => participant),
-          );
-        }
-      },
-    );
+    widget.room.on(Events.participantJoined, (Participant participant) {
+      //Adding only Conference participant to show in grid
+      if (participant.mode == Mode.SEND_AND_RECV) {
+        setState(
+          () => participants.putIfAbsent(participant.id, () => participant),
+        );
+      }
+    });
     widget.room.on(Events.participantModeChanged, () {});
     widget.room.on(Events.participantLeft, (String participantId) {
       if (participants.containsKey(participantId)) {
-        setState(
-          () => participants.remove(participantId),
-        );
+        setState(() => participants.remove(participantId));
       }
     });
   }

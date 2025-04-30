@@ -21,7 +21,7 @@ class _ILSViewerViewState extends State<ILSViewerView> {
   void initState() {
     super.initState();
     hlsState = widget.room.hlsState;
-    playbackHlsUrl = widget.room.hlsPlaybackHlsUrl;
+    playbackHlsUrl = widget.room.hlsUrls['playbackHlsUrl'];
     setMeetingEventListener();
   }
 
