@@ -14,7 +14,7 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'DemoApp' do
+target 'MyApp' do
   config = use_native_modules!
 
   pod 'react-native-webrtc', :path => '../node_modules/@videosdk.live/react-native-webrtc'
