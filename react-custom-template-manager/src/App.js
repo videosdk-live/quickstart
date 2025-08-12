@@ -7,11 +7,11 @@ import {
   useParticipant,
   Constants,
   usePubSub,
+  VideoPlayer
 } from "@videosdk.live/react-sdk";
 import Hls from "hls.js";
 
 import { authToken, createMeeting } from "./API";
-import ReactPlayer from "react-player";
 
 function JoinScreen({ getMeetingAndToken, setMode }) {
   const [meetingId, setMeetingId] = useState(null);
@@ -21,7 +21,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
   };
   return (
     <div className="container">
-      <button onClick={() => onClick("CONFERENCE")}>Create Meeting</button>
+      <button onClick={() => onClick("SEND_AND_RECV")}>Create Meeting</button>
       <br />
       <br />
       {" or "}
@@ -36,25 +36,18 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
       />
       <br />
       <br />
-      <button onClick={() => onClick("CONFERENCE")}>Join as Host</button>
+      <button onClick={() => onClick("SEND_AND_RECV")}>Join as Host</button>
       {" | "}
-      <button onClick={() => onClick("VIEWER")}>Join as Viewer</button>
+      <button onClick={() => onClick("SIGNALLING_ONLY")}>Join as Viewer</button>
     </div>
   );
 }
 
 function ParticipantView(props) {
   const micRef = useRef(null);
-  const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
+  const { micStream, webcamOn, micOn, isLocal, displayName } =
     useParticipant(props.participantId);
 
-  const videoStream = useMemo(() => {
-    if (webcamOn && webcamStream) {
-      const mediaStream = new MediaStream();
-      mediaStream.addTrack(webcamStream.track);
-      return mediaStream;
-    }
-  }, [webcamStream, webcamOn]);
 
   useEffect(() => {
     if (micRef.current) {
@@ -82,22 +75,16 @@ function ParticipantView(props) {
       </p>
       <audio ref={micRef} autoPlay muted={isLocal} />
       {webcamOn && (
-        <ReactPlayer
-          //
-          playsinline // very very imp prop
-          pip={false}
-          light={false}
-          controls={false}
-          muted={true}
-          playing={true}
-          //
-          url={videoStream}
-          //
-          height={"200px"}
-          width={"300px"}
-          onError={(err) => {
-            console.log(err, "participant video error");
+        <VideoPlayer
+          participantId={props.participantId} // Required
+          type="video" // "video" or "share"
+          containerStyle={{
+            height: "200px",
+            width: "300px",
           }}
+          className="h-full"
+          classNameVideo="h-full"
+          videoStyle={{}}
         />
       )}
     </div>
@@ -190,7 +177,7 @@ function Controls() {
 function SpeakerView() {
   const { participants, hlsState } = useMeeting();
   const speakers = [...participants.values()].filter((participant) => {
-    return participant.mode == Constants.modes.CONFERENCE;
+    return participant.mode == Constants.modes.SEND_AND_RECV;
   });
   return (
     <div>
@@ -211,7 +198,7 @@ function ViewerList() {
 
   //Filtering only viewer participant
   const viewers = [...participants.values()].filter((participant) => {
-    return participant.mode == Constants.modes.VIEWER;
+    return participant.mode == Constants.modes.SIGNALLING_ONLY;
   });
 
   return (
@@ -228,7 +215,7 @@ function ViewerListItem({ participantId }) {
   const { displayName } = useParticipant(participantId);
   const { publish } = usePubSub(`CHANGE_MODE_${participantId}`);
   const onClickRequestJoinLiveStream = () => {
-    publish("CONFERENCE");
+    publish("SEND_AND_RECV");
   };
   return (
     <div>
@@ -320,7 +307,7 @@ function Container(props) {
   const { join, localParticipant, changeMode } = useMeeting();
   const mMeeting = useMeeting({
     onMeetingJoined: () => {
-      if (mMeetingRef.current.localParticipant.mode == "CONFERENCE") {
+      if (mMeetingRef.current.localParticipant.mode == "SEND_AND_RECV") {
         mMeetingRef.current.localParticipant.pin();
       }
       setJoined("JOINED");
@@ -331,7 +318,7 @@ function Container(props) {
     onParticipantModeChanged: (data) => {
       const localParticipant = mMeetingRef.current.localParticipant;
       if (data.participantId == localParticipant.id) {
-        if (data.mode == Constants.modes.CONFERENCE) {
+        if (data.mode == Constants.modes.SEND_AND_RECV) {
           localParticipant.pin();
         } else {
           localParticipant.unpin();
@@ -367,9 +354,9 @@ function Container(props) {
     <div className="container">
       <h3>Meeting Id: {props.meetingId}</h3>
       {joined && joined == "JOINED" ? (
-        mMeeting.localParticipant.mode == Constants.modes.CONFERENCE ? (
+        mMeeting.localParticipant.mode == Constants.modes.SEND_AND_RECV ? (
           <SpeakerView />
-        ) : mMeeting.localParticipant.mode == Constants.modes.VIEWER ? (
+        ) : mMeeting.localParticipant.mode == Constants.modes.SIGNALLING_ONLY ? (
           <>
             {joinLivestreamRequest && (
               <div>
@@ -406,7 +393,7 @@ function Container(props) {
 
 function App() {
   const [meetingId, setMeetingId] = useState(null);
-  const [mode, setMode] = useState("CONFERENCE");
+  const [mode, setMode] = useState("SEND_AND_RECV");
   const getMeetingAndToken = async (id) => {
     const meetingId =
       id == null ? await createMeeting({ token: authToken }) : id;
