@@ -146,7 +146,7 @@ class SpeakerFragment : Fragment() {
                 JsonUtils.jsonPut(config, "orientation", "portrait")
                 JsonUtils.jsonPut(config, "theme", "DARK")
                 JsonUtils.jsonPut(config, "quality", "high")
-                meeting!!.startHls(config)
+                meeting!!.startHls(config, null) // TODO: Need to check null
             } else {
                 meeting!!.stopHls()
             }
@@ -157,7 +157,7 @@ class SpeakerFragment : Fragment() {
         mContext = null
         mActivity = null
         if (meeting != null) {
-            meeting!!.removeAllListeners()
+            meeting!!.removeEventListener(meetingEventListener)
             meeting = null
         }
         super.onDestroy()
