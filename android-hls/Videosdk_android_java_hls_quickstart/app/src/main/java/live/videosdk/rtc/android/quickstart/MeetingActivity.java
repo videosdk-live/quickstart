@@ -31,7 +31,7 @@ public class MeetingActivity extends AppCompatActivity {
         // Initialize VideoSDK Meeting
         meeting = VideoSDK.initMeeting(
                 MeetingActivity.this, meetingId, localParticipantName,
-                streamEnable, streamEnable, null, mode, true, null);
+                streamEnable, streamEnable, null, mode, true, null, null);
 
         // join Meeting
         meeting.join();

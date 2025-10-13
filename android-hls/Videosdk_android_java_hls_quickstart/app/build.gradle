@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'live.videosdk.rtc.android.quickstart'
-    compileSdk 33
+    compileSdk 35
 
     defaultConfig {
         applicationId "live.videosdk.rtc.android.quickstart"
         minSdk 21
-        targetSdk 33
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -23,14 +23,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
 
-    implementation 'live.videosdk:rtc-android-sdk:0.1.17'
+    implementation 'live.videosdk:rtc-android-sdk:0.6.0'
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
     implementation 'com.google.android.exoplayer:exoplayer:2.18.5'
     implementation 'androidx.appcompat:appcompat:1.6.1'
