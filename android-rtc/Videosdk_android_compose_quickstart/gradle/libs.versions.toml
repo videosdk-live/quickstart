@@ -1,16 +1,16 @@
 [versions]
-agp = "8.6.0"
+agp = "8.13.1"
 androidNetworking = "1.0.2"
-kotlin = "1.9.0"
+kotlin = "2.2.21"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
+activityCompose = "1.11.0"
 composeBom = "2024.04.01"
 navigationCompose = "2.8.4"
-rtcAndroidSdk = "0.6.0"
+rtcAndroidSdk = "1.1.0"
 
 
 [libraries]
@@ -37,4 +37,5 @@ rtc-android-sdk = { module = "live.videosdk:rtc-android-sdk", version.ref = "rtc
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 

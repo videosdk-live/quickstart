@@ -1,6 +1,5 @@
 package live.videosdk.rtc.android.quickstart.model
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -11,12 +10,14 @@ import live.videosdk.rtc.android.Meeting
 import live.videosdk.rtc.android.Participant
 import live.videosdk.rtc.android.VideoSDK
 import live.videosdk.rtc.android.listeners.MeetingEventListener
+import live.videosdk.rtc.android.quickstart.MainApplication
+import org.webrtc.ApplicationContextProvider.getApplicationContext
 
 class MeetingViewModel : ViewModel() {
 
     private var meeting: Meeting? = null
-    private var micEnabled by mutableStateOf(true)
-    private var webcamEnabled by mutableStateOf(true)
+    private val micEnabled = mutableStateOf(true)
+    private val webcamEnabled = mutableStateOf(true)
     val participants = mutableStateListOf<Participant>()
 
     var isMeetingLeft by mutableStateOf(false)
@@ -26,18 +27,20 @@ class MeetingViewModel : ViewModel() {
     fun reset() {
         meeting?.removeAllListeners()
         meeting = null
-        micEnabled = true
-        webcamEnabled = true
+        micEnabled.value = true
+        webcamEnabled.value = true
         participants.clear()
         isMeetingLeft = false
     }
 
-    fun initMeeting(context: Context, token: String, meetingId: String) {
+    fun initMeeting(meetingId: String) {
+        val context = getApplicationContext() as MainApplication
+        val token = context.sampleToken;
         VideoSDK.config(token)
         if (meeting == null) {
             meeting = VideoSDK.initMeeting(
                 context, meetingId, "John Doe",
-                micEnabled, webcamEnabled, null, null, true, null, null
+                micEnabled.value, webcamEnabled.value, null, null, true, null, null
             )
         }
 
@@ -66,21 +69,21 @@ class MeetingViewModel : ViewModel() {
     }
 
     fun toggleMic() {
-        if (micEnabled) {
+        if (micEnabled.value) {
             meeting?.muteMic()
         } else {
             meeting?.unmuteMic()
         }
-        micEnabled = !micEnabled
+        micEnabled.value = !micEnabled.value
     }
 
     fun toggleWebcam() {
-        if (webcamEnabled) {
+        if (webcamEnabled.value) {
             meeting?.disableWebcam()
         } else {
             meeting?.enableWebcam()
         }
-        webcamEnabled = !webcamEnabled
+        webcamEnabled.value = !webcamEnabled.value
     }
 
     fun leaveMeeting() {

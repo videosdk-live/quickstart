@@ -5,8 +5,11 @@ import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import live.videosdk.rtc.android.quickstart.MainApplication
@@ -24,13 +28,12 @@ import live.videosdk.rtc.android.quickstart.components.MyAppButton
 
 @Composable
 fun JoinScreen(
-    navController: NavController, context: Context
+    navController: NavController
 ) {
-    val app = context.applicationContext as MainApplication
-    val token = app.sampleToken
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -40,8 +43,11 @@ fun JoinScreen(
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             var input by rememberSaveable { mutableStateOf("") }
-            CreateMeetingBtn(navController, token)
+
+            CreateMeetingBtn(navController)
+
             Text(text = "OR")
+
             InputMeetingId(input) { updateInput ->
                 input = updateInput
             }
@@ -51,12 +57,12 @@ fun JoinScreen(
 }
 
 @Composable
-fun CreateMeetingBtn(navController: NavController, token: String) {
-    MyAppButton({
-        NetworkManager.createMeetingId(token) { meetingId ->
+fun CreateMeetingBtn(navController: NavController) {
+    MyAppButton("Create Meeting"){
+        NetworkManager.createMeetingId { meetingId ->
             navController.navigate("meeting_screen?meetingId=$meetingId")
         }
-    }, "Create Meeting")
+    }
 }
 
 
@@ -69,9 +75,9 @@ fun InputMeetingId(input: String, onInputChange: (String) -> Unit) {
 
 @Composable
 fun JoinMeetingBtn(navController: NavController, meetingId: String) {
-    MyAppButton({
+    MyAppButton("Join Meeting"){
         if (meetingId.isNotEmpty()) {
             navController.navigate("meeting_screen?meetingId=$meetingId")
         }
-    }, "Join Meeting")
+    }
 }

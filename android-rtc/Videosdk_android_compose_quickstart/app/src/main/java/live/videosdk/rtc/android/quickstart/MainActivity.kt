@@ -1,11 +1,11 @@
 package live.videosdk.rtc.android.quickstart
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -22,6 +22,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         viewModel = ViewModelProvider(this)[MeetingViewModel::class.java]
 
         checkSelfPermission(REQUESTED_PERMISSIONS[0], PERMISSION_REQ_ID)
@@ -29,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Videosdk_android_compose_quickstartTheme {
-                MyApp(this, viewModel)
+                MyApp(viewModel)
             }
         }
     }
@@ -55,6 +57,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(context: Context, viewModel: MeetingViewModel) {
-    NavigationGraph(context = context, meetingViewModel = viewModel)
+fun MyApp(viewModel: MeetingViewModel) {
+    NavigationGraph(meetingViewModel = viewModel)
 }
