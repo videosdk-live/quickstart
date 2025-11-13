@@ -6,6 +6,8 @@
     android:background="@color/black"
     android:gravity="center"
     android:orientation="vertical"
+    android:paddingBottom="?attr/actionBarSize"
+    android:paddingTop="?attr/actionBarSize"
     tools:context=".SpeakerFragment">
 
     <LinearLayout

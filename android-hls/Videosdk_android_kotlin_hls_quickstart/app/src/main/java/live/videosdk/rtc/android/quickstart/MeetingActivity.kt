@@ -55,4 +55,9 @@ class MeetingActivity : AppCompatActivity() {
             }
         })
     }
+
+    override fun onDestroy() {
+        meeting?.leave()
+        super.onDestroy()
+    }
 }
