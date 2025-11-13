@@ -5,9 +5,9 @@ import {
   MeetingConsumer,
   useMeeting,
   useParticipant,
+  VideoPlayer
 } from "@videosdk.live/react-sdk";
 import { createMeeting, hostToken, guestToken } from "./API";
-import ReactPlayer from "react-player";
 
 function JoinScreen({ getMeetingAndToken }) {
   const [meetingId, setMeetingId] = useState(null);
@@ -32,16 +32,8 @@ function JoinScreen({ getMeetingAndToken }) {
 
 function ParticipantView(props) {
   const micRef = useRef(null);
-  const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
+  const {  micStream, webcamOn, micOn, isLocal, displayName } =
     useParticipant(props.participantId);
-
-  const videoStream = useMemo(() => {
-    if (webcamOn && webcamStream) {
-      const mediaStream = new MediaStream();
-      mediaStream.addTrack(webcamStream.track);
-      return mediaStream;
-    }
-  }, [webcamStream, webcamOn]);
 
   useEffect(() => {
     if (micRef.current) {
@@ -69,22 +61,16 @@ function ParticipantView(props) {
       </p>
       <audio ref={micRef} autoPlay muted={isLocal} />
       {webcamOn && (
-        <ReactPlayer
-          //
-          playsinline // very very imp prop
-          pip={false}
-          light={false}
-          controls={false}
-          muted={true}
-          playing={true}
-          //
-          url={videoStream}
-          //
-          height={"200px"}
-          width={"300px"}
-          onError={(err) => {
-            console.log(err, "participant video error");
+        <VideoPlayer
+          participantId={props.participantId} // Required
+          type="video" // "video" or "share"
+          containerStyle={{
+            height: "200px",
+            width: "300px",
           }}
+          className="h-full"
+          classNameVideo="h-full"
+          videoStyle={{}}
         />
       )}
     </div>
