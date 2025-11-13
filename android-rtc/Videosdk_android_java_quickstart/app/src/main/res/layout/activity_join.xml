@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:paddingBottom="?attr/actionBarSize"
+    android:paddingTop="?attr/actionBarSize"
     tools:context=".JoinActivity">
 
     <Button
