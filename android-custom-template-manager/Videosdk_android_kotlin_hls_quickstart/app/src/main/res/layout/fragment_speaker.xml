@@ -7,6 +7,9 @@
     android:gravity="center"
     android:orientation="vertical"
     tools:context=".SpeakerFragment">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize" />
 
     <TextView
         android:id="@+id/tvMeetingId"
@@ -82,5 +85,9 @@
             android:textAllCaps="false" />
 
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize" />
 
 </LinearLayout>
