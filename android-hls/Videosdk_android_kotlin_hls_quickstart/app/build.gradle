@@ -35,7 +35,7 @@ android {
 dependencies {
 
     // VideoSDK Dependency
-    implementation 'live.videosdk:rtc-android-sdk:1.1.0'
+    implementation 'live.videosdk:rtc-android-sdk:1.1.1'
 
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
     implementation 'com.google.android.exoplayer:exoplayer:2.18.5'
