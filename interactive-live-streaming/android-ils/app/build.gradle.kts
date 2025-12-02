@@ -28,11 +28,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation ("live.videosdk:rtc-android-sdk:0.2.0")
+    implementation ("live.videosdk:rtc-android-sdk:1.1.1")
     implementation ("com.nabinbhandari.android:permissions:3.8")
     implementation ("com.amitshekhar.android:android-networking:1.0.2")
     implementation(libs.androidx.core.ktx)
