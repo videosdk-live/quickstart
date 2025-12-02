@@ -31,7 +31,7 @@ android {
 dependencies {
 
     // VideoSdk Dependency
-    implementation 'live.videosdk:rtc-android-sdk:1.1.0'
+    implementation 'live.videosdk:rtc-android-sdk:1.1.1'
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
