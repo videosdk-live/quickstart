@@ -28,8 +28,9 @@ class MeetingActivity : AppCompatActivity() {
 
         // Initialize VideoSDK Meeting
         meeting = VideoSDK.initMeeting(
-            this@MeetingActivity, meetingId, localParticipantName,
-            streamEnable, streamEnable, null, mode, true,null, null
+            this@MeetingActivity, "euxu-on2o-lpaq", localParticipantName,
+            streamEnable, streamEnable, null, mode, true,null, null,
+            "api.classplus.videosdk.live"
         )
 
         // join Meeting
