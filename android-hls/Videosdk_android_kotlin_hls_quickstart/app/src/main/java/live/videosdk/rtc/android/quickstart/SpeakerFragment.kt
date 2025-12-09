@@ -146,7 +146,7 @@ class SpeakerFragment : Fragment() {
                 JsonUtils.jsonPut(config, "orientation", "portrait")
                 JsonUtils.jsonPut(config, "theme", "DARK")
                 JsonUtils.jsonPut(config, "quality", "high")
-                meeting!!.startHls(config, null) // TODO: Need to check null
+                meeting!!.startHls(config, null)
             } else {
                 meeting!!.stopHls()
             }
