@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-let AUTH_TOKEN: String =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI0N2M3ZTJlYy01NzY5LTQ3OWQtYjdjNS0zYjU5MDcxYzhhMDkiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTY3MjgwOTcxMywiZXhwIjoxODMwNTk3NzEzfQ.KeXr1cxORdq6X7-sxBLLV7MsUnwuJGLaG8_VTyTFBig"
+let AUTH_TOKEN: String = ""
 
 // MARK: - Meeting Role Enum
 enum UserRole: String {
@@ -18,7 +17,7 @@ enum UserRole: String {
 
 struct StartMeetingView: View {
     
-    @State private var meetingId: String = "obsk-dfh0-qmyb"
+    @State private var meetingId: String = ""
     @State private var navigateToMeeting = false
     @State private var selectedRole: UserRole = .host
     @State private var animateButtons = false

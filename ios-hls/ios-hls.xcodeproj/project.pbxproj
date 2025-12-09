@@ -14,9 +14,22 @@
 		849710D92EE18CFE00E77E2D /* ios-hls.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-hls.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		842C9FB02EE80B8700325F2E /* Exceptions for "ios-hls" folder in "ios-hls" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 849710D82EE18CFE00E77E2D /* ios-hls */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		849710DB2EE18CFE00E77E2D /* ios-hls */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				842C9FB02EE80B8700325F2E /* Exceptions for "ios-hls" folder in "ios-hls" target */,
+			);
 			path = "ios-hls";
 			sourceTree = "<group>";
 		};
