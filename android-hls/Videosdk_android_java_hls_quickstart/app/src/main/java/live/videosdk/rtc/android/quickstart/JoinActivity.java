@@ -92,8 +92,24 @@ public class JoinActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(ANError anError) {
+                        String errorMessage;
+                        if (anError.getErrorBody() != null) {
+                            try {
+                                // Parse the JSON error response
+                                JSONObject errorJson = new JSONObject(anError.getErrorBody());
+                                int statusCode = errorJson.getInt("statusCode");
+                                String error = errorJson.getString("error");
+                                errorMessage = "Error " + statusCode + ": " + error;
+
+                            } catch (JSONException e) {
+                                // Fallback to the default message if JSON parsing fails
+                                errorMessage = anError.getMessage();
+                            }
+                        } else {
+                            errorMessage = anError.getMessage();
+                        }
+                        Toast.makeText(JoinActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                         anError.printStackTrace();
-                        Toast.makeText(JoinActivity.this, anError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

@@ -1,16 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "live.videosdk.rtc.android.quickstart"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "live.videosdk.rtc.android.quickstart"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -30,15 +31,10 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
@@ -50,7 +46,9 @@ android {
 }
 
 dependencies {
+    // VideoSdk Dependency
     implementation (libs.rtc.android.sdk)
+
     implementation (libs.android.networking)
 
     implementation(libs.androidx.core.ktx)

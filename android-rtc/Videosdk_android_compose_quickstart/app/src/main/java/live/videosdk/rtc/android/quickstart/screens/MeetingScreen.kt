@@ -1,12 +1,12 @@
 package live.videosdk.rtc.android.quickstart.screens
 
-import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -16,9 +16,8 @@ import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
 
 
 @Composable
-fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, meetingId: String, context: Context)
+fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, meetingId: String)
 {
-    val app = context.applicationContext as MainApplication
     val isMeetingLeft = viewModel.isMeetingLeft
 
     BackHandler {
@@ -32,19 +31,25 @@ fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, mee
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),) {
         Header(meetingId)
         MySpacer()
         ParticipantsGrid(gridCells = GridCells.Fixed(2),viewModel.participants, Modifier.weight(1f))
         MySpacer()
         MediaControlButtons(
             onJoinClick = {
-                viewModel.initMeeting(context, app.sampleToken, meetingId)
+                viewModel.initMeeting(meetingId)
             },
             onMicClick = { viewModel.toggleMic() },
             onCamClick = { viewModel.toggleWebcam() },
             onLeaveClick = {
                 viewModel.leaveMeeting()
+                navController.navigate("join_screen"){
+                    popUpTo("join_screen"){
+                        inclusive = true
+                    }
+                }
             }
         )
     }
@@ -73,6 +78,8 @@ fun MediaControlButtons(
     onLeaveClick: () -> Unit,
     ) {
     var joinClicked by remember { mutableStateOf(false) }
+    var micClicked by remember { mutableStateOf(false) }
+    var camClicked by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -81,14 +88,20 @@ fun MediaControlButtons(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
 
+            // Join Button
             MyAppButton(
-                onClick = { joinClicked = true
-                    onJoinClick()
-                },
                 label = if (joinClicked) "Joined!" else "Join",
                 enabled = !joinClicked
-            )
-            MyAppButton(onMicClick, "Toggle Mic")
+            ){
+                joinClicked = true
+                onJoinClick()
+            }
+
+            // Leave Button
+            MyAppButton( "Leave"){
+                onLeaveClick()
+            }
+
         }
         Row(
             modifier = Modifier
@@ -97,8 +110,18 @@ fun MediaControlButtons(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            MyAppButton(onCamClick, "Toggle Cam")
-            MyAppButton(onLeaveClick, "Leave")
+            // Cam Button
+            MyAppButton( label = if (camClicked) "Toggle Cam On" else "Toggle Cam Off"){
+                    camClicked = !camClicked
+                    onCamClick()
+            }
+
+            // Mic Button
+            MyAppButton( if (micClicked) "Toggle Mic On" else "Toggle Mic Off"){
+                micClicked = !micClicked
+                onMicClick()
+            }
+
         }
     }
 }

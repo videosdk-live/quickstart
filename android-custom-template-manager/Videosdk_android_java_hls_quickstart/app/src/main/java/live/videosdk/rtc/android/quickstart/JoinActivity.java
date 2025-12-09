@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -92,9 +93,29 @@ public class JoinActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(ANError anError) {
+                        String errorMessage;
+                        if (anError.getErrorBody() != null) {
+                            try {
+                                // Parse the JSON error response
+                                JSONObject errorJson = new JSONObject(anError.getErrorBody());
+                                int statusCode = errorJson.getInt("statusCode");
+                                String error = errorJson.getString("error");
+
+                                // Create a formatted error message
+                                errorMessage = "Error " + statusCode + ": " + error;
+
+                            } catch (JSONException e) {
+                                // Fallback to the default message if JSON parsing fails
+                                errorMessage = anError.getMessage();
+                                Log.e("API_ERROR", "Failed to parse error JSON", e);
+                            }
+                        } else {
+                            errorMessage = anError.getMessage();
+                        }
+                        Toast.makeText(JoinActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                         anError.printStackTrace();
-                        Toast.makeText(JoinActivity.this, anError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
+
                 });
     }
 

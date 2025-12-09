@@ -64,8 +64,24 @@ class JoinActivity : AppCompatActivity() {
                 }
 
                 override fun onError(anError: ANError) {
+                    val errorMessage = if (anError.errorBody != null) {
+                        try {
+                            // Parse the JSON error response
+                            val errorJson = JSONObject(anError.errorBody)
+                            val statusCode = errorJson.getInt("statusCode")
+                            val error = errorJson.getString("error")
+
+                            // this will return String form ths if Block
+                            "Error $statusCode: $error"
+
+                        } catch (e: JSONException) {
+                            anError.message ?: "Unknown error"
+                        }
+                    } else {
+                        anError.message ?: "Unknown error"
+                    }
+                    Toast.makeText(this@JoinActivity, errorMessage, Toast.LENGTH_LONG).show()
                     anError.printStackTrace()
-                    Toast.makeText(this@JoinActivity, anError.message, Toast.LENGTH_SHORT).show()
                 }
             })
     }

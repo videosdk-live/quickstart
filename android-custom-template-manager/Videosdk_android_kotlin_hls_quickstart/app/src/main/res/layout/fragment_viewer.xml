@@ -7,10 +7,16 @@
     android:background="@color/black"
     tools:context=".ViewerFragment">
 
+    <View
+        android:id="@+id/top_safe_area"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize" />
+
     <LinearLayout
         android:id="@+id/meetingLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/top_safe_area"
         android:paddingHorizontal="12sp"
         android:paddingVertical="5sp">
 
@@ -36,25 +42,25 @@
         android:id="@+id/waitingLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:text="Waiting for host \n to start the live streaming"
         android:textColor="@color/white"
         android:textFontWeight="700"
-        android:textSize="20sp"
-        android:gravity="center"/>
+        android:textSize="20sp" />
 
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/meetingLayout"
         android:visibility="gone"
         app:resize_mode="fixed_width"
         app:show_buffering="when_playing"
-        app:show_subtitle_button="false"
-        app:use_artwork="false"
         app:show_next_button="false"
         app:show_previous_button="false"
-        app:use_controller="true"
-        android:layout_below="@id/meetingLayout"/>
+        app:show_subtitle_button="false"
+        app:use_artwork="false"
+        app:use_controller="true" />
 
 
 </RelativeLayout>
