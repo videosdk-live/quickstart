@@ -8,6 +8,7 @@ class MainApplication: Application() {
     val sampleToken = "YOUR_TOKEN" //Sample Token From VideoSDK
     override fun onCreate() {
         super.onCreate()
+        VideoSDK.setEnableActivityLifecycle(false)
         VideoSDK.initialize(applicationContext)
     }
 }
