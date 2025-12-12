@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#warning("Provide either auth-url to start the meeting")
 let AUTH_TOKEN: String = ""
 
 // MARK: - Meeting Role Enum
