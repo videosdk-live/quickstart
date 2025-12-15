@@ -40,8 +40,6 @@ class MeetingViewController: ObservableObject {
     
     // MARK: - Meeting Initialization
     func initializeMeeting() {
-        print("👉 Initializing meeting with ID:", meetingId)
-        
         VideoSDK.config(token: AUTH_TOKEN)
         
         let videoMediaTrack = try? VideoSDK.createCameraVideoTrack(
@@ -67,16 +65,12 @@ class MeetingViewController: ObservableObject {
     
     // MARK: - HLS Handling
     func startHLS() {
-        print("🎥 Starting HLS…")
-        
         DispatchQueue.main.async {
             self.meeting?.startHLS()
         }
     }
     
     func stopHLS() {
-        print("🛑 Stopping HLS…")
-        
         DispatchQueue.main.async {
             self.meeting?.stopHLS()
         }
@@ -95,7 +89,6 @@ class MeetingViewController: ObservableObject {
             }
         }
         isMicOn.toggle()
-        print("🎤 Mic toggled →", isMicOn)
     }
     
     func toggleWebcam() {
@@ -109,12 +102,10 @@ class MeetingViewController: ObservableObject {
             }
         }
         isWebcamOn.toggle()
-        print("📷 Webcam toggled →", isWebcamOn)
     }
     
     // MARK: - Leave Meeting
     func leaveMeeting() {
-        print("🚪 Leaving meeting…")
         if (role == .host) {
             if (self.hlsState == .HLS_STARTED || self.hlsState == .HLS_PLAYABLE || self.hlsState == .HLS_STARTING) {
                 self.meeting?.stopHLS()
@@ -159,7 +150,7 @@ extension MeetingViewController: MeetingEventListener {
         case .DISCONNECTED:
                 participants.removeAll()
             default:
-                print("")
+            print("meeting state: \(meetingState.rawValue)")
         }
     }
     
@@ -168,9 +159,8 @@ extension MeetingViewController: MeetingEventListener {
         switch (state) {
         case .HLS_PLAYABLE:
             playbackURL = hlsUrl?.playbackHlsUrl ?? ""
-            print("HLS URL: \(String(describing: hlsUrl?.toJson() ?? nil))")
         default:
-            print("HLS State: \(state.rawValue) || hlsUrl: \(String(describing: hlsUrl ?? nil))")
+            print("HLS State: \(state.rawValue)")
         }
     }
     

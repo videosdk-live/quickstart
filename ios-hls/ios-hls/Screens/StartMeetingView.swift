@@ -124,7 +124,7 @@ struct StartMeetingView: View {
             }
             
         } catch {
-            print("❌ Create meeting failed:", error)
+            print("Meeting creation failed:", error)
         }
         
         isLoading = false
