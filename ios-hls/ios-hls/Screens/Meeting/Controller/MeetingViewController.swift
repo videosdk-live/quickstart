@@ -128,7 +128,7 @@ extension MeetingViewController: MeetingEventListener {
     func onMeetingJoined() {
         guard let localParticipant = self.meeting?.localParticipant else { return }
         let isExist = participants.first { $0.id == localParticipant.id } != nil
-        if (!isExist  && localParticipant.mode != .SIGNALLING_ONLY) {
+        if (!isExist  && (localParticipant.mode != .SIGNALLING_ONLY && localParticipant.mode != .VIEWER)) {
             participants.append(localParticipant)
         }
         // add event listener
@@ -137,7 +137,7 @@ extension MeetingViewController: MeetingEventListener {
     
     func onParticipantJoined(_ participant: Participant) {
         let isExist = participants.first { $0.id == participant.id } != nil
-        if (!isExist && participant.mode != .SIGNALLING_ONLY) {
+        if (!isExist && (participant.mode != .SIGNALLING_ONLY && participant.mode != .VIEWER)) {
             participants.append(participant)
         }
         // add listener

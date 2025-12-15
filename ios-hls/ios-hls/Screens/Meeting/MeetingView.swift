@@ -21,7 +21,8 @@ struct MeetingView: View {
     
     // Grid layout
     private let columns = [
-        GridItem(.flexible(), spacing: 0),
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10),
     ]
     
     var body: some View {
@@ -47,7 +48,8 @@ struct MeetingView: View {
                                     participant: participant,
                                     controller: controller
                                 )
-                                .frame(width: 350,height: 500, alignment: .center)
+                                .frame(height: 200, alignment: .center)
+                                
                             }
                         }
                     }
