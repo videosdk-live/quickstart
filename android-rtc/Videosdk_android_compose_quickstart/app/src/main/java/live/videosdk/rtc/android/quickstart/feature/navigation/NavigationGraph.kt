@@ -1,14 +1,13 @@
-package live.videosdk.rtc.android.quickstart.navigation
+package live.videosdk.rtc.android.quickstart.feature.navigation
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
-import live.videosdk.rtc.android.quickstart.screens.JoinScreen
-import live.videosdk.rtc.android.quickstart.screens.MeetingScreen
+import live.videosdk.rtc.android.quickstart.feature.meeting.MeetingViewModel
+import live.videosdk.rtc.android.quickstart.feature.join.JoinScreen
+import live.videosdk.rtc.android.quickstart.feature.meeting.MeetingScreen
 
 
 @Composable

@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.screens
+package live.videosdk.rtc.android.quickstart.feature.meeting
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
@@ -6,13 +6,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import live.videosdk.rtc.android.quickstart.MainApplication
-import live.videosdk.rtc.android.quickstart.components.*
-import live.videosdk.rtc.android.quickstart.model.MeetingViewModel
+import live.videosdk.rtc.android.quickstart.core.components.MyAppButton
+import live.videosdk.rtc.android.quickstart.core.components.MySpacer
+import live.videosdk.rtc.android.quickstart.core.components.MyText
+import live.videosdk.rtc.android.quickstart.core.components.ParticipantsGrid
 
 
 @Composable
@@ -35,7 +35,11 @@ fun MeetingScreen(viewModel: MeetingViewModel, navController: NavController, mee
         modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),) {
         Header(meetingId)
         MySpacer()
-        ParticipantsGrid(gridCells = GridCells.Fixed(2),viewModel.participants, Modifier.weight(1f))
+        ParticipantsGrid(
+            gridCells = GridCells.Fixed(2),
+            viewModel.participants,
+            Modifier.weight(1f)
+        )
         MySpacer()
         MediaControlButtons(
             onJoinClick = {
@@ -92,13 +96,13 @@ fun MediaControlButtons(
             MyAppButton(
                 label = if (joinClicked) "Joined!" else "Join",
                 enabled = !joinClicked
-            ){
+            ) {
                 joinClicked = true
                 onJoinClick()
             }
 
             // Leave Button
-            MyAppButton( "Leave"){
+            MyAppButton("Leave") {
                 onLeaveClick()
             }
 
@@ -111,13 +115,13 @@ fun MediaControlButtons(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             // Cam Button
-            MyAppButton( label = if (camClicked) "Toggle Cam On" else "Toggle Cam Off"){
-                    camClicked = !camClicked
-                    onCamClick()
+            MyAppButton(label = if (camClicked) "Toggle Cam On" else "Toggle Cam Off") {
+                camClicked = !camClicked
+                onCamClick()
             }
 
             // Mic Button
-            MyAppButton( if (micClicked) "Toggle Mic On" else "Toggle Mic Off"){
+            MyAppButton(if (micClicked) "Toggle Mic On" else "Toggle Mic Off") {
                 micClicked = !micClicked
                 onMicClick()
             }

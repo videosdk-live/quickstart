@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.components
+package live.videosdk.rtc.android.quickstart.core.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer

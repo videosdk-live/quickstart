@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.components
+package live.videosdk.rtc.android.quickstart.core.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +27,7 @@ import live.videosdk.rtc.android.Stream
 import live.videosdk.rtc.android.VideoView
 import live.videosdk.rtc.android.listeners.ParticipantEventListener
 import org.webrtc.VideoTrack
+import kotlin.collections.iterator
 
 @Composable
 fun ParticipantVideoView(

@@ -1,4 +1,4 @@
-package live.videosdk.rtc.android.quickstart.model
+package live.videosdk.rtc.android.quickstart.feature.meeting
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -11,11 +11,11 @@ import live.videosdk.rtc.android.Participant
 import live.videosdk.rtc.android.VideoSDK
 import live.videosdk.rtc.android.listeners.MeetingEventListener
 import live.videosdk.rtc.android.quickstart.MainApplication
-import org.webrtc.ApplicationContextProvider.getApplicationContext
+import org.webrtc.ApplicationContextProvider
 
 class MeetingViewModel : ViewModel() {
 
-    private var meeting: Meeting? = null
+    var meeting: Meeting? = null
     private val micEnabled = mutableStateOf(true)
     private val webcamEnabled = mutableStateOf(true)
     val participants = mutableStateListOf<Participant>()
@@ -34,7 +34,7 @@ class MeetingViewModel : ViewModel() {
     }
 
     fun initMeeting(meetingId: String) {
-        val context = getApplicationContext() as MainApplication
+        val context = ApplicationContextProvider.getApplicationContext() as MainApplication
         val token = context.sampleToken;
         VideoSDK.config(token)
         if (meeting == null) {
@@ -51,7 +51,10 @@ class MeetingViewModel : ViewModel() {
     private val meetingEventListener: MeetingEventListener = object : MeetingEventListener() {
         override fun onMeetingJoined() {
             Log.d("#meeting", "onMeetingJoined()")
-            meeting?.let { participants.add(it.localParticipant) }
+            meeting?.let {
+                participants.remove(it.localParticipant)
+                participants.add(it.localParticipant)
+            }
         }
 
         override fun onMeetingLeft() {

@@ -1,9 +1,10 @@
-package live.videosdk.rtc.android.quickstart
+package live.videosdk.rtc.android.quickstart.core
 
 import android.widget.Toast
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
+import live.videosdk.rtc.android.quickstart.MainApplication
 import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.ApplicationContextProvider.getApplicationContext

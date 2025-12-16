@@ -1,7 +1,6 @@
-package live.videosdk.rtc.android.quickstart.screens
+package live.videosdk.rtc.android.quickstart.feature.join
 
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,12 +18,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import live.videosdk.rtc.android.quickstart.MainApplication
-import live.videosdk.rtc.android.quickstart.NetworkManager
-import live.videosdk.rtc.android.quickstart.components.MyAppButton
+import live.videosdk.rtc.android.quickstart.core.NetworkManager
+import live.videosdk.rtc.android.quickstart.core.components.MyAppButton
 
 @Composable
 fun JoinScreen(
