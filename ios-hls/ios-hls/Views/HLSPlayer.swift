@@ -26,29 +26,6 @@ struct HLSVideoPlayer: View {
                 .onDisappear {
                     player.pause()
                 }
-            
-            // Custom Overlay Controls
-            HStack(spacing: 20) {
-//                Button(action: { player.play() }) {
-//                    Image(systemName: "play.fill")
-//                        .foregroundColor(.white)
-//                        .font(.system(size: 24))
-//                        .padding(12)
-//                        .background(Color.black.opacity(0.6))
-//                        .clipShape(Circle())
-//                }
-//                
-//                Button(action: { player.pause() }) {
-//                    Image(systemName: "pause.fill")
-//                        .foregroundColor(.white)
-//                        .font(.system(size: 24))
-//                        .padding(12)
-//                        .background(Color.black.opacity(0.6))
-//                        .clipShape(Circle())
-//                }
-            }
-            .padding(.bottom, 20)
-            .frame(maxHeight: .infinity, alignment: .bottom)
         }
     }
 

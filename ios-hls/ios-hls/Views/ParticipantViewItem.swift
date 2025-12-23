@@ -16,10 +16,8 @@ struct ParticipantContainerView: View {
     
     var body: some View {
         ZStack {
-            // Main participant view
             participantView(participant: participant, controller: controller)
             
-            // Overlay for name and mic status
             VStack {
                 Spacer()
                 HStack {
@@ -45,7 +43,6 @@ struct ParticipantContainerView: View {
                 .padding(8)
             }
         }
-        // Add border, background, shadow, and rounded corners
         .background(Color.black.opacity(0.9)) // Background color
         .cornerRadius(10) // Rounded corners
         .shadow(color: Color.gray.opacity(0.7), radius: 10, x: 0, y: 5) // Shadow effect

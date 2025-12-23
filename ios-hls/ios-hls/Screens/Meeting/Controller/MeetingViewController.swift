@@ -16,7 +16,6 @@ class MeetingViewController: ObservableObject {
     
     @Published var participants: [Participant] = []
     @Published var hlsState: HLSState = .HLS_STOPPED
-    
     @Published var isMicOn: Bool = true
     @Published var isWebcamOn: Bool = true
     @Published var meeting: Meeting? = nil
@@ -25,7 +24,6 @@ class MeetingViewController: ObservableObject {
     @Published var playbackURL: String? = nil
     
     private var cancellables = Set<AnyCancellable>()
-    
     let meetingId: String
     let role: UserRole
     
@@ -36,7 +34,6 @@ class MeetingViewController: ObservableObject {
         // Auto-start meeting logic when created
         initializeMeeting()
     }
-    
     
     // MARK: - Meeting Initialization
     func initializeMeeting() {
@@ -62,7 +59,6 @@ class MeetingViewController: ObservableObject {
         meeting?.join()
     }
     
-    
     // MARK: - HLS Handling
     func startHLS() {
         DispatchQueue.main.async {
@@ -70,12 +66,53 @@ class MeetingViewController: ObservableObject {
         }
     }
     
+/// NOTE: This function will be used when using the custom template to display the HLS preview,
+///    If you are using custom template then uncomment below function and use it when you want to start HLS
+//    func startHLS(meetingId: String, token: String) {
+//        let templateUrl = "TEMPLATE_URL"
+//        // "https://lab.videosdk.live/react-custom-template-demo?meetingId=\(meetingId)&token=\(token)"
+//
+//        let body: [String: Any] = [
+//            "roomId": meetingId,
+//            "templateUrl": templateUrl,
+//            "config": [
+//                "orientation": "portrait"
+//            ]
+//        ]
+//
+//        guard let url = URL(string: "https://api.videosdk.live/v2/hls/start") else { return }
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//        request.setValue(token, forHTTPHeaderField: "Authorization")
+//        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+//        
+//        URLSession.shared.dataTask(with: request) { data, response, error in
+//            if let error = error {
+//                print("API Error:", error.localizedDescription)
+//                return
+//            }
+//
+//            guard let data = data else {
+//                print("No response data")
+//                return
+//            }
+//
+//            do {
+//                let json = try JSONSerialization.jsonObject(with: data, options: [])
+//                print("HLS Response:", json)
+//            } catch {
+//                print("JSON Parse Error:", error)
+//            }
+//        }.resume()
+//    }
+    
     func stopHLS() {
         DispatchQueue.main.async {
             self.meeting?.stopHLS()
         }
     }
-    
     
     // MARK: - Media Toggles
     func toggleMic() {
@@ -124,6 +161,11 @@ extension MeetingViewController: MeetingEventListener {
         }
         // add event listener
         localParticipant.addEventListener(self)
+        /// NOTE:  This will only work in the custom-template scenario
+        Task {
+            await meeting?.pubsub.subscribe(topic: "CHANGE_BACKGROUND", forListener: self)
+            await meeting?.pubsub.subscribe(topic: "VIEWER_MESSAGE", forListener: self)
+        }
     }
     
     func onParticipantJoined(_ participant: Participant) {
@@ -193,4 +235,13 @@ extension MeetingViewController: ParticipantEventListener {
 
         }
     }
+}
+
+extension MeetingViewController: PubSubMessageListener {
+    
+    func onMessageReceived(_ message: VideoSDKRTC.PubSubMessage) {
+        /// NOTE:  This will only work in the custom-template scenario
+        print("Message received: \(message.message) for topic: \(message.topic)")
+    }
+    
 }

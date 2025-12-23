@@ -12,6 +12,7 @@ struct MeetingView: View {
     
     @StateObject private var controller: MeetingViewController
     @Environment(\.dismiss) var dismiss
+    @State var showSetting: Bool = false
     
     init(meetingId: String, role: UserRole) {
         _controller = StateObject(
@@ -83,6 +84,9 @@ struct MeetingView: View {
                 }
             }
         }
+        .sheet(isPresented: $showSetting, content: {
+            SettingView(meeting: controller.meeting)
+        })
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
     }
@@ -118,23 +122,25 @@ struct MeetingView: View {
     // MARK: Host bottom controls
     private var hostControls: some View {
         HStack(spacing: 14) {
-            
-            if (controller.hlsState == .HLS_STARTING || controller.hlsState == .HLS_STARTED || controller.hlsState == .HLS_PLAYABLE) {
-                    controlButton(title: "Stop HLS") {
-                        controller.stopHLS()
-                    }
-            } else {
-                controlButton(title: "Start HLS") {
+        
+            controlButton(title: (controller.hlsState == .HLS_STARTING || controller.hlsState == .HLS_STARTED || controller.hlsState == .HLS_PLAYABLE) ? "Stop HLS" : "Start HLS") {
+                if (controller.hlsState == .HLS_STARTING || controller.hlsState == .HLS_STARTED || controller.hlsState == .HLS_PLAYABLE) {
+                    controller.stopHLS()
+                } else {
                     controller.startHLS()
                 }
             }
             
-            controlButton(title: "Toggle Webcam") {
+            controlButton(imageName: controller.isWebcamOn ? "video.fill" : "video.slash.fill") {
                 controller.toggleWebcam()
             }
             
-            controlButton(title: "Toggle Mic") {
+            controlButton(imageName: controller.isMicOn ? "mic.fill" : "mic.slash.fill") {
                 controller.toggleMic()
+            }
+            
+            controlButton(imageName: "ellipsis") {
+                showSetting.toggle()
             }
         }
         .padding(.bottom, 20)
@@ -151,6 +157,26 @@ struct MeetingView: View {
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(10)
+        }
+    }
+    
+    // MARK: Reusable UI Elements
+    func controlButton(imageName: String, action: @escaping () -> Void) -> some View {
+        let buttonSize: CGFloat = 45
+        let iconInset: CGFloat = 18
+
+        return Button(action: action) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(imageName.contains(".slash") ? Color.white.opacity(0.4) : Color.blue)
+
+                Image(systemName: imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: buttonSize - iconInset, height: buttonSize - iconInset)
+                    .foregroundColor(imageName.contains(".slash") ? .red : .white)
+            }
+            .frame(width: buttonSize, height: buttonSize, alignment: .center)
         }
     }
 }
