@@ -1,12 +1,10 @@
 import React, { useState, useMemo } from "react";
 import {
-  SafeAreaView,
   TouchableOpacity,
   Text,
   TextInput,
   View,
   FlatList,
-  Clipboard,
 } from "react-native";
 import {
   MeetingProvider,
@@ -16,7 +14,9 @@ import {
   RTCView,
   Constants,
 } from "@videosdk.live/react-native-sdk";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { createMeeting, authToken } from "./api";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Video from "react-native-video";
 
 // Responsible for either schedule new meeting or to join existing meeting as a host or as a viewer.
@@ -71,7 +71,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
       />
       <JoinButton
         onPress={() => {
-          setMode("VIEWER");
+          setMode("SIGNALLING_ONLY");
           getMeetingAndToken(meetingVal);
         }}
         value={"Join as Viewer"}
@@ -212,7 +212,7 @@ function SpeakerView() {
   const speakers = useMemo(() => {
     const speakerParticipants = [...participants.values()].filter(
       (participant) => {
-        return participant.mode == Constants.modes.CONFERENCE;
+        return participant.mode == Constants.modes.SEND_AND_RECV;
       }
     );
     return speakerParticipants;
@@ -288,14 +288,9 @@ function ViewerView({}) {
           {/* Render VideoPlayer that will play `playbackHlsUrl`*/}
           <Video
             controls={true}
-            source={{
-              uri: hlsUrls.playbackHlsUrl,
-            }}
-            resizeMode={"stretch"}
-            style={{
-              flex: 1,
-              backgroundColor: "black",
-            }}
+            source={{ uri: hlsUrls.playbackHlsUrl }}
+            resizeMode={"contain"}
+            style={{ flex: 1, backgroundColor: "black" }}
             onError={(e) => console.log("error", e)}
           />
         </>
@@ -322,9 +317,9 @@ function Container() {
 
   return (
     <View style={{ flex: 1 }}>
-      {localParticipant?.mode == Constants.modes.CONFERENCE ? (
+      {localParticipant?.mode == Constants.modes.SEND_AND_RECV ? (
         <SpeakerView />
-      ) : localParticipant?.mode == Constants.modes.VIEWER ? (
+      ) : localParticipant?.mode == Constants.modes.SIGNALLING_ONLY ? (
         <ViewerView />
       ) : (
         <View
@@ -379,7 +374,7 @@ function App() {
   const [meetingId, setMeetingId] = useState(null);
 
   //State to handle the mode of the participant i.e. CONFERNCE or VIEWER
-  const [mode, setMode] = useState("CONFERENCE");
+  const [mode, setMode] = useState("SEND_AND_RECV");
 
   //Getting MeetingId from the API we created earlier
   const getMeetingAndToken = async (id) => {
@@ -397,6 +392,7 @@ function App() {
         name: "Ahmed",
         //These will be the mode of the participant CONFERENCE or VIEWER
         mode: mode,
+        defaultCamera: "front",
       }}
       token={authToken}
     >
@@ -406,5 +402,4 @@ function App() {
     <JoinScreen getMeetingAndToken={getMeetingAndToken} setMode={setMode} />
   );
 }
-
 export default App;
