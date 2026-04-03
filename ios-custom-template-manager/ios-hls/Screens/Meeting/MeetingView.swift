@@ -7,6 +7,7 @@
 
 import SwiftUI
 import VideoSDKRTC
+import Combine
 
 struct MeetingView: View {
     
@@ -87,6 +88,11 @@ struct MeetingView: View {
         .sheet(isPresented: $showSetting, content: {
             SettingView(meeting: controller.meeting)
         })
+        .onReceive(controller.$shouldExitMeeting.removeDuplicates()) { shouldExit in
+            if shouldExit {
+                dismiss()
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
     }
