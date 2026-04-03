@@ -203,7 +203,11 @@ extension MeetingViewController: MeetingEventListener {
         // add event listener
         localParticipant.addEventListener(self)
         
-        localParticipant.setQuality(.high)
+        do {
+            try localParticipant.setQuality(.high)
+        } catch {
+            print("Error in setQuality: \(error.localizedDescription)")
+        }
         
         Utils.loaderDismiss(viewControler: self)
         
@@ -230,7 +234,11 @@ extension MeetingViewController: MeetingEventListener {
         // add listener
         participant.addEventListener(self)
         
-        participant.setQuality(.high)
+        do {
+            try participant.setQuality(.high)
+        } catch {
+            print("Error in setQuality: \(error.localizedDescription)")
+        }
         
         if(participant.isLocal){
             self.localParticipantViewContainer.isHidden = false
@@ -279,6 +287,10 @@ extension MeetingViewController: MeetingEventListener {
     func showActiveSpeakerIndicator(_ view: UIView, _ show: Bool) {
         view.layer.borderWidth = 4.0
         view.layer.borderColor = show ? UIColor.blue.cgColor : UIColor.clear.cgColor
+    }
+    
+    func onQualityLimitation(type: VideoSDKRTC.QualityLimitationType, state: VideoSDKRTC.QualityLimitationState, timestamp: Int) {
+        print("Quality limitation of type \(type) is now \(state)")
     }
 }
 

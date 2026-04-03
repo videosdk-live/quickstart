@@ -7,6 +7,7 @@
 
 import SwiftUI
 import VideoSDKRTC
+import Combine
 
 struct MeetingView: View {
     
@@ -83,6 +84,11 @@ struct MeetingView: View {
                 }
             }
         }
+        .onReceive(controller.$shouldExitMeeting.removeDuplicates()) { shouldExit in
+            if shouldExit {
+                dismiss()
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
     }
@@ -99,6 +105,8 @@ struct MeetingView: View {
             
             Button {
                 controller.leaveMeeting()
+                // dismiss is also triggered by shouldExitMeeting when onMeetingLeft fires,
+                // but we dismiss here for immediate UX.
                 dismiss()
             } label: {
                 Text("Leave")
@@ -154,3 +162,4 @@ struct MeetingView: View {
         }
     }
 }
+
