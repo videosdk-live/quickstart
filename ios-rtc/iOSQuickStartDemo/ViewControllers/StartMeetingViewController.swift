@@ -19,7 +19,7 @@ class StartMeetingViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         txtMeetingId.delegate = self
         serverToken = TOKEN_STRING
-        txtMeetingId.text = "pbow-6vec-vahn"
+        txtMeetingId.text = ""
     }
     
     func joinMeeting() {

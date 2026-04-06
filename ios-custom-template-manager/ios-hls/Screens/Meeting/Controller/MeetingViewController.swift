@@ -23,6 +23,9 @@ class MeetingViewController: ObservableObject {
     @Published var participantMicStatus: [String: Bool] = [:]
     @Published var playbackURL: String? = nil
     
+    // Navigation trigger to exit meeting screen
+    @Published var shouldExitMeeting: Bool = false
+    
     private var cancellables = Set<AnyCancellable>()
     let meetingId: String
     let role: UserRole
@@ -144,10 +147,11 @@ class MeetingViewController: ObservableObject {
 }
 
 extension MeetingViewController: MeetingEventListener {
+    
     func onMeetingJoined() {
         guard let localParticipant = self.meeting?.localParticipant else { return }
         let isExist = participants.first { $0.id == localParticipant.id } != nil
-        if (!isExist  && (localParticipant.mode != .SIGNALLING_ONLY && localParticipant.mode != .VIEWER)) {
+        if (!isExist  && (localParticipant.mode != .SIGNALLING_ONLY)) {
             participants.append(localParticipant)
         }
         // add event listener
@@ -161,7 +165,7 @@ extension MeetingViewController: MeetingEventListener {
     
     func onParticipantJoined(_ participant: Participant) {
         let isExist = participants.first { $0.id == participant.id } != nil
-        if (!isExist && (participant.mode != .SIGNALLING_ONLY && participant.mode != .VIEWER)) {
+        if (!isExist && (participant.mode != .SIGNALLING_ONLY)) {
             participants.append(participant)
         }
         // add listener
@@ -176,14 +180,23 @@ extension MeetingViewController: MeetingEventListener {
         meeting?.localParticipant.removeEventListener(self)
         meeting?.removeEventListener(self)
         participants.removeAll()
+        // Trigger exit when meeting is left
+        DispatchQueue.main.async {
+            self.shouldExitMeeting = true
+        }
     }
     
     func onMeetingStateChanged(meetingState: MeetingState) {
         switch meetingState {
-        case .DISCONNECTED:
-                participants.removeAll()
-            default:
-            print("meeting state: \(meetingState.rawValue)")
+        case .DISCONNECTED, .FAILED:
+            print("Meeting State: \(meetingState.rawValue)")
+            participants.removeAll()
+           // Trigger exit on disconnect/failure
+           DispatchQueue.main.async {
+               self.shouldExitMeeting = true
+           }
+        default:
+            print("Meeting State: \(meetingState.rawValue)")
         }
     }
     
@@ -191,10 +204,15 @@ extension MeetingViewController: MeetingEventListener {
         hlsState = state
         switch (state) {
         case .HLS_PLAYABLE:
+            print("HLS State: \(state.rawValue)")
             playbackURL = hlsUrl?.playbackHlsUrl ?? ""
         default:
             print("HLS State: \(state.rawValue)")
         }
+    }
+    
+    func onQualityLimitation(type: VideoSDKRTC.QualityLimitationType, state: VideoSDKRTC.QualityLimitationState, timestamp: Int) {
+        print("Quality limitation for \(type.rawValue) is \(state.rawValue)")
     }
     
 }
