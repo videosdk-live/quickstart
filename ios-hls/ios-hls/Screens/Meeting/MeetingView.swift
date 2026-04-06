@@ -105,9 +105,6 @@ struct MeetingView: View {
             
             Button {
                 controller.leaveMeeting()
-                // dismiss is also triggered by shouldExitMeeting when onMeetingLeft fires,
-                // but we dismiss here for immediate UX.
-                dismiss()
             } label: {
                 Text("Leave")
                     .font(.headline)
