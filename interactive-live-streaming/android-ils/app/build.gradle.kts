@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation ("live.videosdk:rtc-android-sdk:1.1.1")
+    implementation ("live.videosdk:rtc-android-sdk:2.0.1")
     implementation ("com.nabinbhandari.android:permissions:3.8")
     implementation ("com.amitshekhar.android:android-networking:1.0.2")
     implementation(libs.androidx.core.ktx)
