@@ -35,9 +35,15 @@ class JoinActivity : AppCompatActivity() {
             )
         }
         btnJoin.setOnClickListener { v: View? ->
+            val meetingId = etMeetingId.text.toString().trim()
+            if (meetingId.isEmpty()) {
+                Toast.makeText(this@JoinActivity, "Please enter the meeting ID", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
             val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
             intent.putExtra("token", sampleToken)
-            intent.putExtra("meetingId", etMeetingId.text.toString())
+            intent.putExtra("meetingId", meetingId)
             startActivity(intent)
         }
     }
@@ -104,4 +110,3 @@ class JoinActivity : AppCompatActivity() {
         )
     }
 }
-
