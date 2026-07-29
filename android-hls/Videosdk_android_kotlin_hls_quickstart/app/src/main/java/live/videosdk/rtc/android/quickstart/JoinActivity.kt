@@ -39,18 +39,28 @@ class JoinActivity : AppCompatActivity() {
 
         // Join as Host
         btnJoinHost.setOnClickListener {
+            val meetingId = etMeetingId.text.toString().trim { it <= ' ' }
+            if (meetingId.isEmpty()) {
+                Toast.makeText(this@JoinActivity, "Please enter the meeting ID", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
             intent.putExtra("token", sampleToken)
-            intent.putExtra("meetingId", etMeetingId.text.toString().trim { it <= ' ' })
+            intent.putExtra("meetingId", meetingId)
             intent.putExtra("mode", "CONFERENCE")
             startActivity(intent)
         }
 
         // Join as Viewer
         btnJoinViewer.setOnClickListener {
+            val meetingId = etMeetingId.text.toString().trim { it <= ' ' }
+            if (meetingId.isEmpty()) {
+                Toast.makeText(this@JoinActivity, "Please enter the meeting ID", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
             intent.putExtra("token", sampleToken)
-            intent.putExtra("meetingId", etMeetingId.text.toString().trim { it <= ' ' })
+            intent.putExtra("meetingId", meetingId)
             intent.putExtra("mode", "VIEWER")
             startActivity(intent)
         }
