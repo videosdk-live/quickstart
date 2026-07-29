@@ -48,9 +48,15 @@ public class JoinActivity extends AppCompatActivity {
         });
 
         btnJoin.setOnClickListener(v -> {
+            String meetingId = etMeetingId.getText().toString().trim();
+            if (meetingId.isEmpty()) {
+                Toast.makeText(JoinActivity.this, "Please enter the meeting ID", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Intent intent = new Intent(JoinActivity.this, MeetingActivity.class);
             intent.putExtra("token", sampleToken);
-            intent.putExtra("meetingId", etMeetingId.getText().toString());
+            intent.putExtra("meetingId", meetingId);
             startActivity(intent);
         });
 
