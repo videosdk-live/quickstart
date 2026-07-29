@@ -49,22 +49,28 @@ public class JoinActivity extends AppCompatActivity {
 
         // Join as Host
         btnJoinHost.setOnClickListener(v -> {
-            Intent intent = new Intent(JoinActivity.this, MeetingActivity.class);
-            intent.putExtra("token", sampleToken);
-            intent.putExtra("meetingId", etMeetingId.getText().toString().trim());
-            intent.putExtra("mode", "CONFERENCE");
-            startActivity(intent);
+            joinMeeting(etMeetingId.getText().toString(), "CONFERENCE");
         });
 
         // Join as Viewer
         btnJoinViewer.setOnClickListener(v -> {
-            Intent intent = new Intent(JoinActivity.this, MeetingActivity.class);
-            intent.putExtra("token", sampleToken);
-            intent.putExtra("meetingId", etMeetingId.getText().toString().trim());
-            intent.putExtra("mode", "VIEWER");
-            startActivity(intent);
+            joinMeeting(etMeetingId.getText().toString(), "VIEWER");
         });
 
+    }
+
+    private void joinMeeting(String meetingIdInput, String mode) {
+        String meetingId = meetingIdInput.trim();
+        if (meetingId.isEmpty()) {
+            Toast.makeText(JoinActivity.this, "Please enter the meeting ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(JoinActivity.this, MeetingActivity.class);
+        intent.putExtra("token", sampleToken);
+        intent.putExtra("meetingId", meetingId);
+        intent.putExtra("mode", mode);
+        startActivity(intent);
     }
 
     private void createMeeting(String token) {
