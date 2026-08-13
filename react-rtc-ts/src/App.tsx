@@ -5,7 +5,7 @@ import {
   MeetingConsumer,
   useMeeting,
   useParticipant,
-  VideoPlayer
+  VideoPlayer,
 } from "@videosdk.live/react-sdk";
 import { authToken, createMeeting } from "./API";
 
@@ -38,7 +38,6 @@ function ParticipantView({ participantId }: { participantId: string }) {
   const micRef = useRef<HTMLAudioElement>(null);
   const { micStream, webcamOn, micOn, isLocal, displayName } =
     useParticipant(participantId);
-
 
   useEffect(() => {
     if (micRef.current) {
@@ -84,11 +83,36 @@ function ParticipantView({ participantId }: { participantId: string }) {
 
 function Controls() {
   const { leave, toggleMic, toggleWebcam } = useMeeting();
+
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave meeting", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
   return (
     <div>
-      <button onClick={() => leave()}>Leave</button>
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+      <button onClick={handleLeave}>Leave</button>
+      <button onClick={handleToggleMic}>toggleMic</button>
+      <button onClick={handleToggleWebcam}>toggleWebcam</button>
     </div>
   );
 }
@@ -110,9 +134,14 @@ function MeetingView({
       onMeetingLeave();
     },
   });
-  const joinMeeting = () => {
+  const joinMeeting = async () => {
     setJoined("JOINING");
-    join();
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join meeting", error);
+      setJoined(null);
+    }
   };
 
   return (
@@ -157,7 +186,7 @@ function App() {
         micEnabled: true,
         webcamEnabled: true,
         name: "C.V. Raman",
-        debugMode: false
+        debugMode: false,
       }}
       token={authToken}
     >

@@ -21,7 +21,7 @@ joinButton.addEventListener("click", async () => {
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  initializeMeeting();
+  await initializeMeeting();
 });
 
 // Create Meeting Button Event Listener
@@ -35,26 +35,35 @@ createButton.addEventListener("click", async () => {
     headers: { Authorization: TOKEN, "Content-Type": "application/json" },
   };
 
-  const { roomId } = await fetch(url, options)
-    .then((response) => response.json())
-    .catch((error) => alert("error", error));
-  meetingId = roomId;
-
-  initializeMeeting();
+  try {
+    const response = await fetch(url, options);
+    const { roomId } = await response.json();
+    meetingId = roomId;
+    await initializeMeeting();
+  } catch (error) {
+    console.error("Failed to create meeting", error);
+    textDiv.textContent = "Unable to create the meeting. Please try again.";
+  }
 });
 
 // Initialize meeting
-function initializeMeeting() {
-  window.VideoSDK.config(TOKEN);
+async function initializeMeeting() {
+  try {
+    await window.VideoSDK.config(TOKEN);
 
-  meeting = window.VideoSDK.initMeeting({
-    meetingId: meetingId, // required
-    name: "C.V.Raman", // required
-    micEnabled: true, // optional, default: true
-    webcamEnabled: true, // optional, default: true
-  });
+    meeting = await window.VideoSDK.initMeeting({
+      meetingId: meetingId, // required
+      name: "C.V.Raman", // required
+      micEnabled: true, // optional, default: true
+      webcamEnabled: true, // optional, default: true
+    });
 
-  meeting.join();
+    await meeting.join();
+  } catch (error) {
+    console.error("Failed to initialize meeting", error);
+    textDiv.textContent = "Unable to join the meeting. Please try again.";
+    return;
+  }
 
   // creating local participant
   createLocalParticipant();
@@ -172,37 +181,53 @@ function setTrack(stream, audioElement, participant, isLocal) {
 
 // leave Meeting Button Event Listener
 leaveButton.addEventListener("click", async () => {
-  meeting?.leave();
+  try {
+    await meeting?.leave();
+  } catch (error) {
+    console.error("Failed to leave meeting", error);
+  }
   document.getElementById("grid-screen").style.display = "none";
   document.getElementById("join-screen").style.display = "block";
 });
 
 // Toggle Mic Button Event Listener
 toggleMicButton.addEventListener("click", async () => {
-  if (isMicOn) {
-    // Disable Mic in Meeting
-    meeting?.muteMic();
-  } else {
-    // Enable Mic in Meeting
-    meeting?.unmuteMic();
+  try {
+    if (isMicOn) {
+      // Disable Mic in Meeting
+      await meeting?.muteMic();
+    } else {
+      // Enable Mic in Meeting
+      await meeting?.unmuteMic();
+    }
+    isMicOn = !isMicOn;
+  } catch (error) {
+    console.error("Failed to toggle mic", error);
   }
-  isMicOn = !isMicOn;
 });
 
 // Toggle Web Cam Button Event Listener
 toggleWebCamButton.addEventListener("click", async () => {
-  if (isWebCamOn) {
-    // Disable Webcam in Meeting
-    meeting?.disableWebcam();
+  try {
+    if (isWebCamOn) {
+      // Disable Webcam in Meeting
+      await meeting?.disableWebcam();
 
-    let vElement = document.getElementById(`f-${meeting.localParticipant.id}`);
-    vElement.style.display = "none";
-  } else {
-    // Enable Webcam in Meeting
-    meeting?.enableWebcam();
+      let vElement = document.getElementById(
+        `f-${meeting.localParticipant.id}`
+      );
+      vElement.style.display = "none";
+    } else {
+      // Enable Webcam in Meeting
+      await meeting?.enableWebcam();
 
-    let vElement = document.getElementById(`f-${meeting.localParticipant.id}`);
-    vElement.style.display = "inline";
+      let vElement = document.getElementById(
+        `f-${meeting.localParticipant.id}`
+      );
+      vElement.style.display = "inline";
+    }
+    isWebCamOn = !isWebCamOn;
+  } catch (error) {
+    console.error("Failed to toggle webcam", error);
   }
-  isWebCamOn = !isWebCamOn;
 });

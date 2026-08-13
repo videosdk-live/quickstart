@@ -20,16 +20,22 @@ let isWebCamOn = false;
 const Constants = VideoSDK.Constants;
 
 // Initialize meeting
-function initializeMeeting(mode) {
-  window.VideoSDK.config(TOKEN);
+async function initializeMeeting(mode) {
+  try {
+    await window.VideoSDK.config(TOKEN);
 
-  meeting = window.VideoSDK.initMeeting({
-    meetingId: meetingId, // required
-    name: "Thomas Edison", // required
-    mode: mode,
-  });
+    meeting = await window.VideoSDK.initMeeting({
+      meetingId: meetingId, // required
+      name: "Thomas Edison", // required
+      mode: mode,
+    });
 
-  meeting.join();
+    await meeting.join();
+  } catch (error) {
+    console.error("Failed to initialize meeting", error);
+    textDiv.textContent = "Unable to join the meeting. Please try again.";
+    return;
+  }
 
   meeting.on("meeting-joined", () => {
     textDiv.textContent = null;
@@ -220,7 +226,7 @@ joinHostButton.addEventListener("click", async () => {
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  initializeMeeting(Constants.modes.CONFERENCE);
+  await initializeMeeting(Constants.modes.CONFERENCE);
 });
 
 // Join Meeting As Viewer Button Event Listener
@@ -231,7 +237,7 @@ joinViewerButton.addEventListener("click", async () => {
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  initializeMeeting(Constants.modes.VIEWER);
+  await initializeMeeting(Constants.modes.VIEWER);
 });
 
 // Create Meeting Button Event Listener
@@ -245,67 +251,94 @@ createButton.addEventListener("click", async () => {
     headers: { Authorization: TOKEN, "Content-Type": "application/json" },
   };
 
-  const { roomId } = await fetch(url, options)
-    .then((response) => response.json())
-    .catch((error) => alert("error", error));
-  meetingId = roomId;
-
-  initializeMeeting(Constants.modes.CONFERENCE);
+  try {
+    const response = await fetch(url, options);
+    const { roomId } = await response.json();
+    meetingId = roomId;
+    await initializeMeeting(Constants.modes.CONFERENCE);
+  } catch (error) {
+    console.error("Failed to create meeting", error);
+    textDiv.textContent = "Unable to create the meeting. Please try again.";
+  }
 });
 
 // leave Meeting Button Event Listener
 leaveButton.addEventListener("click", async () => {
-  meeting?.leave();
+  try {
+    await meeting?.leave();
+  } catch (error) {
+    console.error("Failed to leave meeting", error);
+  }
   document.getElementById("grid-screen").style.display = "none";
   document.getElementById("join-screen").style.display = "block";
 });
 
 // Toggle Mic Button Event Listener
 toggleMicButton.addEventListener("click", async () => {
-  if (isMicOn) {
-    // Disable Mic in Meeting
-    meeting?.muteMic();
-  } else {
-    // Enable Mic in Meeting
-    meeting?.unmuteMic();
+  try {
+    if (isMicOn) {
+      // Disable Mic in Meeting
+      await meeting?.muteMic();
+    } else {
+      // Enable Mic in Meeting
+      await meeting?.unmuteMic();
+    }
+    isMicOn = !isMicOn;
+  } catch (error) {
+    console.error("Failed to toggle mic", error);
   }
-  isMicOn = !isMicOn;
 });
 
 // Toggle Web Cam Button Event Listener
 toggleWebCamButton.addEventListener("click", async () => {
-  if (isWebCamOn) {
-    // Disable Webcam in Meeting
-    meeting?.disableWebcam();
+  try {
+    if (isWebCamOn) {
+      // Disable Webcam in Meeting
+      await meeting?.disableWebcam();
 
-    let vElement = document.getElementById(`f-${meeting.localParticipant.id}`);
-    vElement.style.display = "none";
-  } else {
-    // Enable Webcam in Meeting
-    meeting?.enableWebcam();
+      let vElement = document.getElementById(
+        `f-${meeting.localParticipant.id}`
+      );
+      vElement.style.display = "none";
+    } else {
+      // Enable Webcam in Meeting
+      await meeting?.enableWebcam();
 
-    let vElement = document.getElementById(`f-${meeting.localParticipant.id}`);
-    vElement.style.display = "inline";
+      let vElement = document.getElementById(
+        `f-${meeting.localParticipant.id}`
+      );
+      vElement.style.display = "inline";
+    }
+    isWebCamOn = !isWebCamOn;
+  } catch (error) {
+    console.error("Failed to toggle webcam", error);
   }
-  isWebCamOn = !isWebCamOn;
 });
 
 // Start Hls Button Event Listener
 startHlsButton.addEventListener("click", async () => {
-  meeting?.startHls({
-    layout: {
-      type: "SPOTLIGHT",
-      priority: "PIN",
-      gridSize: 4,
-    },
-    theme: "LIGHT",
-    mode: "video-and-audio",
-    quality: "high",
-    orientation: "landscape",
-  });
+  try {
+    await meeting?.startHls({
+      layout: {
+        type: "SPOTLIGHT",
+        priority: "PIN",
+        gridSize: 4,
+      },
+      theme: "LIGHT",
+      mode: "video-and-audio",
+      quality: "high",
+      orientation: "landscape",
+    });
+  } catch (error) {
+    console.error("Failed to start HLS", error);
+  }
 });
 
 // Stop Hls Button Event Listener
 stopHlsButton.addEventListener("click", async () => {
-  meeting?.stopHls();
+  try {
+    await meeting?.stopHls();
+  } catch (error) {
+    console.error("Failed to stop HLS", error);
+  }
 });

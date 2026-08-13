@@ -20,18 +20,24 @@ let isWebCamOn = false;
 const Constants = VideoSDK.Constants;
 
 // Initialize live stream
-function initializeLiveStream(mode) {
-  window.VideoSDK.config(TOKEN);
-  liveStream = window.VideoSDK.initMeeting({
-    meetingId: streamId,
-    name: "Thomas Edison",
-    webcamEnabled: true,
-    micEnabled: true,
-    mode: mode,
-  });
+async function initializeLiveStream(mode) {
+  try {
+    await window.VideoSDK.config(TOKEN);
+    liveStream = await window.VideoSDK.initMeeting({
+      meetingId: streamId,
+      name: "Thomas Edison",
+      webcamEnabled: true,
+      micEnabled: true,
+      mode: mode,
+    });
 
-  liveStream.join();
-  setupLiveStreamEventHandlers(mode);
+    await liveStream.join();
+    setupLiveStreamEventHandlers(mode);
+  } catch (error) {
+    console.error("Failed to initialize live stream", error);
+    elements.textDiv.textContent =
+      "Unable to join the live stream. Please try again.";
+  }
 }
 
 // Function to update controls visibility
@@ -202,44 +208,74 @@ elements.joinAudienceButton.addEventListener("click", async () => {
 });
 
 // leave Live Stream Button Event Listener
-elements.leaveButton.addEventListener("click", () => {
-  liveStream?.leave();
+elements.leaveButton.addEventListener("click", async () => {
+  try {
+    await liveStream?.leave();
+  } catch (error) {
+    console.error("Failed to leave live stream", error);
+  }
   document.getElementById("grid-screen").style.display = "none";
   document.getElementById("join-screen").style.display = "block";
 });
 
 // Toggle Mic Button Event Listener
-elements.toggleMicButton.addEventListener("click", () => {
-  isMicOn ? liveStream?.muteMic() : liveStream?.unmuteMic();
-  isMicOn = !isMicOn;
+elements.toggleMicButton.addEventListener("click", async () => {
+  try {
+    if (isMicOn) {
+      await liveStream?.muteMic();
+    } else {
+      await liveStream?.unmuteMic();
+    }
+    isMicOn = !isMicOn;
+  } catch (error) {
+    console.error("Failed to toggle mic", error);
+  }
 });
 
 // Toggle Web Cam Button Event Listener
-elements.toggleWebCamButton.addEventListener("click", () => {
-  isWebCamOn ? liveStream?.disableWebcam() : liveStream?.enableWebcam();
-  const vElement = document.getElementById(
-    `f-${liveStream.localParticipant.id}`
-  );
-  if (vElement) vElement.style.display = isWebCamOn ? "none" : "inline";
-  isWebCamOn = !isWebCamOn;
+elements.toggleWebCamButton.addEventListener("click", async () => {
+  try {
+    if (isWebCamOn) {
+      await liveStream?.disableWebcam();
+    } else {
+      await liveStream?.enableWebcam();
+    }
+    const vElement = document.getElementById(
+      `f-${liveStream.localParticipant.id}`
+    );
+    if (vElement) vElement.style.display = isWebCamOn ? "none" : "inline";
+    isWebCamOn = !isWebCamOn;
+  } catch (error) {
+    console.error("Failed to toggle webcam", error);
+  }
 });
 
 // Update switch mode button handler
-elements.switchModeBtn.addEventListener("click", () => {
+elements.switchModeBtn.addEventListener("click", async () => {
   const newMode =
     liveStream.localParticipant.mode === Constants.modes.SEND_AND_RECV
       ? Constants.modes.RECV_ONLY
       : Constants.modes.SEND_AND_RECV;
-  liveStream.changeMode(newMode);
+  try {
+    await liveStream.changeMode(newMode);
+  } catch (error) {
+    console.error("Failed to change mode", error);
+  }
 });
 
 // Helper functions for live stream creation and joining
 async function createLiveStream() {
   document.getElementById("join-screen").style.display = "none";
   elements.textDiv.textContent = "Creating new Live Stream...";
-  const { roomId } = await fetchLiveStreamRoom();
-  streamId = roomId;
-  initializeLiveStream(Constants.modes.SEND_AND_RECV);
+  try {
+    const { roomId } = await fetchLiveStreamRoom();
+    streamId = roomId;
+    await initializeLiveStream(Constants.modes.SEND_AND_RECV);
+  } catch (error) {
+    console.error("Failed to create live stream", error);
+    elements.textDiv.textContent =
+      "Unable to create the live stream. Please try again.";
+  }
 }
 
 async function joinLiveStream(mode) {
@@ -250,7 +286,7 @@ async function joinLiveStream(mode) {
     mode === Constants.modes.SEND_AND_RECV ? "host" : "audience"
   }...`;
   streamId = roomId;
-  initializeLiveStream(mode);
+  await initializeLiveStream(mode);
 }
 
 async function fetchLiveStreamRoom() {
@@ -259,7 +295,6 @@ async function fetchLiveStreamRoom() {
     method: "POST",
     headers: { Authorization: TOKEN, "Content-Type": "application/json" },
   };
-  return await fetch(url, options)
-    .then((response) => response.json())
-    .catch((error) => alert("error", error));
+  const response = await fetch(url, options);
+  return response.json();
 }

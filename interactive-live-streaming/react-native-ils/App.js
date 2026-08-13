@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -9,6 +8,7 @@ import {
   Alert,
   FlatList,
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   MeetingProvider,
   useMeeting,
@@ -16,6 +16,7 @@ import {
   Constants,
   register,
   RTCView,
+  MediaStream,
 } from "@videosdk.live/react-native-sdk";
 import { authToken, createStream } from "./api";
 
@@ -71,6 +72,14 @@ function LSContainer({ streamId, onLeave }) {
     onError: (error) => Alert.alert("Error", error.message), // Display an alert on encountering an error
   });
 
+  const handleJoin = async () => {
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join stream", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {streamId ? (
@@ -80,7 +89,7 @@ function LSContainer({ streamId, onLeave }) {
       {joined ? (
         <StreamView />
       ) : (
-        <TouchableOpacity style={styles.button} onPress={join}>
+        <TouchableOpacity style={styles.button} onPress={handleJoin}>
           <Text style={styles.buttonText}>Join Stream</Text>
         </TouchableOpacity>
       )}
@@ -137,31 +146,58 @@ function LSControls() {
 
   const currentMode = meeting.localParticipant.mode; // Get the current participant's mode
 
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave stream", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
+  const handleChangeMode = async () => {
+    const nextMode =
+      currentMode === Constants.modes.SEND_AND_RECV
+        ? Constants.modes.RECV_ONLY
+        : Constants.modes.SEND_AND_RECV;
+    try {
+      await changeMode(nextMode);
+    } catch (error) {
+      console.error("Failed to change mode", error);
+    }
+  };
+
   return (
     <View style={styles.controls}>
-      <TouchableOpacity style={styles.button} onPress={leave}>
+      <TouchableOpacity style={styles.button} onPress={handleLeave}>
         <Text style={styles.buttonText}>Leave</Text>
       </TouchableOpacity>
       {currentMode === Constants.modes.SEND_AND_RECV && (
         <>
-          <TouchableOpacity style={styles.button} onPress={toggleMic}>
+          <TouchableOpacity style={styles.button} onPress={handleToggleMic}>
             <Text style={styles.buttonText}>Toggle Mic</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={toggleWebcam}>
+          <TouchableOpacity style={styles.button} onPress={handleToggleWebcam}>
             <Text style={styles.buttonText}>Toggle Camera</Text>
           </TouchableOpacity>
         </>
       )}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          changeMode(
-            currentMode === Constants.modes.SEND_AND_RECV
-              ? Constants.modes.RECV_ONLY
-              : Constants.modes.SEND_AND_RECV
-          )
-        }
-      >
+      <TouchableOpacity style={styles.button} onPress={handleChangeMode}>
         <Text style={styles.buttonText}>
           {currentMode === Constants.modes.SEND_AND_RECV
             ? "Switch to Audience"
@@ -173,7 +209,7 @@ function LSControls() {
 }
 
 // Main App Component - Handles the app flow and stream lifecycle
-function App() {
+function AppContent() {
   const [streamId, setStreamId] = useState(null); // Holds the current stream ID
   const [mode, setMode] = useState(Constants.modes.SEND_AND_RECV); // Holds the current user mode (Host or Audience)
 
@@ -193,6 +229,7 @@ function App() {
         webcamEnabled: true, // Enables webcam by default
         name: "John Doe", // Default participant name
         mode,
+        defaultCamera: "front",
       }}
       token={authToken}
     >
@@ -202,6 +239,14 @@ function App() {
   ) : (
     // Renders the join view if no stream is active
     <JoinView initializeStream={initializeStream} setMode={setMode} />
+  );
+}
+
+function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }
 

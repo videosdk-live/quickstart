@@ -7,7 +7,7 @@ import {
   useParticipant,
   Constants,
   usePubSub,
-  VideoPlayer
+  VideoPlayer,
 } from "@videosdk.live/react-sdk";
 import Hls from "hls.js";
 
@@ -45,9 +45,9 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
 
 function ParticipantView(props) {
   const micRef = useRef(null);
-  const { micStream, webcamOn, micOn, isLocal, displayName } =
-    useParticipant(props.participantId);
-
+  const { micStream, webcamOn, micOn, isLocal, displayName } = useParticipant(
+    props.participantId
+  );
 
   useEffect(() => {
     if (micRef.current) {
@@ -98,13 +98,21 @@ function TemplateManager() {
   const { publish: publishBgColor } = usePubSub("CHANGE_BACKGROUND");
   const { publish: publishViewerMessage } = usePubSub("VIEWER_MESSAGE");
 
-  function handleChangeLivestreamBackground() {
-    publishBgColor(bgColor, { persist: true });
+  async function handleChangeLivestreamBackground() {
+    try {
+      await publishBgColor(bgColor, { persist: true });
+    } catch (error) {
+      console.error("Failed to publish background change", error);
+    }
     setBgColor(null);
   }
 
-  function handleViewerMessage() {
-    publishViewerMessage(viewerMessage, { persist: true });
+  async function handleViewerMessage() {
+    try {
+      await publishViewerMessage(viewerMessage, { persist: true });
+    } catch (error) {
+      console.error("Failed to publish viewer message", error);
+    }
     setViewerMessage(null);
   }
 
@@ -139,37 +147,74 @@ function TemplateManager() {
 
 function Controls() {
   const { leave, toggleMic, toggleWebcam, stopHls, meetingId } = useMeeting();
+
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave meeting", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
+  const handleStartHls = async () => {
+    const url = `https://api.videosdk.live/v2/hls/start`;
+    const templateUrl = `https://lab.videosdk.live/react-custom-template-demo?meetingId=${meetingId}&token=${authToken}`;
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: authToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        roomId: meetingId,
+        templateUrl: templateUrl,
+      }),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`Failed to start HLS: ${response.status}`);
+      }
+      await response.json();
+    } catch (error) {
+      console.error("Failed to start HLS", error);
+    }
+  };
+
+  const handleStopHls = async () => {
+    try {
+      await stopHls();
+    } catch (error) {
+      console.error("Failed to stop HLS", error);
+    }
+  };
+
   return (
     <div>
-      <button onClick={() => leave()}>Leave</button>
+      <button onClick={handleLeave}>Leave</button>
       &emsp;|&emsp;
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+      <button onClick={handleToggleMic}>toggleMic</button>
+      <button onClick={handleToggleWebcam}>toggleWebcam</button>
       &emsp;|&emsp;
-      <button
-        onClick={async () => {
-          const url = `https://api.videosdk.live/v2/hls/start`;
-          const templateUrl = `https://lab.videosdk.live/react-custom-template-demo?meetingId=${meetingId}&token=${authToken}`;
-          const options = {
-            method: "POST",
-            headers: {
-              Authorization: authToken,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              roomId: meetingId,
-              templateUrl: templateUrl,
-            }),
-          };
-
-          const result = await fetch(url, options)
-            .then((response) => response.json()) //result will have meeting id
-            .catch((error) => console.error("error", error));
-        }}
-      >
-        Start HLS
-      </button>
-      <button onClick={() => stopHls()}>Stop HLS</button>
+      <button onClick={handleStartHls}>Start HLS</button>
+      <button onClick={handleStopHls}>Stop HLS</button>
     </div>
   );
 }
@@ -214,8 +259,12 @@ function ViewerList() {
 function ViewerListItem({ participantId }) {
   const { displayName } = useParticipant(participantId);
   const { publish } = usePubSub(`CHANGE_MODE_${participantId}`);
-  const onClickRequestJoinLiveStream = () => {
-    publish("SEND_AND_RECV");
+  const onClickRequestJoinLiveStream = async () => {
+    try {
+      await publish("SEND_AND_RECV");
+    } catch (error) {
+      console.error("Failed to publish livestream request", error);
+    }
   };
   return (
     <div>
@@ -306,22 +355,30 @@ function Container(props) {
   const [joined, setJoined] = useState(null);
   const { join, localParticipant, changeMode } = useMeeting();
   const mMeeting = useMeeting({
-    onMeetingJoined: () => {
-      if (mMeetingRef.current.localParticipant.mode == "SEND_AND_RECV") {
-        mMeetingRef.current.localParticipant.pin();
+    onMeetingJoined: async () => {
+      try {
+        if (mMeetingRef.current.localParticipant.mode == "SEND_AND_RECV") {
+          await mMeetingRef.current.localParticipant.pin();
+        }
+      } catch (error) {
+        console.error("Failed to pin local participant", error);
       }
       setJoined("JOINED");
     },
     onMeetingLeft: () => {
       props.onMeetingLeave();
     },
-    onParticipantModeChanged: (data) => {
+    onParticipantModeChanged: async (data) => {
       const localParticipant = mMeetingRef.current.localParticipant;
       if (data.participantId == localParticipant.id) {
-        if (data.mode == Constants.modes.SEND_AND_RECV) {
-          localParticipant.pin();
-        } else {
-          localParticipant.unpin();
+        try {
+          if (data.mode == Constants.modes.SEND_AND_RECV) {
+            await localParticipant.pin();
+          } else {
+            await localParticipant.unpin();
+          }
+        } catch (error) {
+          console.error("Failed to update pin state", error);
         }
       }
     },
@@ -332,9 +389,14 @@ function Container(props) {
       console.log("HLS State Changed", data);
     },
   });
-  const joinMeeting = () => {
+  const joinMeeting = async () => {
     setJoined("JOINING");
-    join();
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join meeting", error);
+      setJoined(null);
+    }
   };
 
   const mMeetingRef = useRef(mMeeting);
@@ -356,15 +418,20 @@ function Container(props) {
       {joined && joined == "JOINED" ? (
         mMeeting.localParticipant.mode == Constants.modes.SEND_AND_RECV ? (
           <SpeakerView />
-        ) : mMeeting.localParticipant.mode == Constants.modes.SIGNALLING_ONLY ? (
+        ) : mMeeting.localParticipant.mode ==
+          Constants.modes.SIGNALLING_ONLY ? (
           <>
             {joinLivestreamRequest && (
               <div>
                 {joinLivestreamRequest.senderName} requested you to join
                 Livestream
                 <button
-                  onClick={() => {
-                    changeMode(joinLivestreamRequest.message);
+                  onClick={async () => {
+                    try {
+                      await changeMode(joinLivestreamRequest.message);
+                    } catch (error) {
+                      console.error("Failed to change mode", error);
+                    }
                     setJoinLivestreamRequest(null);
                   }}
                 >

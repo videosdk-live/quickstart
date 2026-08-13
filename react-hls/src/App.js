@@ -7,7 +7,7 @@ import {
   useParticipant,
   Constants,
   usePubSub,
-  VideoPlayer
+  VideoPlayer,
 } from "@videosdk.live/react-sdk";
 import Hls from "hls.js";
 
@@ -46,9 +46,9 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
 
 function ParticipantView(props) {
   const micRef = useRef(null);
-  const {  micStream, webcamOn, micOn, isLocal, displayName } =
-    useParticipant(props.participantId);
-
+  const { micStream, webcamOn, micOn, isLocal, displayName } = useParticipant(
+    props.participantId
+  );
 
   useEffect(() => {
     if (micRef.current) {
@@ -87,7 +87,6 @@ function ParticipantView(props) {
           classNameVideo="h-full"
           videoStyle={{}}
         />
-
       )}
     </div>
   );
@@ -98,47 +97,85 @@ function Controls(props) {
     useMeeting();
   const [hlsThumbnailImage, setHlsThumbnailImage] = useState(null);
 
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave meeting", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
+  const handleStartHls = async () => {
+    try {
+      await startHls({
+        layout: {
+          type: "SPOTLIGHT",
+          priority: "PIN",
+          gridSize: "20",
+        },
+        theme: "DARK",
+        mode: "video-and-audio",
+        quality: "high",
+        orientation: "landscape",
+      });
+    } catch (error) {
+      console.error("Failed to start HLS", error);
+    }
+  };
+
+  const handleStopHls = async () => {
+    try {
+      await stopHls();
+    } catch (error) {
+      console.error("Failed to stop HLS", error);
+    }
+  };
+
+  const handleCaptureThumbnail = async () => {
+    try {
+      const { filePath, message } = await captureHLSThumbnail({
+        roomId: props.meetingId,
+      });
+      setHlsThumbnailImage({
+        imageLink: filePath,
+        message: message,
+      });
+    } catch (error) {
+      console.error("Failed to capture HLS thumbnail", error);
+      setHlsThumbnailImage({ imageLink: null, message: error.message });
+    }
+  };
+
   return (
     <>
       <div>
-        <button onClick={() => leave()}>Leave</button>
+        <button onClick={handleLeave}>Leave</button>
         &emsp;|&emsp;
-        <button onClick={() => toggleMic()}>toggleMic</button>
-        <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+        <button onClick={handleToggleMic}>toggleMic</button>
+        <button onClick={handleToggleWebcam}>toggleWebcam</button>
         &emsp;|&emsp;
-        <button
-          onClick={() => {
-            startHls({
-              layout: {
-                type: "SPOTLIGHT",
-                priority: "PIN",
-                gridSize: "20",
-              },
-              theme: "DARK",
-              mode: "video-and-audio",
-              quality: "high",
-              orientation: "landscape",
-            });
-          }}
-        >
-          Start HLS
-        </button>
-        <button onClick={() => stopHls()}>Stop HLS</button>
+        <button onClick={handleStartHls}>Start HLS</button>
+        <button onClick={handleStopHls}>Stop HLS</button>
         {(hlsState === "HLS_STARTED" || hlsState === "HLS_PLAYABLE") && (
           <>
             &emsp;|&emsp;
-            <button
-              onClick={async () => {
-                const { filePath, message } = await captureHLSThumbnail({
-                  roomId: props.meetingId,
-                });
-
-                setHlsThumbnailImage({
-                  imageLink: filePath,
-                  message: message,
-                });
-              }}
-            >
+            <button onClick={handleCaptureThumbnail}>
               Capture HLS Thumbnail
             </button>
           </>
@@ -205,8 +242,12 @@ function ViewerList() {
 function ViewerListItem({ participantId }) {
   const { displayName } = useParticipant(participantId);
   const { publish } = usePubSub(`CHANGE_MODE_${participantId}`);
-  const onClickRequestJoinLiveStream = () => {
-    publish("SEND_AND_RECV");
+  const onClickRequestJoinLiveStream = async () => {
+    try {
+      await publish("SEND_AND_RECV");
+    } catch (error) {
+      console.error("Failed to publish livestream request", error);
+    }
   };
   return (
     <div>
@@ -228,8 +269,12 @@ function ViewerView() {
   const { hlsUrls, hlsState } = useMeeting();
   const { publish } = usePubSub("REACTION");
   //highlight-start
-  function sendEmoji(emoji) {
-    publish(emoji);
+  async function sendEmoji(emoji) {
+    try {
+      await publish(emoji);
+    } catch (error) {
+      console.error("Failed to publish reaction", error);
+    }
     // Dispatch custom event here so the local user can see their own emoji
     window.dispatchEvent(
       new CustomEvent("reaction_added", { detail: { emoji } })
@@ -274,23 +319,9 @@ function ViewerView() {
   return (
     <div>
       <div>
-        <button
-          onClick={() => {
-            sendEmoji("confetti");
-            publish("confetti");
-          }}
-        >
-          Send 🎉 Reaction
-        </button>
+        <button onClick={() => sendEmoji("confetti")}>Send 🎉 Reaction</button>
 
-        <button
-          onClick={() => {
-            sendEmoji("clap");
-            publish("clap");
-          }}
-        >
-          Send 👏 Reaction
-        </button>
+        <button onClick={() => sendEmoji("clap")}>Send 👏 Reaction</button>
       </div>
       {hlsState !== "HLS_PLAYABLE" ? (
         <div>
@@ -331,7 +362,7 @@ function Container(props) {
       props.onMeetingLeave();
     },
     onParticipantModeChanged: (data) => {
-      console.log("participantModeChanged", data)
+      console.log("participantModeChanged", data);
     },
     onError: (error) => {
       alert(error.message);
@@ -340,9 +371,14 @@ function Container(props) {
       console.log("HLS State Changed", data);
     },
   });
-  const joinMeeting = () => {
+  const joinMeeting = async () => {
     setJoined("JOINING");
-    join();
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join meeting", error);
+      setJoined(null);
+    }
   };
 
   const mMeetingRef = useRef(mMeeting);
@@ -365,15 +401,20 @@ function Container(props) {
       {joined && joined === "JOINED" ? (
         mMeeting.localParticipant.mode === Constants.modes.SEND_AND_RECV ? (
           <SpeakerView meetingId={props.meetingId} />
-        ) : mMeeting.localParticipant.mode === Constants.modes.SIGNALLING_ONLY ? (
+        ) : mMeeting.localParticipant.mode ===
+          Constants.modes.SIGNALLING_ONLY ? (
           <>
             {joinLivestreamRequest && (
               <div>
                 {joinLivestreamRequest.senderName} requested you to join
                 Livestream
                 <button
-                  onClick={() => {
-                    changeMode(joinLivestreamRequest.message);
+                  onClick={async () => {
+                    try {
+                      await changeMode(joinLivestreamRequest.message);
+                    } catch (error) {
+                      console.error("Failed to change mode", error);
+                    }
                     setJoinLivestreamRequest(null);
                   }}
                 >

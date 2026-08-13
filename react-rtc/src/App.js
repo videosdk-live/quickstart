@@ -32,9 +32,9 @@ function JoinScreen({ getMeetingAndToken }) {
 
 function ParticipantView(props) {
   const micRef = useRef(null);
-  const {  micStream, webcamOn, micOn, isLocal, displayName } =
-    useParticipant(props.participantId);
-
+  const { micStream, webcamOn, micOn, isLocal, displayName } = useParticipant(
+    props.participantId
+  );
 
   useEffect(() => {
     if (micRef.current) {
@@ -63,17 +63,17 @@ function ParticipantView(props) {
       <audio ref={micRef} autoPlay muted={isLocal} />
       {webcamOn && (
         <>
-        <VideoPlayer
-          participantId={props.participantId} // Required
-          type="video" // "video" or "share"
-          containerStyle={{
-            height: "200px",
-            width: "300px",
-          }}
-          className="h-full"
-          classNameVideo="h-full"
-          videoStyle={{}}
-        />
+          <VideoPlayer
+            participantId={props.participantId} // Required
+            type="video" // "video" or "share"
+            containerStyle={{
+              height: "200px",
+              width: "300px",
+            }}
+            className="h-full"
+            classNameVideo="h-full"
+            videoStyle={{}}
+          />
         </>
       )}
     </div>
@@ -82,11 +82,36 @@ function ParticipantView(props) {
 
 function Controls() {
   const { leave, toggleMic, toggleWebcam } = useMeeting();
+
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave meeting", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
   return (
     <div>
-      <button onClick={() => leave()}>Leave</button>
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+      <button onClick={handleLeave}>Leave</button>
+      <button onClick={handleToggleMic}>toggleMic</button>
+      <button onClick={handleToggleWebcam}>toggleWebcam</button>
     </div>
   );
 }
@@ -102,9 +127,14 @@ function MeetingView(props) {
       props.onMeetingLeave();
     },
   });
-  const joinMeeting = () => {
+  const joinMeeting = async () => {
     setJoined("JOINING");
-    join();
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join meeting", error);
+      setJoined(null);
+    }
   };
 
   return (
