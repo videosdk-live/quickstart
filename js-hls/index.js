@@ -21,13 +21,14 @@ const Constants = VideoSDK.Constants;
 
 function showJoinScreen(message) {
   document.getElementById("join-screen").style.display = "block";
+  document.getElementById("grid-screen").style.display = "none";
   textDiv.textContent = message ?? "";
 }
 
 // Initialize meeting
 async function initializeMeeting(mode) {
   try {
-    // VideoSDK.config and initMeeting are synchronous in the 1.x SDK — no await needed.
+    // VideoSDK.config and initMeeting are synchronous in 1.x — no await.
     window.VideoSDK.config(TOKEN);
 
     meeting = window.VideoSDK.initMeeting({
@@ -267,7 +268,9 @@ createButton.addEventListener("click", async () => {
     await initializeMeeting(Constants.modes.CONFERENCE);
   } catch (error) {
     console.error("Failed to create meeting", error);
-    showJoinScreen("Unable to create the meeting. Check your token and try again.");
+    showJoinScreen(
+      "Unable to create the meeting. Check your token and try again."
+    );
   }
 });
 
@@ -302,11 +305,13 @@ toggleMicButton.addEventListener("click", async () => {
 toggleWebCamButton.addEventListener("click", async () => {
   // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
   // toggle so a missing element can't hide the fact that isWebCamOn is stale.
+  // Not using `meeting?.` — if meeting is null we want the SDK call to throw
+  // into the catch, not fall through to the un-guarded DOM access below.
   try {
     if (isWebCamOn) {
-      await meeting?.disableWebcam();
+      await meeting.disableWebcam();
     } else {
-      await meeting?.enableWebcam();
+      await meeting.enableWebcam();
     }
   } catch (error) {
     console.error("Failed to toggle webcam", error);

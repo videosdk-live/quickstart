@@ -28,7 +28,7 @@ function showJoinScreen(message) {
 // Initialize live stream
 async function initializeLiveStream(mode) {
   try {
-    // VideoSDK.config and initMeeting are synchronous in the 1.x SDK — no await needed.
+    // VideoSDK.config and initMeeting are synchronous in 1.x — no await.
     window.VideoSDK.config(TOKEN);
     liveStream = window.VideoSDK.initMeeting({
       meetingId: streamId,
@@ -242,11 +242,13 @@ elements.toggleMicButton.addEventListener("click", async () => {
 elements.toggleWebCamButton.addEventListener("click", async () => {
   // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
   // toggle so a missing element can't hide the fact that isWebCamOn is stale.
+  // Not using `liveStream?.` — if liveStream is null we want the SDK call to
+  // throw into the catch, not fall through to the un-guarded DOM access below.
   try {
     if (isWebCamOn) {
-      await liveStream?.disableWebcam();
+      await liveStream.disableWebcam();
     } else {
-      await liveStream?.enableWebcam();
+      await liveStream.enableWebcam();
     }
   } catch (error) {
     console.error("Failed to toggle webcam", error);
