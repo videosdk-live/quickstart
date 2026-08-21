@@ -25,12 +25,12 @@ export const createMeeting = async ({ token }) => {
   }
 };
 
-export const captureHLSThumbnail = async ({ roomId }) => {
+export const captureHLSThumbnail = async ({ roomId, token }) => {
   try {
     const res = await fetch(`https://api.videosdk.live/v2/hls/capture`, {
       method: "POST",
       headers: {
-        authorization: `${authToken}`,
+        authorization: `${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ roomId: roomId }),

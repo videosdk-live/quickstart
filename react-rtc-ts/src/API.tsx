@@ -1,5 +1,5 @@
 // Generate your token at https://app.videosdk.live/api-keys and paste it below.
-export const authToken = "";
+export const authToken: string = "";
 
 // API call to create meeting
 export const createMeeting = async ({ token }: { token: string }) => {

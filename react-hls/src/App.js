@@ -151,6 +151,7 @@ function Controls(props) {
     try {
       const { filePath, message } = await captureHLSThumbnail({
         roomId: props.meetingId,
+        token: authToken,
       });
       setHlsThumbnailImage({
         imageLink: filePath,
@@ -270,15 +271,16 @@ function ViewerView() {
   const { publish } = usePubSub("REACTION");
   //highlight-start
   async function sendEmoji(emoji) {
+    // Fire the local echo synchronously so the user sees their own reaction
+    // immediately — the await below runs after and doesn't block this line.
+    window.dispatchEvent(
+      new CustomEvent("reaction_added", { detail: { emoji } })
+    );
     try {
       await publish(emoji);
     } catch (error) {
       console.error("Failed to publish reaction", error);
     }
-    // Dispatch custom event here so the local user can see their own emoji
-    window.dispatchEvent(
-      new CustomEvent("reaction_added", { detail: { emoji } })
-    );
   }
   useEffect(() => {
     if (hlsUrls.playbackHlsUrl && hlsState === "HLS_PLAYABLE") {

@@ -356,6 +356,7 @@ function Container(props) {
   const { join, localParticipant, changeMode } = useMeeting();
   const mMeeting = useMeeting({
     onMeetingJoined: async () => {
+      setJoined("JOINED");
       try {
         if (mMeetingRef.current.localParticipant.mode == "SEND_AND_RECV") {
           await mMeetingRef.current.localParticipant.pin();
@@ -363,7 +364,6 @@ function Container(props) {
       } catch (error) {
         console.error("Failed to pin local participant", error);
       }
-      setJoined("JOINED");
     },
     onMeetingLeft: () => {
       props.onMeetingLeave();

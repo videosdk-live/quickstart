@@ -19,12 +19,18 @@ let isWebCamOn = false;
 
 const Constants = VideoSDK.Constants;
 
+function showJoinScreen(message) {
+  document.getElementById("join-screen").style.display = "block";
+  textDiv.textContent = message ?? "";
+}
+
 // Initialize meeting
 async function initializeMeeting(mode) {
   try {
-    await window.VideoSDK.config(TOKEN);
+    // VideoSDK.config and initMeeting are synchronous in the 1.x SDK — no await needed.
+    window.VideoSDK.config(TOKEN);
 
-    meeting = await window.VideoSDK.initMeeting({
+    meeting = window.VideoSDK.initMeeting({
       meetingId: meetingId, // required
       name: "Thomas Edison", // required
       mode: mode,
@@ -33,7 +39,7 @@ async function initializeMeeting(mode) {
     await meeting.join();
   } catch (error) {
     console.error("Failed to initialize meeting", error);
-    textDiv.textContent = "Unable to join the meeting. Please try again.";
+    showJoinScreen("Unable to join the meeting. Please try again.");
     return;
   }
 
@@ -253,12 +259,15 @@ createButton.addEventListener("click", async () => {
 
   try {
     const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`Failed to create meeting: ${response.status}`);
+    }
     const { roomId } = await response.json();
     meetingId = roomId;
     await initializeMeeting(Constants.modes.CONFERENCE);
   } catch (error) {
     console.error("Failed to create meeting", error);
-    textDiv.textContent = "Unable to create the meeting. Please try again.";
+    showJoinScreen("Unable to create the meeting. Check your token and try again.");
   }
 });
 
@@ -291,27 +300,23 @@ toggleMicButton.addEventListener("click", async () => {
 
 // Toggle Web Cam Button Event Listener
 toggleWebCamButton.addEventListener("click", async () => {
+  // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
+  // toggle so a missing element can't hide the fact that isWebCamOn is stale.
   try {
     if (isWebCamOn) {
-      // Disable Webcam in Meeting
       await meeting?.disableWebcam();
-
-      let vElement = document.getElementById(
-        `f-${meeting.localParticipant.id}`
-      );
-      vElement.style.display = "none";
     } else {
-      // Enable Webcam in Meeting
       await meeting?.enableWebcam();
-
-      let vElement = document.getElementById(
-        `f-${meeting.localParticipant.id}`
-      );
-      vElement.style.display = "inline";
     }
-    isWebCamOn = !isWebCamOn;
   } catch (error) {
     console.error("Failed to toggle webcam", error);
+    return;
+  }
+
+  isWebCamOn = !isWebCamOn;
+  const vElement = document.getElementById(`f-${meeting.localParticipant.id}`);
+  if (vElement) {
+    vElement.style.display = isWebCamOn ? "inline" : "none";
   }
 });
 

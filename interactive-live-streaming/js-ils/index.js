@@ -19,11 +19,18 @@ let isWebCamOn = false;
 
 const Constants = VideoSDK.Constants;
 
+function showJoinScreen(message) {
+  document.getElementById("join-screen").style.display = "block";
+  document.getElementById("grid-screen").style.display = "none";
+  elements.textDiv.textContent = message ?? "";
+}
+
 // Initialize live stream
 async function initializeLiveStream(mode) {
   try {
-    await window.VideoSDK.config(TOKEN);
-    liveStream = await window.VideoSDK.initMeeting({
+    // VideoSDK.config and initMeeting are synchronous in the 1.x SDK — no await needed.
+    window.VideoSDK.config(TOKEN);
+    liveStream = window.VideoSDK.initMeeting({
       meetingId: streamId,
       name: "Thomas Edison",
       webcamEnabled: true,
@@ -35,8 +42,7 @@ async function initializeLiveStream(mode) {
     setupLiveStreamEventHandlers(mode);
   } catch (error) {
     console.error("Failed to initialize live stream", error);
-    elements.textDiv.textContent =
-      "Unable to join the live stream. Please try again.";
+    showJoinScreen("Unable to join the live stream. Please try again.");
   }
 }
 
@@ -234,19 +240,25 @@ elements.toggleMicButton.addEventListener("click", async () => {
 
 // Toggle Web Cam Button Event Listener
 elements.toggleWebCamButton.addEventListener("click", async () => {
+  // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
+  // toggle so a missing element can't hide the fact that isWebCamOn is stale.
   try {
     if (isWebCamOn) {
       await liveStream?.disableWebcam();
     } else {
       await liveStream?.enableWebcam();
     }
-    const vElement = document.getElementById(
-      `f-${liveStream.localParticipant.id}`
-    );
-    if (vElement) vElement.style.display = isWebCamOn ? "none" : "inline";
-    isWebCamOn = !isWebCamOn;
   } catch (error) {
     console.error("Failed to toggle webcam", error);
+    return;
+  }
+
+  isWebCamOn = !isWebCamOn;
+  const vElement = document.getElementById(
+    `f-${liveStream.localParticipant.id}`
+  );
+  if (vElement) {
+    vElement.style.display = isWebCamOn ? "inline" : "none";
   }
 });
 
@@ -273,8 +285,9 @@ async function createLiveStream() {
     await initializeLiveStream(Constants.modes.SEND_AND_RECV);
   } catch (error) {
     console.error("Failed to create live stream", error);
-    elements.textDiv.textContent =
-      "Unable to create the live stream. Please try again.";
+    showJoinScreen(
+      "Unable to create the live stream. Check your token and try again."
+    );
   }
 }
 
@@ -296,5 +309,8 @@ async function fetchLiveStreamRoom() {
     headers: { Authorization: TOKEN, "Content-Type": "application/json" },
   };
   const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`Failed to create live stream room: ${response.status}`);
+  }
   return response.json();
 }
