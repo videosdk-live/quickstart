@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
 import {
-  SafeAreaView,
   TouchableOpacity,
   Text,
   TextInput,
   View,
   FlatList,
+  type ListRenderItemInfo,
 } from 'react-native';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {
   MeetingProvider,
   useMeeting,
@@ -110,11 +111,43 @@ function ControlsContainer({
   toggleWebcam,
   toggleMic,
 }: {
-  join: () => void;
-  leave: () => void;
-  toggleWebcam: () => void;
-  toggleMic: () => void;
+  join: () => Promise<void> | void;
+  leave: () => Promise<void> | void;
+  toggleWebcam: () => Promise<void> | void;
+  toggleMic: () => Promise<void> | void;
 }) {
+  const handleJoin = async () => {
+    try {
+      await join();
+    } catch (error) {
+      console.error('Failed to join meeting', error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error('Failed to toggle webcam', error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error('Failed to toggle mic', error);
+    }
+  };
+
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error('Failed to leave meeting', error);
+    }
+  };
+
   return (
     <View
       style={{
@@ -123,30 +156,22 @@ function ControlsContainer({
         justifyContent: 'space-between',
       }}>
       <Button
-        onPress={() => {
-          join();
-        }}
+        onPress={handleJoin}
         buttonText={'Join'}
         backgroundColor={'#1178F8'}
       />
       <Button
-        onPress={() => {
-          toggleWebcam();
-        }}
+        onPress={handleToggleWebcam}
         buttonText={'Toggle Webcam'}
         backgroundColor={'#1178F8'}
       />
       <Button
-        onPress={() => {
-          toggleMic();
-        }}
+        onPress={handleToggleMic}
         buttonText={'Toggle Mic'}
         backgroundColor={'#1178F8'}
       />
       <Button
-        onPress={() => {
-          leave();
-        }}
+        onPress={handleLeave}
         buttonText={'Leave'}
         backgroundColor={'#FF0000'}
       />
@@ -184,7 +209,8 @@ function ParticipantList({participants}: {participants: string[]}) {
   return participants.length > 0 ? (
     <FlatList
       data={participants}
-      renderItem={({item}) => {
+      keyExtractor={(item: string) => item}
+      renderItem={({item}: ListRenderItemInfo<string>) => {
         return <ParticipantView participantId={item} />;
       }}
     />
@@ -223,7 +249,7 @@ function MeetingView() {
   );
 }
 
-export default function App() {
+function AppContent() {
   const [meetingId, setMeetingId] = useState<string | null>(null);
 
   const getMeetingId = async (id?: string) => {
@@ -242,16 +268,21 @@ export default function App() {
           micEnabled: false,
           webcamEnabled: true,
           name: 'Test User',
+          defaultCamera: 'front'
         }}
         token={token}>
         <MeetingView />
       </MeetingProvider>
     </SafeAreaView>
   ) : (
-    <JoinScreen
-      getMeetingId={() => {
-        getMeetingId();
-      }}
-    />
+    <JoinScreen getMeetingId={getMeetingId} />
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }

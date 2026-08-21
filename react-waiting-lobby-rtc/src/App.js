@@ -5,7 +5,7 @@ import {
   MeetingConsumer,
   useMeeting,
   useParticipant,
-  VideoPlayer
+  VideoPlayer,
 } from "@videosdk.live/react-sdk";
 import { createMeeting, hostToken, guestToken } from "./API";
 
@@ -32,8 +32,9 @@ function JoinScreen({ getMeetingAndToken }) {
 
 function ParticipantView(props) {
   const micRef = useRef(null);
-  const {  micStream, webcamOn, micOn, isLocal, displayName } =
-    useParticipant(props.participantId);
+  const { micStream, webcamOn, micOn, isLocal, displayName } = useParticipant(
+    props.participantId
+  );
 
   useEffect(() => {
     if (micRef.current) {
@@ -79,11 +80,36 @@ function ParticipantView(props) {
 
 function Controls() {
   const { leave, toggleMic, toggleWebcam } = useMeeting();
+
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave meeting", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
   return (
     <div>
-      <button onClick={() => leave()}>Leave</button>
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
+      <button onClick={handleLeave}>Leave</button>
+      <button onClick={handleToggleMic}>toggleMic</button>
+      <button onClick={handleToggleWebcam}>toggleWebcam</button>
     </div>
   );
 }
@@ -120,15 +146,25 @@ function MeetingView(props) {
       }
     },
   });
-  const joinMeeting = () => {
+  const joinMeeting = async () => {
     setJoined("JOINING");
-    join();
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join meeting", error);
+      setJoined(null);
+    }
   };
 
-  const joinHostMeeting = () => {
+  const joinHostMeeting = async () => {
     setIsHost(true);
     setJoined("JOINING");
-    join();
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join meeting", error);
+      setJoined(null);
+    }
   };
 
   return (
@@ -138,14 +174,28 @@ function MeetingView(props) {
         <div>
           <Controls />
           {requestedEntries.map(({ participantId, name, allow, deny }) => {
+            const handleAllow = async () => {
+              try {
+                await allow();
+              } catch (error) {
+                console.error("Failed to allow participant", error);
+              }
+            };
+            const handleDeny = async () => {
+              try {
+                await deny();
+              } catch (error) {
+                console.error("Failed to deny participant", error);
+              }
+            };
             return (
-              <>
+              <React.Fragment key={participantId}>
                 <p>{name} wants to join Meeting</p>
-                <button onClick={allow}>Allow</button>
-                <button onClick={deny} style={{ marginLeft: 8 }}>
+                <button onClick={handleAllow}>Allow</button>
+                <button onClick={handleDeny} style={{ marginLeft: 8 }}>
                   Deny
                 </button>
-              </>
+              </React.Fragment>
             );
           })}
           {[...participants.keys()].map((participantId) => (

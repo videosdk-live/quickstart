@@ -3,3 +3,6 @@
 # dependencies
 /config.js
 
+
+# npm lockfile — ignored per project convention
+package-lock.json

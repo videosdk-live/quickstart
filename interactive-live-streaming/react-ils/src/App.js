@@ -52,11 +52,23 @@ function LSContainer({ streamId, onLeave }) {
     onError: (error) => alert(error.message), // Display an alert on encountering an error
   });
 
+  const handleJoin = async () => {
+    try {
+      await join();
+    } catch (error) {
+      console.error("Failed to join stream", error);
+    }
+  };
+
   return (
     <div className="container">
       <h3>Stream Id: {streamId}</h3>
       {/* Show the stream view if joined, otherwise display the "Join Stream" button */}
-      {joined ? <StreamView /> : <button onClick={join}>Join Stream</button>}
+      {joined ? (
+        <StreamView />
+      ) : (
+        <button onClick={handleJoin}>Join Stream</button>
+      )}
     </div>
   );
 }
@@ -126,31 +138,59 @@ function LSControls() {
   const { leave, toggleMic, toggleWebcam, changeMode, meeting } = useMeeting(); // Access methods
   const currentMode = meeting.localParticipant.mode; // Get the current participant's mode
 
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error("Failed to leave stream", error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error("Failed to toggle mic", error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error("Failed to toggle webcam", error);
+    }
+  };
+
+  const handleChangeMode = async () => {
+    const nextMode =
+      currentMode === Constants.modes.SEND_AND_RECV
+        ? Constants.modes.RECV_ONLY
+        : Constants.modes.SEND_AND_RECV;
+    try {
+      await changeMode(nextMode);
+    } catch (error) {
+      console.error("Failed to change mode", error);
+    }
+  };
+
   return (
     <div className="controls">
       {/* Button to leave the stream */}
-      <button onClick={leave}>Leave</button>
+      <button onClick={handleLeave}>Leave</button>
 
       {/* Show mic and webcam toggles if in SEND_AND_RECV mode */}
       {currentMode === Constants.modes.SEND_AND_RECV && (
         <>
-          <button onClick={toggleMic}>Toggle Mic</button>{" "}
+          <button onClick={handleToggleMic}>Toggle Mic</button>{" "}
           {/* Mute/unmute mic */}
-          <button onClick={toggleWebcam}>Toggle Camera</button>{" "}
+          <button onClick={handleToggleWebcam}>Toggle Camera</button>{" "}
           {/* Enable/disable Camera */}
         </>
       )}
 
       {/* Button to switch between Host Mode and Viewer Mode */}
-      <button
-        onClick={() =>
-          changeMode(
-            currentMode === Constants.modes.SEND_AND_RECV
-              ? Constants.modes.RECV_ONLY
-              : Constants.modes.SEND_AND_RECV
-          )
-        }
-      >
+      <button onClick={handleChangeMode}>
         {currentMode === Constants.modes.SEND_AND_RECV
           ? "Switch to Audience Mode"
           : "Switch to Host Mode"}

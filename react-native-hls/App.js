@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react';
 import {
   TouchableOpacity,
   Text,
   TextInput,
   View,
   FlatList,
-} from "react-native";
+} from 'react-native';
 import {
   MeetingProvider,
   useMeeting,
@@ -13,28 +13,28 @@ import {
   MediaStream,
   RTCView,
   Constants,
-} from "@videosdk.live/react-native-sdk";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { createMeeting, authToken } from "./api";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Video from "react-native-video";
+} from '@videosdk.live/react-native-sdk';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { createMeeting, authToken } from './api';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Video from 'react-native-video';
 
 // Responsible for either schedule new meeting or to join existing meeting as a host or as a viewer.
 function JoinScreen({ getMeetingAndToken, setMode }) {
-  const [meetingVal, setMeetingVal] = useState("");
+  const [meetingVal, setMeetingVal] = useState('');
 
   const JoinButton = ({ value, onPress }) => {
     return (
       <TouchableOpacity
         style={{
-          backgroundColor: "#1178F8",
+          backgroundColor: '#1178F8',
           padding: 12,
           marginVertical: 8,
           borderRadius: 6,
         }}
         onPress={onPress}
       >
-        <Text style={{ color: "white", alignSelf: "center", fontSize: 18 }}>
+        <Text style={{ color: 'white', alignSelf: 'center', fontSize: 18 }}>
           {value}
         </Text>
       </TouchableOpacity>
@@ -44,45 +44,46 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: "black",
-        justifyContent: "center",
+        backgroundColor: 'black',
+        justifyContent: 'center',
         paddingHorizontal: 6 * 10,
       }}
     >
       <TextInput
         value={meetingVal}
         onChangeText={setMeetingVal}
-        placeholder={"XXXX-XXXX-XXXX"}
-        placeholderTextColor={"grey"}
+        placeholder={'XXXX-XXXX-XXXX'}
+        placeholderTextColor={'grey'}
         style={{
           padding: 12,
           borderWidth: 1,
-          borderColor: "white",
+          borderColor: 'white',
           borderRadius: 6,
-          color: "white",
+          color: 'white',
           marginBottom: 16,
         }}
       />
       <JoinButton
         onPress={() => {
+          setMode('SEND_AND_RECV');
           getMeetingAndToken(meetingVal);
         }}
-        value={"Join as Host"}
+        value={'Join as Host'}
       />
       <JoinButton
         onPress={() => {
-          setMode("SIGNALLING_ONLY");
+          setMode('SIGNALLING_ONLY');
           getMeetingAndToken(meetingVal);
         }}
-        value={"Join as Viewer"}
+        value={'Join as Viewer'}
       />
       <Text
         style={{
-          alignSelf: "center",
+          alignSelf: 'center',
           fontSize: 22,
           marginVertical: 16,
-          fontStyle: "italic",
-          color: "grey",
+          fontStyle: 'italic',
+          color: 'grey',
         }}
       >
         ---------- OR ----------
@@ -92,7 +93,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
         onPress={() => {
           getMeetingAndToken();
         }}
-        value={"Create Studio Room"}
+        value={'Create Studio Room'}
       />
     </SafeAreaView>
   );
@@ -104,7 +105,7 @@ function ParticipantView({ participantId }) {
   return webcamOn && webcamStream ? (
     <RTCView
       streamURL={new MediaStream([webcamStream.track]).toURL()}
-      objectFit={"cover"}
+      objectFit={'cover'}
       style={{
         height: 300,
         marginVertical: 8,
@@ -114,10 +115,10 @@ function ParticipantView({ participantId }) {
   ) : (
     <View
       style={{
-        backgroundColor: "grey",
+        backgroundColor: 'grey',
         height: 300,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
         marginVertical: 8,
         marginHorizontal: 8,
       }}
@@ -130,22 +131,42 @@ function ParticipantView({ participantId }) {
 // Responsible for managing meeting controls such as toggle mic / webcam and leave
 function Controls() {
   const { toggleWebcam, toggleMic, startHls, stopHls, hlsState } = useMeeting(
-    {}
+    {},
   );
 
   const _handleHLS = async () => {
-    if (!hlsState || hlsState === "HLS_STOPPED") {
-      startHls({
-        layout: {
-          type: "GRID",
-          priority: "PIN",
-          gridSize: 4,
-        },
-        theme: "DARK",
-        orientation: "portrait",
-      });
-    } else if (hlsState === "HLS_STARTED" || hlsState === "HLS_PLAYABLE") {
-      stopHls();
+    try {
+      if (!hlsState || hlsState === 'HLS_STOPPED') {
+        await startHls({
+          layout: {
+            type: 'GRID',
+            priority: 'PIN',
+            gridSize: 4,
+          },
+          theme: 'DARK',
+          orientation: 'portrait',
+        });
+      } else if (hlsState === 'HLS_STARTED' || hlsState === 'HLS_PLAYABLE') {
+        await stopHls();
+      }
+    } catch (error) {
+      console.error('Failed to toggle HLS', error);
+    }
+  };
+
+  const handleToggleWebcam = async () => {
+    try {
+      await toggleWebcam();
+    } catch (error) {
+      console.error('Failed to toggle webcam', error);
+    }
+  };
+
+  const handleToggleMic = async () => {
+    try {
+      await toggleMic();
+    } catch (error) {
+      console.error('Failed to toggle mic', error);
     }
   };
 
@@ -153,50 +174,42 @@ function Controls() {
     <View
       style={{
         padding: 24,
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
       }}
     >
       <Button
-        onPress={() => {
-          toggleWebcam();
-        }}
-        buttonText={"Toggle Webcam"}
-        backgroundColor={"#1178F8"}
+        onPress={handleToggleWebcam}
+        buttonText={'Toggle Webcam'}
+        backgroundColor={'#1178F8'}
       />
       <Button
-        onPress={() => {
-          toggleMic();
-        }}
-        buttonText={"Toggle Mic"}
-        backgroundColor={"#1178F8"}
+        onPress={handleToggleMic}
+        buttonText={'Toggle Mic'}
+        backgroundColor={'#1178F8'}
       />
-      {hlsState === "HLS_STARTED" ||
-      hlsState === "HLS_STOPPING" ||
-      hlsState === "HLS_STARTING" ||
-      hlsState === "HLS_PLAYABLE" ? (
+      {hlsState === 'HLS_STARTED' ||
+      hlsState === 'HLS_STOPPING' ||
+      hlsState === 'HLS_STARTING' ||
+      hlsState === 'HLS_PLAYABLE' ? (
         <Button
-          onPress={() => {
-            _handleHLS();
-          }}
+          onPress={_handleHLS}
           buttonText={
-            hlsState === "HLS_STARTED"
+            hlsState === 'HLS_STARTED'
               ? `Live Starting`
-              : hlsState === "HLS_STOPPING"
+              : hlsState === 'HLS_STOPPING'
               ? `Live Stopping`
-              : hlsState === "HLS_PLAYABLE"
+              : hlsState === 'HLS_PLAYABLE'
               ? `Stop Live`
               : `Go Live`
           }
-          backgroundColor={"#FF5D5D"}
+          backgroundColor={'#FF5D5D'}
         />
       ) : (
         <Button
-          onPress={() => {
-            _handleHLS();
-          }}
+          onPress={_handleHLS}
           buttonText={`Go Live`}
-          backgroundColor={"#1178F8"}
+          backgroundColor={'#1178F8'}
         />
       )}
     </View>
@@ -211,15 +224,15 @@ function SpeakerView() {
   // For getting speaker participant, we will filter out `CONFERENCE` mode participant
   const speakers = useMemo(() => {
     const speakerParticipants = [...participants.values()].filter(
-      (participant) => {
+      participant => {
         return participant.mode == Constants.modes.SEND_AND_RECV;
-      }
+      },
     );
     return speakerParticipants;
   }, [participants]);
 
   return (
-    <SafeAreaView style={{ backgroundColor: "black", flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: 'black', flex: 1 }}>
       {/* Render Header for copy meetingId and leave meeting*/}
       <HeaderView />
 
@@ -241,34 +254,41 @@ function SpeakerView() {
 
 function HeaderView() {
   const { meetingId, leave } = useMeeting();
+
+  const handleLeave = async () => {
+    try {
+      await leave();
+    } catch (error) {
+      console.error('Failed to leave meeting', error);
+    }
+  };
+
   return (
     <View
       style={{
-        flexDirection: "row",
+        flexDirection: 'row',
         marginTop: 12,
-        justifyContent: "space-evenly",
-        alignItems: "center",
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
       }}
     >
-      <Text style={{ fontSize: 24, color: "white" }}>{meetingId}</Text>
+      <Text style={{ fontSize: 24, color: 'white' }}>{meetingId}</Text>
       <Button
         btnStyle={{
           borderWidth: 1,
-          borderColor: "white",
+          borderColor: 'white',
         }}
         onPress={() => {
           Clipboard.setString(meetingId);
-          alert("MeetingId copied successfully");
+          alert('MeetingId copied successfully');
         }}
-        buttonText={"Copy MeetingId"}
-        backgroundColor={"transparent"}
+        buttonText={'Copy MeetingId'}
+        backgroundColor={'transparent'}
       />
       <Button
-        onPress={() => {
-          leave();
-        }}
-        buttonText={"Leave"}
-        backgroundColor={"#FF0000"}
+        onPress={handleLeave}
+        buttonText={'Leave'}
+        backgroundColor={'#FF0000'}
       />
     </View>
   );
@@ -279,8 +299,8 @@ function ViewerView({}) {
   const { hlsState, hlsUrls } = useMeeting();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-      {hlsState == "HLS_PLAYABLE" ? (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      {hlsState == 'HLS_PLAYABLE' ? (
         <>
           {/* Render Header for copy meetingId and leave meeting*/}
           <HeaderView />
@@ -289,16 +309,16 @@ function ViewerView({}) {
           <Video
             controls={true}
             source={{ uri: hlsUrls.playbackHlsUrl }}
-            resizeMode={"contain"}
-            style={{ flex: 1, backgroundColor: "black" }}
-            onError={(e) => console.log("error", e)}
+            resizeMode={'contain'}
+            style={{ flex: 1, backgroundColor: 'black' }}
+            onError={e => console.log('error', e)}
           />
         </>
       ) : (
         <SafeAreaView
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <Text style={{ fontSize: 20, color: "white" }}>
+          <Text style={{ fontSize: 20, color: 'white' }}>
             HLS is not started yet or is stopped
           </Text>
         </SafeAreaView>
@@ -310,10 +330,18 @@ function ViewerView({}) {
 // Responsible for managing two view (Speaker & Viewer) based on provided mode (`CONFERENCE` & `VIEWER`)
 function Container() {
   const { join, localParticipant } = useMeeting({
-    onError: (error) => {
+    onError: error => {
       console.log(error.message);
     },
   });
+
+  const handleJoin = async () => {
+    try {
+      await join();
+    } catch (error) {
+      console.error('Failed to join meeting', error);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -325,12 +353,12 @@ function Container() {
         <View
           style={{
             flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "black",
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'black',
           }}
         >
-          <Text style={{ fontSize: 20, color: "white" }}>
+          <Text style={{ fontSize: 20, color: 'white' }}>
             Press Join button to enter studio.
           </Text>
           <Button
@@ -339,13 +367,11 @@ function Container() {
               paddingHorizontal: 22,
               padding: 12,
               borderWidth: 1,
-              borderColor: "white",
+              borderColor: 'white',
               borderRadius: 8,
             }}
-            buttonText={"Join"}
-            onPress={() => {
-              join();
-            }}
+            buttonText={'Join'}
+            onPress={handleJoin}
           />
         </View>
       )}
@@ -365,19 +391,19 @@ const Button = ({ onPress, buttonText, backgroundColor, btnStyle }) => {
         borderRadius: 8,
       }}
     >
-      <Text style={{ color: "white", fontSize: 12 }}>{buttonText}</Text>
+      <Text style={{ color: 'white', fontSize: 12 }}>{buttonText}</Text>
     </TouchableOpacity>
   );
 };
 
-function App() {
+function AppContent() {
   const [meetingId, setMeetingId] = useState(null);
 
   //State to handle the mode of the participant i.e. CONFERNCE or VIEWER
-  const [mode, setMode] = useState("SEND_AND_RECV");
+  const [mode, setMode] = useState('SEND_AND_RECV');
 
   //Getting MeetingId from the API we created earlier
-  const getMeetingAndToken = async (id) => {
+  const getMeetingAndToken = async id => {
     const meetingId =
       id == null ? await createMeeting({ token: authToken }) : id;
     setMeetingId(meetingId);
@@ -389,10 +415,10 @@ function App() {
         meetingId,
         micEnabled: true,
         webcamEnabled: true,
-        name: "Ahmed",
+        name: 'Ahmed',
         //These will be the mode of the participant CONFERENCE or VIEWER
         mode: mode,
-        defaultCamera: "front",
+        defaultCamera: 'front',
       }}
       token={authToken}
     >
@@ -400,6 +426,14 @@ function App() {
     </MeetingProvider>
   ) : (
     <JoinScreen getMeetingAndToken={getMeetingAndToken} setMode={setMode} />
+  );
+}
+
+function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }
 export default App;
