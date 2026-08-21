@@ -48,7 +48,7 @@ npm install
 Bingo, it's time to push the launch button.
 
 ```js
-npm run start
+npm run dev
 ```
 
 <br/>
