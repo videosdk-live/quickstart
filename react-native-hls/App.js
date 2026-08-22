@@ -201,7 +201,7 @@ function Controls() {
               ? `Live Stopping`
               : hlsState === 'HLS_PLAYABLE'
               ? `Stop Live`
-              : `Go Live`
+              : `Loading...`
           }
           backgroundColor={'#FF5D5D'}
         />

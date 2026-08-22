@@ -38,8 +38,12 @@ async function initializeLiveStream(mode) {
       mode: mode,
     });
 
-    await liveStream.join();
+    // Register all event handlers before joining so no event is missed.
     setupLiveStreamEventHandlers(mode);
+
+    // `join()` resolves when the join request is accepted — wait for the
+    // `meeting-joined` event before calling other live stream methods.
+    await liveStream.join();
   } catch (error) {
     console.error("Failed to initialize live stream", error);
     showJoinScreen("Unable to join the live stream. Please try again.");
@@ -240,10 +244,6 @@ elements.toggleMicButton.addEventListener("click", async () => {
 
 // Toggle Web Cam Button Event Listener
 elements.toggleWebCamButton.addEventListener("click", async () => {
-  // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
-  // toggle so a missing element can't hide the fact that isWebCamOn is stale.
-  // Not using `liveStream?.` — if liveStream is null we want the SDK call to
-  // throw into the catch, not fall through to the un-guarded DOM access below.
   try {
     if (isWebCamOn) {
       await liveStream.disableWebcam();

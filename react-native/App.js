@@ -239,7 +239,8 @@ function AppContent() {
 
   const getMeetingId = async id => {
     if (!token) {
-      console.log('PLEASE PROVIDE TOKEN IN api.js FROM app.videosdk.live');
+      console.error('PLEASE PROVIDE TOKEN IN api.js FROM app.videosdk.live');
+      return;
     }
     const meetingId = id == null ? await createMeeting({ token }) : id;
     setMeetingId(meetingId);

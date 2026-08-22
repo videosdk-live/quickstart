@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MeetingProvider,
   MeetingConsumer,
@@ -60,7 +60,7 @@ function ParticipantView(props) {
         micRef.current
           .play()
           .catch((error) =>
-            console.error("videoElem.current.play() failed", error)
+            console.error("micElem.current.play() failed", error)
           );
       } else {
         micRef.current.srcObject = null;
@@ -69,7 +69,7 @@ function ParticipantView(props) {
   }, [micStream, micOn]);
 
   return (
-    <div key={props.participantId}>
+    <div>
       <p>
         Participant: {displayName} | Webcam: {webcamOn ? "ON" : "OFF"} | Mic:{" "}
         {micOn ? "ON" : "OFF"}
@@ -338,7 +338,6 @@ function ViewerView() {
               autoPlay={true}
               controls
               style={{ width: "100%", height: "100%" }}
-              playsinline
               playsInline
               muted={true}
               playing
@@ -455,6 +454,10 @@ function App() {
   const [meetingId, setMeetingId] = useState(null);
   const [mode, setMode] = useState("SEND_AND_RECV");
   const getMeetingAndToken = async (id) => {
+    if (!authToken) {
+      console.error("PLEASE PROVIDE TOKEN IN API.js FROM app.videosdk.live");
+      return;
+    }
     const meetingId =
       id == null ? await createMeeting({ token: authToken }) : id;
     setMeetingId(meetingId);

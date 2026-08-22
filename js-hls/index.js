@@ -37,137 +37,142 @@ async function initializeMeeting(mode) {
       mode: mode,
     });
 
+    // Register all event handlers before joining so no event is missed.
+    meeting.on("meeting-joined", async () => {
+      textDiv.textContent = null;
+
+      document.getElementById("grid-screen").style.display = "block";
+      document.getElementById(
+        "meetingIdHeading"
+      ).textContent = `Meeting Id: ${meetingId}`;
+
+      if (meeting.hlsState === Constants.hlsEvents.HLS_STOPPED) {
+        hlsStatusHeading.textContent = "HLS has not stared yet";
+      } else {
+        hlsStatusHeading.textContent = `HLS Status: ${meeting.hlsState}`;
+      }
+
+      if (mode === Constants.modes.SEND_AND_RECV) {
+        document.getElementById("speakerView").style.display = "block";
+
+        // Pin the local participant if he joins in `SEND_AND_RECV` mode
+        try {
+          await meeting.localParticipant.pin();
+        } catch (error) {
+          console.error("Failed to pin the local participant", error);
+        }
+      }
+    });
+
+    meeting.on("meeting-left", () => {
+      videoContainer.innerHTML = "";
+    });
+
+    meeting.on("hls-state-changed", (data) => {
+      const { status } = data;
+
+      hlsStatusHeading.textContent = `HLS Status: ${status}`;
+
+      if (mode === Constants.modes.SIGNALLING_ONLY) {
+        if (status === Constants.hlsEvents.HLS_PLAYABLE) {
+          const { playbackHlsUrl } = data;
+          let video = document.createElement("video");
+          video.setAttribute("width", "100%");
+          video.setAttribute("muted", "false");
+          // enableAutoPlay for browser auto play policy
+          video.setAttribute("autoplay", "true");
+
+          if (Hls.isSupported()) {
+            var hls = new Hls({
+              maxLoadingDelay: 1, // max video loading delay used in automatic start level selection
+              defaultAudioCodec: "mp4a.40.2", // default audio codec
+              maxBufferLength: 0, // If buffer length is/become less than this value, a new fragment will be loaded
+              maxMaxBufferLength: 1, // Hls.js will never exceed this value
+              startLevel: 0, // Start playback at the lowest quality level
+              startPosition: -1, // set -1 playback will start from intialtime = 0
+              maxBufferHole: 0.001, // 'Maximum' inter-fragment buffer hole tolerance that hls.js can cope with when searching for the next fragment to load.
+              highBufferWatchdogPeriod: 0, // if media element is expected to play and if currentTime has not moved for more than highBufferWatchdogPeriod and if there are more than maxBufferHole seconds buffered upfront, hls.js will jump buffer gaps, or try to nudge playhead to recover playback.
+              nudgeOffset: 0.05, // In case playback continues to stall after first playhead nudging, currentTime will be nudged evenmore following nudgeOffset to try to restore playback. media.currentTime += (nb nudge retry -1)*nudgeOffset
+              nudgeMaxRetry: 1, // Max nb of nudge retries before hls.js raise a fatal BUFFER_STALLED_ERROR
+              maxFragLookUpTolerance: 0.1, // This tolerance factor is used during fragment lookup.
+              liveSyncDurationCount: 1, // if set to 3, playback will start from fragment N-3, N being the last fragment of the live playlist
+              abrEwmaFastLive: 1, // Fast bitrate Exponential moving average half-life, used to compute average bitrate for Live streams.
+              abrEwmaSlowLive: 3, // Slow bitrate Exponential moving average half-life, used to compute average bitrate for Live streams.
+              abrEwmaFastVoD: 1, // Fast bitrate Exponential moving average half-life, used to compute average bitrate for VoD streams
+              abrEwmaSlowVoD: 3, // Slow bitrate Exponential moving average half-life, used to compute average bitrate for VoD streams
+              maxStarvationDelay: 1, // ABR algorithm will always try to choose a quality level that should avoid rebuffering
+            });
+            hls.loadSource(playbackHlsUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+              video.play();
+            });
+          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = playbackHlsUrl;
+            video.addEventListener("canplay", function () {
+              video.play();
+            });
+          }
+
+          videoContainer.appendChild(video);
+        }
+
+        if (status === Constants.hlsEvents.HLS_STOPPING) {
+          videoContainer.innerHTML = "";
+        }
+      }
+    });
+
+    if (mode === Constants.modes.SEND_AND_RECV) {
+      // creating local participant
+      createLocalParticipant();
+
+      // setting local participant stream
+      meeting.localParticipant.on("stream-enabled", (stream) => {
+        setTrack(stream, null, meeting.localParticipant, true);
+      });
+
+      // participant joined
+      meeting.on("participant-joined", async (participant) => {
+        if (participant.mode === Constants.modes.SEND_AND_RECV) {
+          let videoElement = createVideoElement(
+            participant.id,
+            participant.displayName
+          );
+          let audioElement = createAudioElement(participant.id);
+
+          participant.on("stream-enabled", (stream) => {
+            setTrack(stream, audioElement, participant, false);
+          });
+
+          videoContainer.appendChild(videoElement);
+          videoContainer.appendChild(audioElement);
+
+          try {
+            await participant.pin();
+          } catch (error) {
+            console.error("Failed to pin the participant", error);
+          }
+        }
+      });
+
+      // participants left
+      meeting.on("participant-left", (participant) => {
+        let vElement = document.getElementById(`f-${participant.id}`);
+        vElement.remove(vElement);
+
+        let aElement = document.getElementById(`a-${participant.id}`);
+        aElement.remove(aElement);
+      });
+    }
+
+    // `join()` resolves when the join request is accepted — wait for the
+    // `meeting-joined` event before calling other meeting methods.
     await meeting.join();
   } catch (error) {
     console.error("Failed to initialize meeting", error);
-    showJoinScreen("Unable to join the meeting. Please try again.");
-    return;
-  }
-
-  meeting.on("meeting-joined", async () => {
-    textDiv.textContent = null;
-
-    document.getElementById("grid-screen").style.display = "block";
-    document.getElementById(
-      "meetingIdHeading"
-    ).textContent = `Meeting Id: ${meetingId}`;
-
-    if (meeting.hlsState === Constants.hlsEvents.HLS_STOPPED) {
-      hlsStatusHeading.textContent = "HLS has not stared yet";
-    } else {
-      hlsStatusHeading.textContent = `HLS Status: ${meeting.hlsState}`;
-    }
-
-    if (mode === Constants.modes.SEND_AND_RECV) {
-      document.getElementById("speakerView").style.display = "block";
-
-      // Pin the local participant if he joins in `SEND_AND_RECV` mode
-      try {
-        await meeting.localParticipant.pin();
-      } catch (error) {
-        console.error("Failed to pin the local participant", error);
-      }
-    }
-  });
-
-  meeting.on("meeting-left", () => {
     videoContainer.innerHTML = "";
-  });
-
-  meeting.on("hls-state-changed", (data) => {
-    const { status } = data;
-
-    hlsStatusHeading.textContent = `HLS Status: ${status}`;
-
-    if (mode === Constants.modes.SIGNALLING_ONLY) {
-      if (status === Constants.hlsEvents.HLS_PLAYABLE) {
-        const { playbackHlsUrl } = data;
-        let video = document.createElement("video");
-        video.setAttribute("width", "100%");
-        video.setAttribute("muted", "false");
-        // enableAutoPlay for browser auto play policy
-        video.setAttribute("autoplay", "true");
-
-        if (Hls.isSupported()) {
-          var hls = new Hls({
-            maxLoadingDelay: 4, // max video loading delay used in automatic start level selection
-            defaultAudioCodec: "mp4a.40.2", // default audio codec
-            startLevel: 0, // Start playback at the lowest quality level
-            startPosition: -1, // set -1 playback will start from intialtime = 0
-            maxBufferHole: 0.001, // 'Maximum' inter-fragment buffer hole tolerance that hls.js can cope with when searching for the next fragment to load.
-            highBufferWatchdogPeriod: 0, // if media element is expected to play and if currentTime has not moved for more than highBufferWatchdogPeriod and if there are more than maxBufferHole seconds buffered upfront, hls.js will jump buffer gaps, or try to nudge playhead to recover playback.
-            nudgeOffset: 0.05, // In case playback continues to stall after first playhead nudging, currentTime will be nudged evenmore following nudgeOffset to try to restore playback. media.currentTime += (nb nudge retry -1)*nudgeOffset
-            nudgeMaxRetry: 3, // Max nb of nudge retries before hls.js raise a fatal BUFFER_STALLED_ERROR
-            maxFragLookUpTolerance: 0.1, // This tolerance factor is used during fragment lookup.
-            liveSyncDurationCount: 1, // if set to 3, playback will start from fragment N-3, N being the last fragment of the live playlist
-            abrEwmaFastLive: 1, // Fast bitrate Exponential moving average half-life, used to compute average bitrate for Live streams.
-            abrEwmaSlowLive: 3, // Slow bitrate Exponential moving average half-life, used to compute average bitrate for Live streams.
-            abrEwmaFastVoD: 1, // Fast bitrate Exponential moving average half-life, used to compute average bitrate for VoD streams
-            abrEwmaSlowVoD: 3, // Slow bitrate Exponential moving average half-life, used to compute average bitrate for VoD streams
-            maxStarvationDelay: 1, // ABR algorithm will always try to choose a quality level that should avoid rebuffering
-          });
-          hls.loadSource(playbackHlsUrl);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play();
-          });
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = playbackHlsUrl;
-          video.addEventListener("canplay", function () {
-            video.play();
-          });
-        }
-
-        videoContainer.appendChild(video);
-      }
-
-      if (status === Constants.hlsEvents.HLS_STOPPING) {
-        videoContainer.innerHTML = "";
-      }
-    }
-  });
-
-  if (mode === Constants.modes.SEND_AND_RECV) {
-    // creating local participant
-    createLocalParticipant();
-
-    // setting local participant stream
-    meeting.localParticipant.on("stream-enabled", (stream) => {
-      setTrack(stream, null, meeting.localParticipant, true);
-    });
-
-    // participant joined
-    meeting.on("participant-joined", async (participant) => {
-      if (participant.mode === Constants.modes.SEND_AND_RECV) {
-        let videoElement = createVideoElement(
-          participant.id,
-          participant.displayName
-        );
-        let audioElement = createAudioElement(participant.id);
-
-        participant.on("stream-enabled", (stream) => {
-          setTrack(stream, audioElement, participant, false);
-        });
-
-        videoContainer.appendChild(videoElement);
-        videoContainer.appendChild(audioElement);
-
-        try {
-          await participant.pin();
-        } catch (error) {
-          console.error("Failed to pin the participant", error);
-        }
-      }
-    });
-
-    // participants left
-    meeting.on("participant-left", (participant) => {
-      let vElement = document.getElementById(`f-${participant.id}`);
-      vElement.remove(vElement);
-
-      let aElement = document.getElementById(`a-${participant.id}`);
-      aElement.remove(aElement);
-    });
+    showJoinScreen("Unable to join the meeting. Please try again.");
   }
 }
 // creating video element
@@ -316,10 +321,6 @@ toggleMicButton.addEventListener("click", async () => {
 
 // Toggle Web Cam Button Event Listener
 toggleWebCamButton.addEventListener("click", async () => {
-  // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
-  // toggle so a missing element can't hide the fact that isWebCamOn is stale.
-  // Not using `meeting?.` — if meeting is null we want the SDK call to throw
-  // into the catch, not fall through to the un-guarded DOM access below.
   try {
     if (isWebCamOn) {
       await meeting.disableWebcam();

@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MeetingProvider,
   MeetingConsumer,
@@ -49,7 +49,7 @@ function ParticipantView({ participantId }: { participantId: string }) {
         micRef.current
           .play()
           .catch((error) =>
-            console.error("videoElem.current.play() failed", error)
+            console.error("micElem.current.play() failed", error)
           );
       } else {
         micRef.current.srcObject = null;
@@ -58,7 +58,7 @@ function ParticipantView({ participantId }: { participantId: string }) {
   }, [micStream, micOn]);
 
   return (
-    <div key={participantId}>
+    <div>
       <p>
         Participant: {displayName} | Webcam: {webcamOn ? "ON" : "OFF"} | Mic:{" "}
         {micOn ? "ON" : "OFF"}
@@ -125,8 +125,7 @@ function MeetingView({
   meetingId: string;
 }) {
   const [joined, setJoined] = useState<string | null>(null);
-  const { join } = useMeeting();
-  const { participants } = useMeeting({
+  const { join, participants } = useMeeting({
     onMeetingJoined: () => {
       setJoined("JOINED");
     },
@@ -170,6 +169,10 @@ function App() {
   const [meetingId, setMeetingId] = useState<string | null>(null);
 
   const getMeetingAndToken = async (id?: string) => {
+    if (!authToken) {
+      console.error("PLEASE PROVIDE TOKEN IN API.tsx FROM app.videosdk.live");
+      return;
+    }
     const meetingId =
       id == null ? await createMeeting({ token: authToken }) : id;
     setMeetingId(meetingId);

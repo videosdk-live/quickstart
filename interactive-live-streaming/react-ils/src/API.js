@@ -1,7 +1,7 @@
 // Generate your token at https://app.videosdk.live/api-keys and paste it below.
 export const authToken = "";
 
-// API call to create meeting
+// API call to create stream
 export const createStream = async ({ token }) => {
   try {
     const res = await fetch(`https://api.videosdk.live/v2/rooms`, {
