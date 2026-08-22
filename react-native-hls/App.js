@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -221,7 +221,7 @@ function SpeakerView() {
   // Get the Participant Map and meetingId
   const { meetingId, participants } = useMeeting({});
 
-  // For getting speaker participant, we will filter out `CONFERENCE` mode participant
+  // For getting speaker participant, we will filter out `SEND_AND_RECV` mode participant
   const speakers = useMemo(() => {
     const speakerParticipants = [...participants.values()].filter(
       participant => {
@@ -327,13 +327,31 @@ function ViewerView({}) {
   );
 }
 
-// Responsible for managing two view (Speaker & Viewer) based on provided mode (`CONFERENCE` & `VIEWER`)
+// Responsible for managing two view (Speaker & Viewer) based on provided mode (`SEND_AND_RECV` & `SIGNALLING_ONLY`)
 function Container() {
-  const { join, localParticipant } = useMeeting({
+  const { join, localParticipant } = useMeeting();
+  const mMeeting = useMeeting({
+    onMeetingJoined: async () => {
+      // Pin the local participant if he joins in SEND_AND_RECV mode
+      if (mMeetingRef.current.localParticipant.mode === 'SEND_AND_RECV') {
+        try {
+          await mMeetingRef.current.localParticipant.pin();
+        } catch (error) {
+          console.error('Failed to pin the local participant', error);
+        }
+      }
+    },
     onError: error => {
       console.log(error.message);
     },
   });
+
+  // Create a ref to meeting object so that when used inside the
+  // Callback functions, meeting state is maintained
+  const mMeetingRef = useRef(mMeeting);
+  useEffect(() => {
+    mMeetingRef.current = mMeeting;
+  }, [mMeeting]);
 
   const handleJoin = async () => {
     try {
@@ -399,7 +417,7 @@ const Button = ({ onPress, buttonText, backgroundColor, btnStyle }) => {
 function AppContent() {
   const [meetingId, setMeetingId] = useState(null);
 
-  //State to handle the mode of the participant i.e. CONFERNCE or VIEWER
+  //State to handle the mode of the participant i.e. SEND_AND_RECV or SIGNALLING_ONLY
   const [mode, setMode] = useState('SEND_AND_RECV');
 
   //Getting MeetingId from the API we created earlier
@@ -416,7 +434,7 @@ function AppContent() {
         micEnabled: true,
         webcamEnabled: true,
         name: 'Ahmed',
-        //These will be the mode of the participant CONFERENCE or VIEWER
+        //These will be the mode of the participant SEND_AND_RECV or SIGNALLING_ONLY
         mode: mode,
         defaultCamera: 'front',
       }}

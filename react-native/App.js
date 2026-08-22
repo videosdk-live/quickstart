@@ -68,7 +68,6 @@ function JoinScreen(props) {
           borderRadius: 6,
         }}
         onPress={() => {
-          console.log('dmeo user ');
           props.getMeetingId(meetingVal);
         }}
       >

@@ -44,7 +44,7 @@ async function initializeMeeting(mode) {
     return;
   }
 
-  meeting.on("meeting-joined", () => {
+  meeting.on("meeting-joined", async () => {
     textDiv.textContent = null;
 
     document.getElementById("grid-screen").style.display = "block";
@@ -58,8 +58,15 @@ async function initializeMeeting(mode) {
       hlsStatusHeading.textContent = `HLS Status: ${meeting.hlsState}`;
     }
 
-    if (mode === Constants.modes.CONFERENCE) {
+    if (mode === Constants.modes.SEND_AND_RECV) {
       document.getElementById("speakerView").style.display = "block";
+
+      // Pin the local participant if he joins in `SEND_AND_RECV` mode
+      try {
+        await meeting.localParticipant.pin();
+      } catch (error) {
+        console.error("Failed to pin the local participant", error);
+      }
     }
   });
 
@@ -72,7 +79,7 @@ async function initializeMeeting(mode) {
 
     hlsStatusHeading.textContent = `HLS Status: ${status}`;
 
-    if (mode === Constants.modes.VIEWER) {
+    if (mode === Constants.modes.SIGNALLING_ONLY) {
       if (status === Constants.hlsEvents.HLS_PLAYABLE) {
         const { playbackHlsUrl } = data;
         let video = document.createElement("video");
@@ -120,7 +127,7 @@ async function initializeMeeting(mode) {
     }
   });
 
-  if (mode === Constants.modes.CONFERENCE) {
+  if (mode === Constants.modes.SEND_AND_RECV) {
     // creating local participant
     createLocalParticipant();
 
@@ -130,20 +137,26 @@ async function initializeMeeting(mode) {
     });
 
     // participant joined
-    meeting.on("participant-joined", (participant) => {
-      if (participant.mode === Constants.modes.CONFERENCE) {
+    meeting.on("participant-joined", async (participant) => {
+      if (participant.mode === Constants.modes.SEND_AND_RECV) {
         let videoElement = createVideoElement(
           participant.id,
           participant.displayName
         );
+        let audioElement = createAudioElement(participant.id);
 
         participant.on("stream-enabled", (stream) => {
           setTrack(stream, audioElement, participant, false);
         });
 
-        let audioElement = createAudioElement(participant.id);
         videoContainer.appendChild(videoElement);
         videoContainer.appendChild(audioElement);
+
+        try {
+          await participant.pin();
+        } catch (error) {
+          console.error("Failed to pin the participant", error);
+        }
       }
     });
 
@@ -233,7 +246,7 @@ joinHostButton.addEventListener("click", async () => {
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  await initializeMeeting(Constants.modes.CONFERENCE);
+  await initializeMeeting(Constants.modes.SEND_AND_RECV);
 });
 
 // Join Meeting As Viewer Button Event Listener
@@ -244,7 +257,7 @@ joinViewerButton.addEventListener("click", async () => {
   roomId = document.getElementById("meetingIdTxt").value;
   meetingId = roomId;
 
-  await initializeMeeting(Constants.modes.VIEWER);
+  await initializeMeeting(Constants.modes.SIGNALLING_ONLY);
 });
 
 // Create Meeting Button Event Listener
@@ -265,7 +278,7 @@ createButton.addEventListener("click", async () => {
     }
     const { roomId } = await response.json();
     meetingId = roomId;
-    await initializeMeeting(Constants.modes.CONFERENCE);
+    await initializeMeeting(Constants.modes.SEND_AND_RECV);
   } catch (error) {
     console.error("Failed to create meeting", error);
     showJoinScreen(

@@ -357,7 +357,15 @@ function Container(props) {
   const [joined, setJoined] = useState(null);
   const { join, changeMode } = useMeeting();
   const mMeeting = useMeeting({
-    onMeetingJoined: () => {
+    onMeetingJoined: async () => {
+      // Pin the local participant if he joins in SEND_AND_RECV mode
+      if (mMeetingRef.current.localParticipant.mode === "SEND_AND_RECV") {
+        try {
+          await mMeetingRef.current.localParticipant.pin();
+        } catch (error) {
+          console.error("Failed to pin the local participant", error);
+        }
+      }
       setJoined("JOINED");
     },
     onMeetingLeft: () => {
