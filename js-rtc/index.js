@@ -65,62 +65,65 @@ async function initializeMeeting() {
 
     meeting = window.VideoSDK.initMeeting({
       meetingId: meetingId, // required
-      name: "C.V.Raman", // required
+      name: "Thomas Edison", // required
       micEnabled: true, // optional, default: true
       webcamEnabled: true, // optional, default: true
     });
 
+    // creating local participant
+    createLocalParticipant();
+
+    // Register all event handlers before joining so no event is missed.
+    // setting local participant stream
+    meeting.localParticipant.on("stream-enabled", (stream) => {
+      setTrack(stream, null, meeting.localParticipant, true);
+    });
+
+    meeting.on("meeting-joined", () => {
+      textDiv.textContent = null;
+
+      document.getElementById("grid-screen").style.display = "block";
+      document.getElementById(
+        "meetingIdHeading"
+      ).textContent = `Meeting Id: ${meetingId}`;
+    });
+
+    meeting.on("meeting-left", () => {
+      videoContainer.innerHTML = "";
+    });
+
+    //  participant joined
+    meeting.on("participant-joined", (participant) => {
+      let videoElement = createVideoElement(
+        participant.id,
+        participant.displayName
+      );
+      let audioElement = createAudioElement(participant.id);
+
+      participant.on("stream-enabled", (stream) => {
+        setTrack(stream, audioElement, participant, false);
+      });
+      videoContainer.appendChild(videoElement);
+      videoContainer.appendChild(audioElement);
+    });
+
+    // participants left
+    meeting.on("participant-left", (participant) => {
+      let vElement = document.getElementById(`f-${participant.id}`);
+      vElement.remove(vElement);
+
+      let aElement = document.getElementById(`a-${participant.id}`);
+      aElement.remove(aElement);
+    });
+
+    // `join()` resolves when the join request is accepted — wait for the
+    // `meeting-joined` event before calling other meeting methods.
     await meeting.join();
   } catch (error) {
     console.error("Failed to initialize meeting", error);
-    showJoinScreen("Unable to join the meeting. Please try again.");
-    return;
-  }
-
-  // creating local participant
-  createLocalParticipant();
-
-  // setting local participant stream
-  meeting.localParticipant.on("stream-enabled", (stream) => {
-    setTrack(stream, null, meeting.localParticipant, true);
-  });
-
-  meeting.on("meeting-joined", () => {
-    textDiv.textContent = null;
-
-    document.getElementById("grid-screen").style.display = "block";
-    document.getElementById(
-      "meetingIdHeading"
-    ).textContent = `Meeting Id: ${meetingId}`;
-  });
-
-  meeting.on("meeting-left", () => {
     videoContainer.innerHTML = "";
-  });
-
-  //  participant joined
-  meeting.on("participant-joined", (participant) => {
-    let videoElement = createVideoElement(
-      participant.id,
-      participant.displayName
-    );
-    let audioElement = createAudioElement(participant.id);
-
-    participant.on("stream-enabled", (stream) => {
-      setTrack(stream, audioElement, participant, false);
-    });
-    videoContainer.appendChild(videoElement);
-    videoContainer.appendChild(audioElement);
-  });
-
-  // participants left
-  meeting.on("participant-left", (participant) => {
-    let vElement = document.getElementById(`f-${participant.id}`);
-    vElement.remove(vElement);
-
-    let aElement = document.getElementById(`a-${participant.id}`);
-    aElement.remove(aElement);
-  });
+    showJoinScreen("Unable to join the meeting. Please try again.");
+  }
 }
 
 // creating video element
@@ -220,10 +223,6 @@ toggleMicButton.addEventListener("click", async () => {
 
 // Toggle Web Cam Button Event Listener
 toggleWebCamButton.addEventListener("click", async () => {
-  // Only the SDK call is wrapped in try/catch. DOM work runs after a successful
-  // toggle so a missing element can't hide the fact that isWebCamOn is stale.
-  // Not using `meeting?.` — if meeting is null we want the SDK call to throw
-  // into the catch, not fall through to the un-guarded DOM access below.
   try {
     if (isWebCamOn) {
       await meeting.disableWebcam();

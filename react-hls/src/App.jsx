@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MeetingProvider,
   MeetingConsumer,
@@ -60,7 +60,7 @@ function ParticipantView(props) {
         micRef.current
           .play()
           .catch((error) =>
-            console.error("videoElem.current.play() failed", error)
+            console.error("micElem.current.play() failed", error)
           );
       } else {
         micRef.current.srcObject = null;
@@ -69,7 +69,7 @@ function ParticipantView(props) {
   }, [micStream, micOn]);
 
   return (
-    <div key={props.participantId}>
+    <div>
       <p>
         Participant: {displayName} | Webcam: {webcamOn ? "ON" : "OFF"} | Mic:{" "}
         {micOn ? "ON" : "OFF"}
@@ -269,7 +269,6 @@ function ViewerView() {
   const playerRef = useRef(null);
   const { hlsUrls, hlsState } = useMeeting();
   const { publish } = usePubSub("REACTION");
-  //highlight-start
   async function sendEmoji(emoji) {
     // Fire the local echo synchronously so the user sees their own reaction
     // immediately — the await below runs after and doesn't block this line.
@@ -338,7 +337,6 @@ function ViewerView() {
               autoPlay={true}
               controls
               style={{ width: "100%", height: "100%" }}
-              playsinline
               playsInline
               muted={true}
               playing
@@ -357,7 +355,15 @@ function Container(props) {
   const [joined, setJoined] = useState(null);
   const { join, changeMode } = useMeeting();
   const mMeeting = useMeeting({
-    onMeetingJoined: () => {
+    onMeetingJoined: async () => {
+      // Pin the local participant if he joins in SEND_AND_RECV mode
+      if (mMeetingRef.current.localParticipant.mode === "SEND_AND_RECV") {
+        try {
+          await mMeetingRef.current.localParticipant.pin();
+        } catch (error) {
+          console.error("Failed to pin the local participant", error);
+        }
+      }
       setJoined("JOINED");
     },
     onMeetingLeft: () => {
@@ -447,6 +453,10 @@ function App() {
   const [meetingId, setMeetingId] = useState(null);
   const [mode, setMode] = useState("SEND_AND_RECV");
   const getMeetingAndToken = async (id) => {
+    if (!authToken) {
+      console.error("PLEASE PROVIDE TOKEN IN API.js FROM app.videosdk.live");
+      return;
+    }
     const meetingId =
       id == null ? await createMeeting({ token: authToken }) : id;
     setMeetingId(meetingId);
