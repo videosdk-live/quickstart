@@ -214,6 +214,10 @@ function AppContent() {
   const [mode, setMode] = useState(Constants.modes.SEND_AND_RECV); // Holds the current user mode (Host or Audience)
 
   const initializeStream = async (id) => {
+    if (!authToken) {
+      console.error("PLEASE PROVIDE TOKEN IN api.js FROM app.videosdk.live");
+      return;
+    }
     // Creates a new stream if no ID is provided or uses the given stream ID
     const newStreamId = id || (await createStream({ token: authToken }));
     setStreamId(newStreamId);
