@@ -1,7 +1,6 @@
 package live.videosdk.rtc.android.quickstart
 
 import android.app.Application
-import io.github.crow_misia.mediasoup.Logger
 import live.videosdk.rtc.android.VideoSDK
 import live.videosdk.rtc.android.lib.tracing.LogLevel
 
@@ -12,7 +11,8 @@ class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        VideoSDK.setLogLevel(LogLevel.ALL)
+        // SDK logs stay silent until a level is set; DEBUG shows what the SDK does while you build.
+        VideoSDK.setLogLevel(LogLevel.DEBUG)
         VideoSDK.initialize(applicationContext)
     }
 }
