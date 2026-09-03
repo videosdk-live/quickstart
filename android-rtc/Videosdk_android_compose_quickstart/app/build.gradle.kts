@@ -16,9 +16,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
@@ -34,9 +31,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+    buildFeatures {
+        compose = true
     }
     packaging {
         resources {
@@ -46,17 +42,18 @@ android {
 }
 
 kotlin {
-    jvmToolchain(17)
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
 dependencies {
-    // VideoSdk Dependency
-    implementation (libs.rtc.android.sdk)
-
-    implementation (libs.android.networking)
+    // VideoSDK
+    implementation(libs.rtc.android.sdk)
+    // Used once, to create a meeting id through the VideoSDK REST API
+    implementation(libs.okhttp)
+    // viewModel() inside composables
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -66,7 +63,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
