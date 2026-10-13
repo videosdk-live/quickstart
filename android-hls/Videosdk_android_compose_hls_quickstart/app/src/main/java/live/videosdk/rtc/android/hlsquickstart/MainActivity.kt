@@ -122,7 +122,7 @@ fun JoinScreen(viewModel: HlsViewModel, modifier: Modifier = Modifier) {
 
 @Composable
 fun HostScreen(meetingId: String, viewModel: HlsViewModel, modifier: Modifier = Modifier) {
-    // Back button leaves the meeting; onMeetingLeft brings the join screen back.
+    // Back button leaves the meeting and brings the join screen back.
     BackHandler { viewModel.leaveMeeting() }
 
     Column(modifier = modifier.fillMaxSize()) {

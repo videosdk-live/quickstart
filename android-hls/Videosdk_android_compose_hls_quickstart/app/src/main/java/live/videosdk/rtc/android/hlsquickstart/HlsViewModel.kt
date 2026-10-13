@@ -10,10 +10,23 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import live.videosdk.rtc.android.Meeting
 import live.videosdk.rtc.android.Participant
+import live.videosdk.rtc.android.Room
 import live.videosdk.rtc.android.VideoSDK
-import live.videosdk.rtc.android.listeners.MeetingEventListener
+import live.videosdk.rtc.android.lib.HLSState
+import live.videosdk.rtc.android.lib.LeaveReason
+import live.videosdk.rtc.android.lib.Mode
+import live.videosdk.rtc.android.lib.VideoSDKError
+import live.videosdk.rtc.android.lib.VideoSDKException
+import live.videosdk.rtc.android.listeners.RoomEventListener
+import live.videosdk.rtc.android.model.ConfigLayout
+import live.videosdk.rtc.android.model.ConfigLayoutGrid
+import live.videosdk.rtc.android.model.ConfigLayoutPriority
+import live.videosdk.rtc.android.model.ConfigOrientation
+import live.videosdk.rtc.android.model.ConfigQuality
+import live.videosdk.rtc.android.model.ConfigTheme
+import live.videosdk.rtc.android.model.HLSConfig
+import live.videosdk.rtc.android.model.HLSUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -26,7 +39,7 @@ class HlsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val token = (application as? MainApplication)?.sampleToken
         ?: error("Add android:name=\".MainApplication\" to <application> in AndroidManifest.xml")
-    private var meeting: Meeting? = null
+    private var room: Room? = null
 
     // Non-null while we are inside a meeting. MainActivity switches screens on it.
     var meetingId by mutableStateOf<String?>(null)
@@ -55,11 +68,11 @@ class HlsViewModel(application: Application) : AndroidViewModel(application) {
     var errorMessage by mutableStateOf<String?>(null)
 
     val isLive: Boolean
-        get() = hlsState == "HLS_STARTED" || hlsState == "HLS_PLAYABLE"
+        get() = hlsState == HLSState.HLS_STARTED.name || hlsState == HLSState.HLS_PLAYABLE.name
 
     // Creates a room through the VideoSDK REST API, then joins it as host.
     fun createMeeting() {
-        if (meeting != null) return  // already joining or joined
+        if (room != null) return  // already joining or joined
         viewModelScope.launch {
             try {
                 val roomId = withContext(Dispatchers.IO) {
@@ -81,66 +94,74 @@ class HlsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Configures the SDK, creates the Meeting object and joins it.
+    // Creates the Room object and joins it.
     fun joinMeeting(meetingId: String, role: Role) {
-        if (meeting != null) return  // already joining or joined
+        if (room != null) return  // already joining or joined
         this.role = role
         val host = role == Role.HOST
-        VideoSDK.config(token)
-        val meeting = VideoSDK.initMeeting(
-            getApplication<Application>(),        // context
-            meetingId,                            // meetingId
-            if (host) "Host" else "Viewer",       // participant name
-            host,                                 // micEnabled
-            host,                                 // webcamEnabled
-            null,                                 // participantId, SDK generates one
-            // A viewer watches the HLS feed, so it needs no WebRTC media at all.
-            if (host) "SEND_AND_RECV" else "SIGNALLING_ONLY",
-            false,                                // multiStream
-            null,                                 // customTracks
-            null,                                 // metaData
-            VideoSDK.PreferredProtocol.UDP_OVER_TCP // preferredProtocol (the default)
-        )
-        meeting.addEventListener(meetingEventListener)
-        meeting.join()
-        this.meeting = meeting
+        val room = try {
+            VideoSDK.createRoom(
+                roomId = meetingId,
+                token = token,
+                participantName = if (host) "Host" else "Viewer",
+                micEnabled = host,
+                camEnabled = host,
+                // A viewer watches the HLS feed, so it needs no WebRTC media at all.
+                mode = if (host) Mode.SEND_AND_RECV else Mode.SIGNALLING_ONLY,
+                multiStream = false,
+            )
+        } catch (e: VideoSDKException) {
+            errorMessage = "${e.code} ${e.name}: ${e.message}"
+            return
+        }
+        room.addEventListener(roomEventListener)
+        // onRoomJoined can fire before join() returns, so keep the room before joining.
+        this.room = room
         this.meetingId = meetingId
         this.micEnabled = host
         this.webcamEnabled = host
+        viewModelScope.launch {
+            try {
+                room.join()
+            } catch (e: VideoSDKException) {
+                errorMessage = "Join failed: ${e.code} ${e.name}"
+                if (this@HlsViewModel.room === room) reset()
+            }
+        }
     }
 
-    // All SDK callbacks arrive on the main thread.
-    private val meetingEventListener = object : MeetingEventListener() {
-        override fun onMeetingJoined() {
-            meeting?.let { if (role == Role.HOST) addParticipant(it.localParticipant) }
+    // Room callbacks arrive on the main thread, except onError.
+    private val roomEventListener = object : RoomEventListener() {
+        override fun onRoomJoined(switchRoomId: String?) {
+            room?.let { if (role == Role.HOST) addParticipant(it.localParticipant) }
         }
 
         override fun onParticipantJoined(participant: Participant) {
             if (role == Role.HOST) addParticipant(participant)
         }
 
-        override fun onParticipantLeft(participant: Participant) {
+        override fun onParticipantLeft(participant: Participant, reason: LeaveReason) {
             participants.removeAll { it.id == participant.id }
         }
 
-        // The only HLS callback that carries the playback address; onHlsStarted does not.
-        override fun onHlsStateChanged(state: JSONObject) {
-            hlsState = state.optString("status")
+        // The only HLS callback that carries the playback address.
+        override fun onHlsStateChanged(state: HLSState, hlsUrl: HLSUrl?) {
+            hlsState = state.name
             // The server needs a few seconds after HLS_STARTED before a stream is playable.
-            playbackUrl = if (hlsState == "HLS_PLAYABLE") {
-                state.optString("playbackHlsUrl").ifBlank { null }
+            playbackUrl = if (state == HLSState.HLS_PLAYABLE) {
+                hlsUrl?.playbackHlsUrl?.ifBlank { null }
             } else {
                 null
             }
         }
 
         // Also fired by the SDK when the server ends the call.
-        override fun onMeetingLeft() {
+        override fun onRoomLeft(reason: LeaveReason) {
             reset()
         }
 
-        override fun onError(error: JSONObject) {
-            errorMessage = error.optString("message")
+        override fun onError(error: VideoSDKError) {
+            viewModelScope.launch { errorMessage = error.message }
         }
     }
 
@@ -150,45 +171,75 @@ class HlsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleMic() {
-        if (micEnabled) meeting?.muteMic() else meeting?.unmuteMic()
-        micEnabled = !micEnabled
+        val room = room ?: return
+        viewModelScope.launch {
+            try {
+                if (room.isMicEnabled) room.muteMic() else room.unmuteMic()
+            } catch (e: VideoSDKException) {
+                errorMessage = "${e.code} ${e.name}: ${e.message}"
+            }
+            // read the state back instead of flipping our own flag
+            micEnabled = room.isMicEnabled
+        }
     }
 
     fun toggleWebcam() {
-        if (webcamEnabled) meeting?.disableWebcam() else meeting?.enableWebcam()
-        webcamEnabled = !webcamEnabled
+        val room = room ?: return
+        viewModelScope.launch {
+            try {
+                if (room.isCamEnabled) room.disableCam() else room.enableCam()
+            } catch (e: VideoSDKException) {
+                errorMessage = "${e.code} ${e.name}: ${e.message}"
+            }
+            webcamEnabled = room.isCamEnabled
+        }
     }
 
     fun toggleHls() {
-        if (isLive) {
-            meeting?.stopHls()
-        } else {
-            // Layout, theme and quality of the composed stream the server produces.
-            val layout = JSONObject()
-                .put("type", "SPOTLIGHT")
-                .put("priority", "PIN")
-                .put("gridSize", 4)
-            val config = JSONObject()
-                .put("layout", layout)
-                .put("orientation", "portrait")
-                .put("theme", "DARK")
-                .put("quality", "high")
-            meeting?.startHls(config, null)
+        val room = room ?: return
+        viewModelScope.launch {
+            try {
+                if (isLive) {
+                    room.stopHLS()
+                } else {
+                    // Layout, theme and quality of the composed stream the server produces.
+                    room.startHLS(
+                        HLSConfig(
+                            layout = ConfigLayout(
+                                type = ConfigLayoutGrid.SPOTLIGHT,
+                                priority = ConfigLayoutPriority.PIN,
+                                gridSize = 4,
+                            ),
+                            orientation = ConfigOrientation.PORTRAIT,
+                            theme = ConfigTheme.DARK,
+                            quality = ConfigQuality.HIGH,
+                        )
+                    )
+                }
+            } catch (e: VideoSDKException) {
+                errorMessage = "${e.code} ${e.name}: ${e.message}"
+            }
         }
     }
 
     fun leaveMeeting() {
-        meeting?.let {
-            it.removeAllListeners()  // this Meeting is finished, ignore anything else it reports
-            it.leave()
+        room?.let {
+            it.removeAllEventListeners()  // this Room is finished, ignore anything else it reports
+            viewModelScope.launch {
+                try {
+                    it.leave()
+                } catch (e: VideoSDKException) {
+                    // 3035: the join never completed, 3054: already left
+                }
+            }
         }
-        // Reset here instead of waiting for a callback: onMeetingLeft never fires if the join itself failed.
+        // Reset here instead of waiting for onRoomLeft, since the listener is already removed.
         reset()
     }
 
     // Back to the Join screen with clean state; setting meetingId to null switches the UI.
     private fun reset() {
-        meeting = null
+        room = null
         participants.clear()
         micEnabled = true
         webcamEnabled = true

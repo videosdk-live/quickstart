@@ -22,11 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import live.videosdk.rtc.android.MediaType
 import live.videosdk.rtc.android.Participant
-import live.videosdk.rtc.android.Stream
+import live.videosdk.rtc.android.RTCStream
 import live.videosdk.rtc.android.VideoView
 import live.videosdk.rtc.android.listeners.ParticipantEventListener
-import org.webrtc.VideoTrack
+import videosdk.org.webrtc.VideoTrack
 
 @Composable
 fun ParticipantsGrid(participants: List<Participant>, modifier: Modifier = Modifier) {
@@ -48,14 +49,15 @@ fun ParticipantVideoView(participant: Participant) {
     var videoTrack by remember(participant) { mutableStateOf(participant.videoTrack()) }
 
     // One listener per tile: follows the participant's camera on/off.
+    // addEventListener also calls onStreamEnabled right away for a camera that is already on.
     DisposableEffect(participant) {
         val listener = object : ParticipantEventListener() {
-            override fun onStreamEnabled(stream: Stream) {
-                if (stream.kind == "video") videoTrack = stream.track as VideoTrack
+            override fun onStreamEnabled(stream: RTCStream) {
+                if (stream.kind == MediaType.VIDEO) videoTrack = stream.track as VideoTrack
             }
 
-            override fun onStreamDisabled(stream: Stream) {
-                if (stream.kind == "video") videoTrack = null
+            override fun onStreamDisabled(stream: RTCStream) {
+                if (stream.kind == MediaType.VIDEO) videoTrack = null
             }
         }
         participant.addEventListener(listener)
@@ -108,4 +110,4 @@ fun ParticipantVideoView(participant: Participant) {
 
 // The participant's current camera track, if the camera is on.
 private fun Participant.videoTrack(): VideoTrack? =
-    streams.values.firstOrNull { it.kind == "video" }?.track as? VideoTrack
+    streams.values.firstOrNull { it.kind == MediaType.VIDEO }?.track as? VideoTrack
