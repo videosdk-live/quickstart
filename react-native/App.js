@@ -8,9 +8,11 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
-  MeetingProvider,
-  useMeeting,
+  RoomProvider,
+  useRoom,
   useParticipant,
+  useMediaDevice,
+  Constants,
   MediaStream,
   RTCView,
 } from '@videosdk.live/react-native-sdk';
@@ -96,9 +98,13 @@ const Button = ({ onPress, buttonText, backgroundColor }) => {
   );
 };
 
-function ControlsContainer({ join, leave, toggleWebcam, toggleMic }) {
+function ControlsContainer({ join, leave, toggleCam, toggleMic }) {
+  const { requestPermission } = useMediaDevice();
+
   const handleJoin = async () => {
     try {
+      // Android no longer asks for camera and microphone access by itself
+      await requestPermission(Constants.permission.AUDIO_AND_VIDEO);
       await join();
     } catch (error) {
       console.error('Failed to join meeting', error);
@@ -107,7 +113,7 @@ function ControlsContainer({ join, leave, toggleWebcam, toggleMic }) {
 
   const handleToggleWebcam = async () => {
     try {
-      await toggleWebcam();
+      await toggleCam();
     } catch (error) {
       console.error('Failed to toggle webcam', error);
     }
@@ -211,23 +217,23 @@ function ParticipantList({ participants }) {
 }
 
 function MeetingView() {
-  // Get `participants` from useMeeting Hook
-  const { join, leave, toggleWebcam, toggleMic, participants, meetingId } =
-    useMeeting({});
+  // Get `participants` from useRoom Hook
+  const { join, leave, toggleCam, toggleMic, participants, roomId } =
+    useRoom({});
   const participantsArrId = [...participants.keys()];
 
   return (
     <View style={{ flex: 1 }}>
-      {meetingId ? (
+      {roomId ? (
         <Text style={{ fontSize: 18, padding: 12 }}>
-          Meeting Id :{meetingId}
+          Meeting Id :{roomId}
         </Text>
       ) : null}
       <ParticipantList participants={participantsArrId} />
       <ControlsContainer
         join={join}
         leave={leave}
-        toggleWebcam={toggleWebcam}
+        toggleCam={toggleCam}
         toggleMic={toggleMic}
       />
     </View>
@@ -248,18 +254,18 @@ function AppContent() {
 
   return meetingId ? (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F6F6FF' }}>
-      <MeetingProvider
+      <RoomProvider
         config={{
-          meetingId,
+          roomId: meetingId,
           micEnabled: false,
-          webcamEnabled: true,
-          name: 'Test User',
+          camEnabled: true,
+          participantName: 'Test User',
           defaultCamera: 'front',
         }}
         token={token}
       >
         <MeetingView />
-      </MeetingProvider>
+      </RoomProvider>
     </SafeAreaView>
   ) : (
     <JoinScreen getMeetingId={getMeetingId} />

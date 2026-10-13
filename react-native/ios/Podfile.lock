@@ -1246,7 +1246,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context (5.9.0):
+  - react-native-safe-area-context (5.10.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1259,8 +1259,8 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.9.0)
-    - react-native-safe-area-context/fabric (= 5.9.0)
+    - react-native-safe-area-context/common (= 5.10.1)
+    - react-native-safe-area-context/fabric (= 5.10.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1270,7 +1270,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context/common (5.9.0):
+  - react-native-safe-area-context/common (5.10.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1292,7 +1292,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context/fabric (5.9.0):
+  - react-native-safe-area-context/fabric (5.10.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1675,6 +1675,10 @@ PODS:
   - ReactNativeDependencies (0.87.0)
   - SocketRocket (0.7.1):
     - ReactNativeDependencies
+  - VideoSDKReactNative (2.0.0):
+    - React-Core
+    - VideoSDKRTC
+  - VideoSDKRTC (4.0.0)
   - Yoga (0.0.0):
     - React-Core-prebuilt
 
@@ -1765,6 +1769,8 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - SocketRocket (from `build/rndeps-facades/SocketRocket`)
+  - "VideoSDKReactNative (from `../node_modules/@videosdk.live/react-native-sdk`)"
+  - "VideoSDKRTC (from `../node_modules/@videosdk.live/react-native-sdk/ios/VideoSDKRTC.podspec`)"
   - Yoga (from `build/rncore-facades/Yoga`)
 
 EXTERNAL SOURCES:
@@ -1939,6 +1945,10 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   SocketRocket:
     :path: build/rndeps-facades/SocketRocket
+  VideoSDKReactNative:
+    :path: "../node_modules/@videosdk.live/react-native-sdk"
+  VideoSDKRTC:
+    :podspec: "../node_modules/@videosdk.live/react-native-sdk/ios/VideoSDKRTC.podspec"
   Yoga:
     :path: build/rncore-facades/Yoga
 
@@ -1990,7 +2000,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: acf4ac61f163f15ced7dfad7308957816b2d7abd
   React-microtasksnativemodule: 512d9f7c6b66574d90832a6b10b6102d4a8fdf30
   React-mutationobservernativemodule: 2c5abeb9a4ae316ba6d9420ef8d9baa81faa9d56
-  react-native-safe-area-context: 3a6b38edff2a811fc1e27f5ff81249b24ea7e607
+  react-native-safe-area-context: f2bf5d3db254014a48910436c4a58ab0c4e2fe1f
   React-NativeModulesApple: 22b2f3e1538ceb1aab1ab182ccb0666ea2ec36ad
   React-networking: b58b3098d4a626f88bbaeaf6bf5e67b18ff39089
   React-oscompat: 72573ceb65b6c6c6bc34e51e0df8f44c91081a6d
@@ -2028,8 +2038,10 @@ SPEC CHECKSUMS:
   ReactCommon: 5f5a302748322015f2e3334869cdd9b4d0395846
   ReactNativeDependencies: ec5530432d8191b38e278117d498aaff05ea9d6f
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
+  VideoSDKReactNative: c454687ba1845afd6c2b14f1f3f95d3d31bcead7
+  VideoSDKRTC: 7f5c4a94f64fe8c60fe4b07da9a2c87c34904422
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
 
-PODFILE CHECKSUM: 0d8736b622dc8c21173a7797e9f2403950e7c274
+PODFILE CHECKSUM: 93e50baf1ed3b505303191f74364236c4aa0023c
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
