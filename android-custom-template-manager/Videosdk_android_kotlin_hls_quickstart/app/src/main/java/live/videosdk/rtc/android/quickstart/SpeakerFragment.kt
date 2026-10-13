@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,24 +12,25 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.google.android.material.textfield.TextInputLayout
-import live.videosdk.rtc.android.Meeting
-import live.videosdk.rtc.android.lib.JsonUtils
-import live.videosdk.rtc.android.listeners.MeetingEventListener
+import kotlinx.coroutines.launch
+import live.videosdk.rtc.android.Room
+import live.videosdk.rtc.android.lib.HLSState
+import live.videosdk.rtc.android.lib.LeaveReason
+import live.videosdk.rtc.android.lib.VideoSDKException
+import live.videosdk.rtc.android.listeners.RoomEventListener
+import live.videosdk.rtc.android.model.HLSUrl
 import live.videosdk.rtc.android.model.PubSubPublishOptions
-import org.json.JSONException
 import org.json.JSONObject
 
 class SpeakerFragment : Fragment() {
-    private var micEnabled = true
-    private var webcamEnabled = true
     private var hlsEnabled = false
     private var btnMic: Button? = null
     private var btnWebcam: Button? = null
@@ -45,7 +45,7 @@ class SpeakerFragment : Fragment() {
         mContext = context
         if (context is Activity) {
             mActivity = context
-            meeting = (mActivity as MeetingActivity?)!!.meeting
+            room = (mActivity as MeetingActivity?)!!.room
             token = (mActivity as MeetingActivity?)!!.token
         }
     }
@@ -63,16 +63,18 @@ class SpeakerFragment : Fragment() {
         btnSetting = view.findViewById(R.id.btnSetting)
         tvMeetingId = view.findViewById(R.id.tvMeetingId)
         tvHlsState = view.findViewById(R.id.tvHlsState)
-        if (meeting != null) {
-            tvMeetingId!!.text = "Meeting Id : " + meeting!!.meetingId
+        if (room != null) {
+            tvMeetingId!!.text = "Meeting Id : " + room!!.id
             setActionListeners()
-            // add Listener to the meeting
-            meeting!!.addEventListener(meetingEventListener)
+            // add Listener to the room
+            room!!.addEventListener(roomEventListener)
+            // the stream may already be running: its state arrived before this fragment existed
+            showHlsState(room!!.hlsState)
             // set speakerAdapter
             val rvParticipants = view.findViewById<RecyclerView>(R.id.rvParticipants)
             rvParticipants.layoutManager =
                 GridLayoutManager(mContext, 2)
-            rvParticipants.adapter = SpeakerAdapter(meeting!!)
+            rvParticipants.adapter = SpeakerAdapter(room!!, lifecycleScope)
         }
 
         btnSetting!!.setOnClickListener { showSettingDialog() }
@@ -92,43 +94,42 @@ class SpeakerFragment : Fragment() {
         val btnBgColor = dialog.findViewById<Button>(R.id.btnBgColor)
         val btnNotify = dialog.findViewById<Button>(R.id.btnNotify)
         btnBgColor.setOnClickListener { _: View? ->
-            val publishOptions = PubSubPublishOptions()
-            publishOptions.isPersist = true
-
             // Sending the Message using the publish method
-            meeting!!.pubSub.publish(
+            publish(
                 "CHANGE_BACKGROUND",
                 et_bgColor.editText!!.text.toString().trim { it <= ' ' },
-                publishOptions
+                "LiveStream Background Changed"
             )
             dialog.dismiss()
-            Toast.makeText(
-                mContext,
-                "LiveStream Background Changed",
-                Toast.LENGTH_SHORT
-            ).show()
         }
         btnNotify.setOnClickListener {
-            val publishOptions = PubSubPublishOptions()
-            publishOptions.isPersist = true
-
             // Sending the Message using the publish method
-            meeting!!.pubSub.publish(
+            publish(
                 "VIEWER_MESSAGE",
                 et_message.editText!!.text.toString().trim { it <= ' ' },
-                publishOptions
+                "Notified User"
             )
             dialog.dismiss()
-            Toast.makeText(mContext, "Notified User", Toast.LENGTH_SHORT).show()
         }
         dialog.show()
         dialog.window!!.setBackgroundDrawableResource(R.color.dark_grey)
     }
 
-    private val meetingEventListener: MeetingEventListener = object : MeetingEventListener() {
-        override fun onMeetingLeft() {
-            // unpin the local participant
-            meeting!!.localParticipant.unpin("SHARE_AND_CAM")
+    // publish() is a suspend function that throws VideoSDKException
+    private fun publish(topic: String, message: String, doneText: String) {
+        val room = room ?: return
+        lifecycleScope.launch {
+            try {
+                room.pubSub.publish(topic, message, PubSubPublishOptions(persist = true))
+                Toast.makeText(mContext, doneText, Toast.LENGTH_SHORT).show()
+            } catch (e: VideoSDKException) {
+                Toast.makeText(mContext, "${e.code} ${e.name}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private val roomEventListener: RoomEventListener = object : RoomEventListener() {
+        override fun onRoomLeft(reason: LeaveReason) {
             if (isAdded) {
                 val intents = Intent(mContext, JoinActivity::class.java)
                 intents.addFlags(
@@ -140,73 +141,83 @@ class SpeakerFragment : Fragment() {
             }
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.P)
-        override fun onHlsStateChanged(HlsState: JSONObject) {
-            if (HlsState.has("status")) {
-                try {
-                    tvHlsState!!.text = "Current HLS State : " + HlsState.getString("status")
-                    if (HlsState.getString("status") == "HLS_STARTED") {
-                        hlsEnabled = true
-                        btnHls!!.text = "Stop HLS"
-                    }
-                    if (HlsState.getString("status") == "HLS_STOPPED") {
-                        hlsEnabled = false
-                        btnHls!!.text = "Start HLS"
-                    }
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-            }
+        override fun onHlsStateChanged(state: HLSState, hlsUrl: HLSUrl?) {
+            showHlsState(state)
+        }
+    }
+
+    private fun showHlsState(state: HLSState) {
+        tvHlsState!!.text = "Current HLS State : $state"
+        if (state == HLSState.HLS_STARTED || state == HLSState.HLS_PLAYABLE) {
+            hlsEnabled = true
+            btnHls!!.text = "Stop HLS"
+        }
+        if (state == HLSState.HLS_STOPPED) {
+            hlsEnabled = false
+            btnHls!!.text = "Start HLS"
         }
     }
 
     private fun setActionListeners() {
         btnMic!!.setOnClickListener {
-            if (micEnabled) {
-                meeting!!.muteMic()
-                Toast.makeText(mContext, "Mic Muted", Toast.LENGTH_SHORT).show()
-            } else {
-                meeting!!.unmuteMic()
-                Toast.makeText(
-                    mContext,
-                    "Mic Enabled",
-                    Toast.LENGTH_SHORT
-                ).show()
+            val room = room ?: return@setOnClickListener
+            lifecycleScope.launch {
+                try {
+                    if (room.isMicEnabled) {
+                        room.muteMic()
+                        Toast.makeText(mContext, "Mic Muted", Toast.LENGTH_SHORT).show()
+                    } else {
+                        room.unmuteMic()
+                        Toast.makeText(
+                            mContext,
+                            "Mic Enabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: VideoSDKException) {
+                    Toast.makeText(mContext, "${e.code} ${e.name}", Toast.LENGTH_SHORT).show()
+                }
             }
-            micEnabled = !micEnabled
         }
         btnWebcam!!.setOnClickListener {
-            if (webcamEnabled) {
-                meeting!!.disableWebcam()
-                Toast.makeText(
-                    mContext,
-                    "Webcam Disabled",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                meeting!!.enableWebcam()
-                Toast.makeText(
-                    mContext,
-                    "Webcam Enabled",
-                    Toast.LENGTH_SHORT
-                ).show()
+            val room = room ?: return@setOnClickListener
+            lifecycleScope.launch {
+                try {
+                    if (room.isCamEnabled) {
+                        room.disableCam()
+                        Toast.makeText(
+                            mContext,
+                            "Webcam Disabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        room.enableCam()
+                        Toast.makeText(
+                            mContext,
+                            "Webcam Enabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: VideoSDKException) {
+                    Toast.makeText(mContext, "${e.code} ${e.name}", Toast.LENGTH_SHORT).show()
+                }
             }
-            webcamEnabled = !webcamEnabled
         }
-        btnLeave!!.setOnClickListener { meeting!!.leave() }
+        btnLeave!!.setOnClickListener { (mActivity as MeetingActivity?)?.leaveRoom() }
         btnHls!!.setOnClickListener {
+            val room = room ?: return@setOnClickListener
             if (!hlsEnabled) {
                 //Update your Custom Template URL here if you have deployed your own
                 val templateUrl =
-                    "https://lab.videosdk.live/react-custom-template-demo?meetingId=" + meeting!!.meetingId + "&token=" + token
+                    "https://lab.videosdk.live/react-custom-template-demo?meetingId=" + room.id + "&token=" + token
 
                 val bodyJson = JSONObject()
-                JsonUtils.jsonPut(bodyJson, "roomId", meeting!!.meetingId)
-                JsonUtils.jsonPut(bodyJson, "templateUrl", templateUrl)
+                bodyJson.put("roomId", room.id)
+                bodyJson.put("templateUrl", templateUrl)
 
                 val config = JSONObject()
-                JsonUtils.jsonPut(config, "orientation", "portrait")
-                JsonUtils.jsonPut(bodyJson, "config", config)
+                config.put("orientation", "portrait")
+                bodyJson.put("config", config)
 
                 AndroidNetworking.post("https://api.videosdk.live/v2/hls/start")
                     .addHeaders(
@@ -237,7 +248,13 @@ class SpeakerFragment : Fragment() {
                         }
                     })
             } else {
-                meeting!!.stopHls()
+                lifecycleScope.launch {
+                    try {
+                        room.stopHLS()
+                    } catch (e: VideoSDKException) {
+                        Toast.makeText(mContext, "${e.code} ${e.name}", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
@@ -246,9 +263,9 @@ class SpeakerFragment : Fragment() {
     override fun onDestroy() {
         mContext = null
         mActivity = null
-        if (meeting != null) {
-            meeting!!.removeAllListeners()
-            meeting = null
+        if (room != null) {
+            room!!.removeAllEventListeners()
+            room = null
         }
         super.onDestroy()
     }
@@ -256,6 +273,6 @@ class SpeakerFragment : Fragment() {
     companion object {
         private var mActivity: Activity? = null
         private var mContext: Context? = null
-        private var meeting: Meeting? = null
+        private var room: Room? = null
     }
 }
