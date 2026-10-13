@@ -18,8 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Videosdk_android_kotlin_quickstart"
         tools:targetApi="31" >
+        <!-- configChanges keeps the activity, and its joined Room, alive across a rotation -->
         <activity
             android:name=".MeetingActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:exported="false" >
             <meta-data
                 android:name="android.app.lib_name"

@@ -5,41 +5,42 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import live.videosdk.rtc.android.Meeting
+import live.videosdk.rtc.android.MediaType
 import live.videosdk.rtc.android.Participant
-import live.videosdk.rtc.android.Stream
+import live.videosdk.rtc.android.RTCStream
+import live.videosdk.rtc.android.Room
 import live.videosdk.rtc.android.VideoView
-import live.videosdk.rtc.android.listeners.MeetingEventListener
+import live.videosdk.rtc.android.lib.LeaveReason
 import live.videosdk.rtc.android.listeners.ParticipantEventListener
-import org.webrtc.VideoTrack
+import live.videosdk.rtc.android.listeners.RoomEventListener
+import videosdk.org.webrtc.VideoTrack
 
-class ParticipantAdapter(meeting: Meeting) :
+class ParticipantAdapter(room: Room) :
     RecyclerView.Adapter<ParticipantAdapter.PeerViewHolder>() {
     private val participants: MutableList<Participant> = ArrayList()
 
     init {
-        // adding the local participant(You) to the list
-        participants.add(meeting.localParticipant)
+        // adding Room Event listener to get the participant join/leave event in the meeting.
+        room.addEventListener(object : RoomEventListener() {
+            override fun onRoomJoined(switchRoomId: String?) {
+                // adding the local participant(You) to the list once the join completes
+                if (participants.none { it.isLocal }) {
+                    participants.add(0, room.localParticipant)
+                    notifyItemInserted(0)
+                }
+            }
 
-        // adding Meeting Event listener to get the participant join/leave event in the meeting.
-        meeting.addEventListener(object : MeetingEventListener() {
             override fun onParticipantJoined(participant: Participant) {
                 // add participant to the list
                 participants.add(participant)
                 notifyItemInserted(participants.size - 1)
             }
 
-            override fun onParticipantLeft(participant: Participant) {
-                var pos = -1
-                for (i in participants.indices) {
-                    if (participants[i].id == participant.id) {
-                        pos = i
-                        break
-                    }
-                }
+            override fun onParticipantLeft(participant: Participant, reason: LeaveReason) {
+                val pos = participants.indexOfFirst { it.id == participant.id }
                 // remove participant from the list
-                participants.remove(participant)
                 if (pos >= 0) {
+                    participants.removeAt(pos)
                     notifyItemRemoved(pos)
                 }
             }
@@ -56,28 +57,19 @@ class ParticipantAdapter(meeting: Meeting) :
         val participant = participants[position]
         holder.tvName.text = participant.displayName
 
-        // adding the initial video stream for the participant into the 'VideoView'
-        for ((_, stream) in participant.streams) {
-            if (stream.kind.equals("video", ignoreCase = true)) {
-                holder.participantView.visibility = View.VISIBLE
-                val videoTrack = stream.track as VideoTrack
-                holder.participantView.addTrack(videoTrack)
-                break
-            }
-        }
-
-        // add Listener to the participant which will update start or stop the video stream of that participant
+        // add Listener to the participant which will update start or stop the video stream of that participant.
+        // addEventListener also calls onStreamEnabled right away for the streams the participant already has.
         participant.addEventListener(object : ParticipantEventListener() {
-            override fun onStreamEnabled(stream: Stream) {
-                if (stream.kind.equals("video", ignoreCase = true)) {
+            override fun onStreamEnabled(stream: RTCStream) {
+                if (stream.kind == MediaType.VIDEO) {
                     holder.participantView.visibility = View.VISIBLE
                     val videoTrack = stream.track as VideoTrack
                     holder.participantView.addTrack(videoTrack)
                 }
             }
 
-            override fun onStreamDisabled(stream: Stream) {
-                if (stream.kind.equals("video", ignoreCase = true)) {
+            override fun onStreamDisabled(stream: RTCStream) {
+                if (stream.kind == MediaType.VIDEO) {
                     holder.participantView.removeTrack()
                     holder.participantView.visibility = View.GONE
                 }
