@@ -10,17 +10,15 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
-  MeetingProvider,
-  useMeeting,
+  RoomProvider,
+  useRoom,
   useParticipant,
+  useMediaDevice,
   Constants,
-  register,
   RTCView,
   MediaStream,
 } from "@videosdk.live/react-native-sdk";
 import { authToken, createStream } from "./api";
-
-register();
 
 // Join Screen - Handles joining or creating a live stream
 function JoinView({ initializeStream, setMode }) {
@@ -36,7 +34,7 @@ function JoinView({ initializeStream, setMode }) {
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleAction(Constants.modes.SEND_AND_RECV)}
+        onPress={() => handleAction(Constants.Mode.SEND_AND_RECV)}
       >
         <Text style={styles.buttonText}>Create Live Stream as Host</Text>
       </TouchableOpacity>
@@ -48,13 +46,13 @@ function JoinView({ initializeStream, setMode }) {
       />
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleAction(Constants.modes.SEND_AND_RECV)}
+        onPress={() => handleAction(Constants.Mode.SEND_AND_RECV)}
       >
         <Text style={styles.buttonText}>Join as Host</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleAction(Constants.modes.RECV_ONLY)}
+        onPress={() => handleAction(Constants.Mode.RECV_ONLY)}
       >
         <Text style={styles.buttonText}>Join as Audience</Text>
       </TouchableOpacity>
@@ -66,14 +64,17 @@ function JoinView({ initializeStream, setMode }) {
 function LSContainer({ streamId, onLeave }) {
   const [joined, setJoined] = useState(false); // Track if the user has joined the stream
 
-  const { join } = useMeeting({
-    onMeetingJoined: () => setJoined(true), // Set `joined` to true when successfully joined
-    onMeetingLeft: onLeave, // Handle the leave stream event
+  const { requestPermission } = useMediaDevice();
+  const { join } = useRoom({
+    onRoomJoined: () => setJoined(true), // Set `joined` to true when successfully joined
+    onRoomLeft: onLeave, // Handle the leave stream event
     onError: (error) => Alert.alert("Error", error.message), // Display an alert on encountering an error
   });
 
   const handleJoin = async () => {
     try {
+      // Android no longer asks for camera and microphone access by itself
+      await requestPermission(Constants.permission.AUDIO_AND_VIDEO);
       await join();
     } catch (error) {
       console.error("Failed to join stream", error);
@@ -99,10 +100,10 @@ function LSContainer({ streamId, onLeave }) {
 
 // Component to display the live stream view
 function StreamView() {
-  const { participants } = useMeeting(); // Access participants using the VideoSDK useMeeting hook
+  const { participants } = useRoom(); // Access participants using the VideoSDK useRoom hook
   const participantsArrId = Array.from(participants.entries())
     .filter(
-      ([_, participant]) => participant.mode === Constants.modes.SEND_AND_RECV
+      ([_, participant]) => participant.mode === Constants.Mode.SEND_AND_RECV
     )
     .map(([key]) => key);
 
@@ -142,9 +143,10 @@ function Participant({ participantId }) {
 
 // Component for managing stream controls
 function LSControls() {
-  const { leave, toggleMic, toggleWebcam, changeMode, meeting } = useMeeting(); // Access methods
+  const { leave, toggleMic, toggleCam, changeMode, room } = useRoom(); // Access methods
+  const { requestPermission } = useMediaDevice();
 
-  const currentMode = meeting.localParticipant.mode; // Get the current participant's mode
+  const currentMode = room.localParticipant.mode; // Get the current participant's mode
 
   const handleLeave = async () => {
     try {
@@ -164,7 +166,7 @@ function LSControls() {
 
   const handleToggleWebcam = async () => {
     try {
-      await toggleWebcam();
+      await toggleCam();
     } catch (error) {
       console.error("Failed to toggle webcam", error);
     }
@@ -172,10 +174,14 @@ function LSControls() {
 
   const handleChangeMode = async () => {
     const nextMode =
-      currentMode === Constants.modes.SEND_AND_RECV
-        ? Constants.modes.RECV_ONLY
-        : Constants.modes.SEND_AND_RECV;
+      currentMode === Constants.Mode.SEND_AND_RECV
+        ? Constants.Mode.RECV_ONLY
+        : Constants.Mode.SEND_AND_RECV;
     try {
+      if (nextMode === Constants.Mode.SEND_AND_RECV) {
+        // a host publishes, so ask for camera and microphone access first
+        await requestPermission(Constants.permission.AUDIO_AND_VIDEO);
+      }
       await changeMode(nextMode);
     } catch (error) {
       console.error("Failed to change mode", error);
@@ -187,7 +193,7 @@ function LSControls() {
       <TouchableOpacity style={styles.button} onPress={handleLeave}>
         <Text style={styles.buttonText}>Leave</Text>
       </TouchableOpacity>
-      {currentMode === Constants.modes.SEND_AND_RECV && (
+      {currentMode === Constants.Mode.SEND_AND_RECV && (
         <>
           <TouchableOpacity style={styles.button} onPress={handleToggleMic}>
             <Text style={styles.buttonText}>Toggle Mic</Text>
@@ -199,7 +205,7 @@ function LSControls() {
       )}
       <TouchableOpacity style={styles.button} onPress={handleChangeMode}>
         <Text style={styles.buttonText}>
-          {currentMode === Constants.modes.SEND_AND_RECV
+          {currentMode === Constants.Mode.SEND_AND_RECV
             ? "Switch to Audience"
             : "Switch to Host"}
         </Text>
@@ -211,7 +217,7 @@ function LSControls() {
 // Main App Component - Handles the app flow and stream lifecycle
 function AppContent() {
   const [streamId, setStreamId] = useState(null); // Holds the current stream ID
-  const [mode, setMode] = useState(Constants.modes.SEND_AND_RECV); // Holds the current user mode (Host or Audience)
+  const [mode, setMode] = useState(Constants.Mode.SEND_AND_RECV); // Holds the current user mode (Host or Audience)
 
   const initializeStream = async (id) => {
     if (!authToken) {
@@ -226,12 +232,12 @@ function AppContent() {
   const onStreamLeave = () => setStreamId(null); // Resets the stream state on leave
 
   return authToken && streamId ? (
-    <MeetingProvider
+    <RoomProvider
       config={{
-        meetingId: streamId,
+        roomId: streamId,
         micEnabled: true, // Enables microphone by default
-        webcamEnabled: true, // Enables webcam by default
-        name: "John Doe", // Default participant name
+        camEnabled: true, // Enables webcam by default
+        participantName: "John Doe", // Default participant name
         mode,
         defaultCamera: "front",
       }}
@@ -239,7 +245,7 @@ function AppContent() {
     >
       {/* Renders the live stream container if a stream is active */}
       <LSContainer streamId={streamId} onLeave={onStreamLeave} />
-    </MeetingProvider>
+    </RoomProvider>
   ) : (
     // Renders the join view if no stream is active
     <JoinView initializeStream={initializeStream} setMode={setMode} />

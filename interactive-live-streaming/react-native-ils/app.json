@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bitcode": false
+      "bitcode": false,
+      "bundleIdentifier": "com.anonymous.ilsreactnative"
     },
     "android": {
       "adaptiveIcon": {
@@ -41,7 +42,8 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.WAKE_LOCK",
-        "android.permission.BLUETOOTH"
+        "android.permission.BLUETOOTH",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "package": "com.anonymous.ilsreactnative"
     },
@@ -49,14 +51,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@videosdk.live/expo-config-plugin",
       [
-        "@config-plugins/react-native-webrtc",
+        "@videosdk.live/expo-config-plugin",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-status-bar"
     ]
   }
 }
