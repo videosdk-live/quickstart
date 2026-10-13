@@ -1,23 +1,26 @@
 package com.example.videosdk_android_modes_quickstart.model
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.videosdk_android_modes_quickstart.StreamingMode
-import live.videosdk.rtc.android.Meeting
+import kotlinx.coroutines.launch
 import live.videosdk.rtc.android.Participant
+import live.videosdk.rtc.android.Room
 import live.videosdk.rtc.android.VideoSDK
-import live.videosdk.rtc.android.listeners.MeetingEventListener
-import org.json.JSONException
-import org.json.JSONObject
+import live.videosdk.rtc.android.lib.LeaveReason
+import live.videosdk.rtc.android.lib.Mode
+import live.videosdk.rtc.android.lib.VideoSDKException
+import live.videosdk.rtc.android.listeners.RoomEventListener
 
 class StreamViewModel : ViewModel() {
-    private var stream: Meeting? = null
-    private var micEnabled by mutableStateOf(true)
-    private var webcamEnabled by mutableStateOf(true)
+    private var stream: Room? = null
+    private var appContext: Context? = null
     var isConferenceMode by mutableStateOf(true)
     val currentParticipants = mutableStateListOf<Participant>()
 
@@ -34,30 +37,45 @@ class StreamViewModel : ViewModel() {
         private set
 
     fun initStream(context: Context, token: String, streamId: String, mode: StreamingMode) {
-        VideoSDK.config(token)
+        appContext = context.applicationContext
         currentMode = mode
         if (stream == null) {
-            stream = if (mode.name == StreamingMode.SendAndReceive.name) {
-                VideoSDK.initMeeting(
-                    context,streamId, "John Doe",
-                    micEnabled, webcamEnabled, null, null, true, null, null
+            stream = try {
+                VideoSDK.createRoom(
+                    roomId = streamId,
+                    token = token,
+                    participantName = "John Doe",
+                    // an audience member who switches to host gets the mic and camera asked for here
+                    micEnabled = true,
+                    camEnabled = true,
+                    mode = if (mode == StreamingMode.SendAndReceive) Mode.SEND_AND_RECV else Mode.RECV_ONLY,
+                    multiStream = true,
                 )
-            } else {
-                VideoSDK.initMeeting(
-                    context, streamId, "John Doe",
-                    micEnabled, webcamEnabled, null, "RECV_ONLY", true, null, null
-                )
+            } catch (e: VideoSDKException) {
+                showError(e)
+                return
             }
         }
-        stream!!.addEventListener(meetingEventListener)
-        stream!!.join()
+        val stream = stream!!
+        // onRoomJoined can fire before join() returns, so add the listener first
+        stream.addEventListener(roomEventListener)
         isJoined = true
+        viewModelScope.launch {
+            try {
+                stream.join()
+            } catch (e: VideoSDKException) {
+                showError(e)
+                stream.removeAllEventListeners()
+                this@StreamViewModel.stream = null
+                isJoined = false
+            }
+        }
     }
 
-    private val meetingEventListener: MeetingEventListener = object : MeetingEventListener() {
-        override fun onMeetingJoined() {
+    private val roomEventListener: RoomEventListener = object : RoomEventListener() {
+        override fun onRoomJoined(switchRoomId: String?) {
             stream?.let {
-                if (it.localParticipant.mode != "RECV_ONLY") {
+                if (it.localParticipant.mode != Mode.RECV_ONLY) {
                     if (!currentParticipants.contains(it.localParticipant)) {
                         currentParticipants.add(it.localParticipant)
                     }
@@ -66,104 +84,120 @@ class StreamViewModel : ViewModel() {
             }
         }
 
-        override fun onMeetingLeft() {
+        override fun onRoomLeft(reason: LeaveReason) {
             currentParticipants.clear()
             stream = null
             isStreamLeft = true
         }
 
         override fun onParticipantJoined(participant: Participant) {
-            if (participant.mode != "RECV_ONLY") {
+            if (participant.mode != Mode.RECV_ONLY) {
                 currentParticipants.add(participant)
             }
         }
 
-        override fun onParticipantLeft(participant: Participant) {
-            currentParticipants.remove(participant)
+        override fun onParticipantLeft(participant: Participant, reason: LeaveReason) {
+            currentParticipants.removeAll { it.id == participant.id }
         }
 
-        override fun onParticipantModeChanged(data: JSONObject?) {
-            try {
-                val participantId = data?.getString("peerId")
-                val participant = if (stream?.localParticipant?.id == participantId) {
-                    stream?.localParticipant
-                } else {
-                    stream?.participants?.get(participantId)
-                }
+        override fun onParticipantModeChanged(participantId: String, mode: Mode) {
+            val participant = if (stream?.localParticipant?.id == participantId) {
+                stream?.localParticipant
+            } else {
+                stream?.participants?.get(participantId)
+            }
 
-                participant?.let {
-                    when (it.mode) {
-                        "RECV_ONLY" -> {
-                            currentParticipants.remove(it)
-                        }
-                        "SEND_AND_RECV" -> {
-                            if (!currentParticipants.contains(it)) {
-                                currentParticipants.add(it)
-                            } else { }
-                        }
-                        else -> {}
+            participant?.let {
+                when (mode) {
+                    Mode.RECV_ONLY -> {
+                        currentParticipants.remove(it)
                     }
+                    Mode.SEND_AND_RECV -> {
+                        if (!currentParticipants.contains(it)) {
+                            currentParticipants.add(it)
+                        }
+                    }
+                    else -> {}
                 }
-            } catch (e: JSONException) {
-                e.printStackTrace()
             }
         }
     }
 
     fun toggleMic() {
-        if (micEnabled) stream?.muteMic() else stream?.unmuteMic()
-        micEnabled = !micEnabled
+        val stream = stream ?: return
+        viewModelScope.launch {
+            try {
+                if (stream.isMicEnabled) stream.muteMic() else stream.unmuteMic()
+            } catch (e: VideoSDKException) {
+                showError(e)
+            }
+        }
     }
 
     fun toggleWebcam() {
-        if (webcamEnabled) stream?.disableWebcam() else stream?.enableWebcam()
-        webcamEnabled = !webcamEnabled
+        val stream = stream ?: return
+        viewModelScope.launch {
+            try {
+                if (stream.isCamEnabled) stream.disableCam() else stream.enableCam()
+            } catch (e: VideoSDKException) {
+                showError(e)
+            }
+        }
     }
 
     fun leaveStream() {
         currentParticipants.clear()
-        stream?.leave()
-        stream?.removeAllListeners()
+        stream?.let {
+            it.removeAllEventListeners()
+            viewModelScope.launch {
+                try {
+                    it.leave()
+                } catch (e: VideoSDKException) {
+                    // 3035: the join never completed, 3054: already left
+                }
+            }
+        }
+        stream = null
         isStreamLeft = true
         isJoined = false
     }
 
     fun toggleMode() {
+        val stream = stream ?: return
         val newMode = if (currentMode == StreamingMode.SendAndReceive) {
-            stream?.disableWebcam()
-            stream?.changeMode("RECV_ONLY")
-            isConferenceMode = false
             StreamingMode.ReceiveOnly
         } else {
-            stream?.changeMode("SEND_AND_RECV")
-            isConferenceMode = true
             StreamingMode.SendAndReceive
         }
+        viewModelScope.launch {
+            try {
+                // Going back to SEND_AND_RECV turns the mic and camera back on as they were,
+                // so there is no enableCam() / unmuteMic() to call here.
+                stream.changeMode(if (newMode == StreamingMode.SendAndReceive) Mode.SEND_AND_RECV else Mode.RECV_ONLY)
+            } catch (e: VideoSDKException) {
+                showError(e)
+                return@launch
+            }
+            isConferenceMode = newMode == StreamingMode.SendAndReceive
 
-        // Clear all participants first
-        currentParticipants.clear()
-
-        // Wait briefly for mode change to complete
-        stream?.let { it ->
+            // Rebuild the list for the new mode
+            currentParticipants.clear()
             // Add back all non-viewer participants
-            it.participants.values.forEach { participant ->
-                if (participant.mode != "RECV_ONLY") {
+            stream.participants.values.forEach { participant ->
+                if (participant.mode != Mode.RECV_ONLY) {
                     currentParticipants.add(participant)
                 }
             }
-
             // Add local participant only if in SEND_AND_RECV mode
             if (newMode == StreamingMode.SendAndReceive) {
-                it.localParticipant?.let { localParticipant ->
-                    if (!currentParticipants.contains(localParticipant)) {
-                        currentParticipants.add(localParticipant)
-                    }
-                }
-                // Re-enable webcam if it was enabled before
-                if (webcamEnabled) {
-                    it.enableWebcam() }
+                currentParticipants.add(stream.localParticipant)
             }
+            currentMode = newMode
         }
-        currentMode = newMode
+    }
+
+    // SDK errors from a call this screen made; onError can arrive off the main thread, these do not
+    private fun showError(e: VideoSDKException) {
+        appContext?.let { Toast.makeText(it, "${e.code} ${e.name}: ${e.message}", Toast.LENGTH_SHORT).show() }
     }
 }

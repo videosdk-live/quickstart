@@ -23,11 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import live.videosdk.rtc.android.MediaType
 import live.videosdk.rtc.android.Participant
-import live.videosdk.rtc.android.Stream
+import live.videosdk.rtc.android.RTCStream
 import live.videosdk.rtc.android.VideoView
 import live.videosdk.rtc.android.listeners.ParticipantEventListener
-import org.webrtc.VideoTrack
+import videosdk.org.webrtc.VideoTrack
 
 @Composable
 fun ParticipantVideoView(
@@ -37,14 +38,13 @@ fun ParticipantVideoView(
         // Remember the event listener to prevent recreation on each recomposition
         val eventListener = remember(participant) {
             object : ParticipantEventListener() {
-                override fun onStreamEnabled(stream: Stream) {
-                    if (stream.kind.equals("video", ignoreCase = true)) {
-                        val videoTrack = stream.track as VideoTrack
+                override fun onStreamEnabled(stream: RTCStream) {
+                    if (stream.kind == MediaType.VIDEO) {
                         isVideoEnabled = true
                     }
                 }
-                override fun onStreamDisabled(stream: Stream) {
-                    if (stream.kind.equals("video", ignoreCase = true)) {
+                override fun onStreamDisabled(stream: RTCStream) {
+                    if (stream.kind == MediaType.VIDEO) {
                         isVideoEnabled = false
                     }
                 }
@@ -60,7 +60,7 @@ fun ParticipantVideoView(
         // Initial video state check
         LaunchedEffect(participant) {
             val hasVideoStream = participant.streams.any { (_, stream) ->
-                stream.kind.equals("video", ignoreCase = true) && stream.track != null
+                stream.kind == MediaType.VIDEO
             }
             isVideoEnabled = hasVideoStream
         }
@@ -74,7 +74,7 @@ fun ParticipantVideoView(
                 factory = { context ->
                     VideoView(context).apply {
                         for ((_, stream) in participant.streams) {
-                            if (stream.kind.equals("video", ignoreCase = true)) {
+                            if (stream.kind == MediaType.VIDEO) {
                                 val videoTrack = stream.track as VideoTrack
                                 addTrack(videoTrack)
                                 isVideoEnabled = true
@@ -86,11 +86,7 @@ fun ParticipantVideoView(
                     // Handle video track updates only
                     // The event listener is now managed separately
                     for ((_, stream) in participant.streams) {
-                        if (stream.kind.equals(
-                                "video",
-                                ignoreCase = true
-                            ) && stream.track != null
-                        ) {
+                        if (stream.kind == MediaType.VIDEO) {
                             val videoTrack = stream.track as VideoTrack
                             videoView.addTrack(videoTrack)
                         }
