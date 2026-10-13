@@ -7,7 +7,6 @@
 
 import VideoSDKRTC
 import SwiftUI
-internal import Mediasoup
 
 struct ParticipantContainerView: View {
     let participant: Participant
