@@ -7,7 +7,6 @@
 
 import UIKit
 import VideoSDKRTC
-import WebRTC
 import AVFoundation
 
 class MeetingViewController: UIViewController {
@@ -40,8 +39,8 @@ class MeetingViewController: UIViewController {
     /// Meeting data - required to start
     var meetingData: MeetingData!
     
-    /// current meeting reference
-    private var meeting: Meeting?
+    /// current room reference
+    private var room: Room?
     
     // MARK: - video participants including self to show in UI
     private var participants: [Participant] = []
@@ -50,9 +49,6 @@ class MeetingViewController: UIViewController {
         super.viewDidLoad()
         
         Utils.loaderShow(viewControler: self)
-        
-        // config
-        VideoSDK.config(token: meetingData.token)
         
         // init meeting
         initializeMeeting()
@@ -81,31 +77,48 @@ class MeetingViewController: UIViewController {
     }
     
     @IBAction func btnLeaveTapped(_ sender: Any) {
-        DispatchQueue.main.async {
-            self.meeting?.leave()
+        Task { @MainActor in
+            do {
+                try await self.room?.leave()
+            } catch {
+                print("Leave failed: \(error)")
+            }
             self.dismiss(animated: true)
         }
     }
     
     
     @IBAction func btnToggleMicTapped(_ sender: Any) {
-        if micEnabled {
-            micEnabled = !micEnabled // false
-            self.meeting?.muteMic()
-        } else {
-            micEnabled = !micEnabled // true
-            self.meeting?.unmuteMic()
+        guard let room = room else { return }
+        Task {
+            do {
+                // read the SDK's state instead of flipping a local flag
+                if room.isMicEnabled {
+                    try await room.muteMic()
+                } else {
+                    try await room.unmuteMic()
+                }
+            } catch {
+                print("Mic toggle failed: \(error)")
+            }
+            micEnabled = room.isMicEnabled
         }
     }
     
     
     @IBAction func btnToggleVideoTapped(_ sender: Any) {
-        if videoEnabled {
-            videoEnabled = !videoEnabled // false
-            self.meeting?.disableWebcam()
-        } else {
-            videoEnabled = !videoEnabled // true
-            self.meeting?.enableWebcam()
+        guard let room = room else { return }
+        Task {
+            do {
+                if room.isCamEnabled {
+                    try await room.disableCam()
+                } else {
+                    try await room.enableCam()
+                }
+            } catch {
+                print("Webcam toggle failed: \(error)")
+            }
+            videoEnabled = room.isCamEnabled
         }
     }
     
@@ -114,27 +127,40 @@ class MeetingViewController: UIViewController {
     private func initializeMeeting() {
         
         // initialize
-        meeting = VideoSDK.initMeeting(
-            meetingId: meetingData.meetingId,
-            participantName: meetingData.name,
-            micEnabled: meetingData.micEnabled,
-            webcamEnabled: meetingData.cameraEnabled
-        )
+        do {
+            room = try VideoSDK.createRoom(
+                roomId: meetingData.meetingId,
+                token: meetingData.token,
+                participantName: meetingData.name,
+                micEnabled: meetingData.micEnabled,
+                camEnabled: meetingData.cameraEnabled
+            )
+        } catch {
+            Utils.loaderDismiss(viewControler: self)
+            print("Setup failed: \(error)")   // ERROR_INVALID_PARAMETER for an empty token or room ID
+            return
+        }
         
         // listener
-        meeting?.addEventListener(self)
+        room?.addEventListener(self)
         
         // join
-        meeting?.join()
+        Task {
+            do {
+                try await room?.join()
+            } catch {
+                print("Join failed: \(error)")
+            }
+        }
     }
 
 }
 
 private extension MeetingViewController {
     
-    func updateUI(participant: Participant, forStream stream: MediaStream, enabled: Bool) { // true
+    func updateUI(participant: Participant, forStream stream: RTCStream, enabled: Bool) { // true
         switch stream.kind {
-        case .state(value: .video):
+        case .video:
             if let videotrack = stream.track as? RTCVideoTrack {
                 if enabled {
                     DispatchQueue.main.async {
@@ -173,7 +199,7 @@ private extension MeetingViewController {
                 }
             }
             
-        case .state(value: .audio):
+        case .audio:
             if participant.isLocal {
                 localParticipantViewContainer.layer.borderWidth = 4.0
                 localParticipantViewContainer.layer.borderColor = enabled ? UIColor.clear.cgColor : UIColor.red.cgColor
@@ -188,26 +214,20 @@ private extension MeetingViewController {
     }
 }
 
-// MARK: - MeetingEventListener
+// MARK: - RoomEventListener
 
-extension MeetingViewController: MeetingEventListener {
+extension MeetingViewController: RoomEventListener {
     
     /// Meeting started
-    func onMeetingJoined() {
+    func onRoomJoined() {
         
         // handle local participant on start
-        guard let localParticipant = self.meeting?.localParticipant else { return }
+        guard let localParticipant = self.room?.localParticipant else { return }
             // add to list
         participants.append(localParticipant)
         
         // add event listener
         localParticipant.addEventListener(self)
-        
-        do {
-            try localParticipant.setQuality(.high)
-        } catch {
-            print("Error in setQuality: \(error.localizedDescription)")
-        }
         
         Utils.loaderDismiss(viewControler: self)
         
@@ -219,11 +239,11 @@ extension MeetingViewController: MeetingEventListener {
     }
     
     /// Meeting ended
-    func onMeetingLeft() {
+    func onRoomLeft(reason: LeaveReason) {
         
         // remove listeners
-        meeting?.localParticipant.removeEventListener(self)
-        meeting?.removeEventListener(self)
+        room?.localParticipant.removeEventListener(self)
+        room?.removeEventListener(self)
         
     }
     
@@ -234,10 +254,12 @@ extension MeetingViewController: MeetingEventListener {
         // add listener
         participant.addEventListener(self)
         
-        do {
-            try participant.setQuality(.high)
-        } catch {
-            print("Error in setQuality: \(error.localizedDescription)")
+        Task {
+            do {
+                try await participant.setQuality(.high)
+            } catch {
+                print("Error in setQuality: \(error)")
+            }
         }
         
         if(participant.isLocal){
@@ -249,7 +271,7 @@ extension MeetingViewController: MeetingEventListener {
     
     /// A participant left from the meeting
     /// - Parameter participant: participant object
-    func onParticipantLeft(_ participant: Participant) {
+    func onParticipantLeft(_ participant: Participant, reason: LeaveReason) {
         participant.removeEventListener(self)
         guard let index = self.participants.firstIndex(where: { $0.id == participant.id }) else {
             return
@@ -265,8 +287,8 @@ extension MeetingViewController: MeetingEventListener {
     }
     
     /// Called when speaker is changed
-    /// - Parameter participantId: participant id of the speaker, nil when no one is speaking.
-    func onSpeakerChanged(participantId: String?) {
+    /// - Parameter activeSpeakerId: participant id of the speaker, nil when no one is speaking.
+    func onSpeakerChanged(activeSpeakerId participantId: String?) {
         
         // show indication for active speaker
         if let participant = participants.first(where: { $0.id == participantId }) {
@@ -302,7 +324,7 @@ extension MeetingViewController: ParticipantEventListener {
     /// - Parameters:
     ///   - stream: enabled stream object
     ///   - participant: participant object
-    func onStreamEnabled(_ stream: MediaStream, forParticipant participant: Participant) {
+    func onStreamEnabled(_ stream: RTCStream, forParticipant participant: Participant) {
         updateUI(participant: participant, forStream: stream, enabled: true)
     }
     
@@ -310,7 +332,7 @@ extension MeetingViewController: ParticipantEventListener {
     /// - Parameters:
     ///   - stream: disabled stream object
     ///   - participant: participant object
-    func onStreamDisabled(_ stream: MediaStream, forParticipant participant: Participant) {
+    func onStreamDisabled(_ stream: RTCStream, forParticipant participant: Participant) {
         updateUI(participant: participant, forStream: stream, enabled: false)
     }
 }

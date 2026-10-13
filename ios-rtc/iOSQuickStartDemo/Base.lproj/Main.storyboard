@@ -159,7 +159,7 @@
                                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xhF-nq-hsd" userLabel="LocalParticipantVideoView" customClass="RTCMTLVideoView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xhF-nq-hsd" userLabel="LocalParticipantVideoView" customClass="RTCMTLVideoView" customModule="VideoSDKRTC">
                                                 <rect key="frame" x="0.0" y="0.0" width="358" height="230"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
@@ -184,7 +184,7 @@
                                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OV0-Hh-RN1" userLabel="RemoteParticipantVideoView" customClass="RTCMTLVideoView">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OV0-Hh-RN1" userLabel="RemoteParticipantVideoView" customClass="RTCMTLVideoView" customModule="VideoSDKRTC">
                                                 <rect key="frame" x="0.0" y="0.0" width="358" height="230"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </view>
