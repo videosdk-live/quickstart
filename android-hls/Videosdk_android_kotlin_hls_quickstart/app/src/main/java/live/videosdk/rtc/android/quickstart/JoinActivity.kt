@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
+import live.videosdk.rtc.android.lib.Mode
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -47,7 +48,7 @@ class JoinActivity : AppCompatActivity() {
             val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
             intent.putExtra("token", sampleToken)
             intent.putExtra("meetingId", meetingId)
-            intent.putExtra("mode", "CONFERENCE")
+            intent.putExtra("mode", Mode.SEND_AND_RECV.name)
             startActivity(intent)
         }
 
@@ -61,7 +62,7 @@ class JoinActivity : AppCompatActivity() {
             val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
             intent.putExtra("token", sampleToken)
             intent.putExtra("meetingId", meetingId)
-            intent.putExtra("mode", "VIEWER")
+            intent.putExtra("mode", Mode.SIGNALLING_ONLY.name)
             startActivity(intent)
         }
     }
@@ -81,7 +82,7 @@ class JoinActivity : AppCompatActivity() {
                         val intent = Intent(this@JoinActivity, MeetingActivity::class.java)
                         intent.putExtra("token", sampleToken)
                         intent.putExtra("meetingId", meetingId)
-                        intent.putExtra("mode", "CONFERENCE")
+                        intent.putExtra("mode", Mode.SEND_AND_RECV.name)
                         startActivity(intent)
                     } catch (e: JSONException) {
                         e.printStackTrace()

@@ -44,7 +44,8 @@ At Video SDK, we’re building tools to help companies create world-class collab
 - Development environment requirements:
   - [Java Development Kit](https://www.oracle.com/java/technologies/downloads/)
   - Android Studio 3.0 or later
-- A physical or virtual mobile device running Android 5.0 or later
+- An ARM Android device (or an `arm64-v8a` emulator image) running Android 7.0 (API 24) or later
+- Kotlin 1.8 or later: VideoSDK Android 3.x is Kotlin-only
 - Valid [Video SDK Account](https://app.videosdk.live/)
 
 <br/>
@@ -81,20 +82,18 @@ Run the android app with **Shift+F10** or the **▶ Run** from toolbar.
 
 ## Key Concepts
 
-- `Meeting` - A Meeting represents Real time audio and video communication.
-
-  **`Note : Don't confuse with Room and Meeting keyword, both are same thing 😃`**
+- `Room` - A Room represents Real time audio and video communication. (`Room` was called `Meeting` before 3.0.0.)
 
 - `Sessions` - A particular duration you spend in a given meeting is a referred as session, you can
-  have multiple session of a particular meetingId.
+  have multiple session of a particular roomId.
 - `Participant` - Participant represents someone who is attending the meeting's
   session, `local partcipant` represents self (You), for this self, other participants
   are `remote participants`.
-- `Stream` - Stream means video or audio media content that is either published
+- `RTCStream` - Stream means video or audio media content that is either published
   by `local participant` or `remote participants`.
-- `Mode` - There are 2 types of modes:
-  1. `CONFERENCE`: Both audio and video streams will be produced and consumed in this mode.
-  2. `VIEWER`: Audio and video streams will not be produced or consumed in this mode.
+- `Mode` - This sample uses 2 of the modes:
+  1. `Mode.SEND_AND_RECV` (the host): Both audio and video streams will be produced and consumed in this mode.
+  2. `Mode.SIGNALLING_ONLY` (the viewer): Audio and video streams will not be produced or consumed in this mode.
 
 <br/>
 
@@ -132,63 +131,65 @@ Token is used to create and validate a meeting using API and also initialise a m
 
 <br/>
 
-## [Initialize a Meeting](https://docs.videosdk.live/android/api/sdk-reference/initMeeting)
+## [Create a Room](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/quick-start)
 
-1. For meeting initialization, you have to first initialize the `VideoSDK`. You can initialize the `VideoSDK` using `initialize()` method.
+1. Initialize the `VideoSDK` once with `initialize()`.
 
-```js
-  VideoSDK.initialize(context: Context)
+```kotlin
+  VideoSDK.initialize(applicationContext)
 ```
 
-2. After successfully initialization, you can configure `VideoSDK` by passing token in `config` method
+2. Create the `Room` with the room id, the token and the mode. Use named arguments.
 
-```js
-  VideoSDK.config(token: String?)
-```
-
-3. After VideoSDK initialization and configuration, you can initialize the meeting using `initMeeting()` method. `initMeeting()` will generate a new `Meeting` class and the initiated meeting will be returned.
-
-```js
- val meeting: Meeting? = VideoSDK.initMeeting(
-                            context: Context?,
-                            meetingId: String?,
-                            name: String?,
-                            micEnabled: Boolean,
-                            webcamEnabled: Boolean,
-                            participantId: String?,
-                            mode: String?,
-                            customTracks: Map<String?, CustomStreamTrack?>?
-                        )
+```kotlin
+  val room: Room = VideoSDK.createRoom(
+      roomId = meetingId,
+      token = token,
+      participantName = "John Doe",
+      micEnabled = true,
+      camEnabled = true,
+      mode = Mode.SEND_AND_RECV, // Mode.SIGNALLING_ONLY for a viewer
+  )
 ```
 
 ## [Join Meeting](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/start-join-meeting)
 
-```js
-meeting!!.join()
+`join()` and the other actions are `suspend` functions that throw `VideoSDKException`.
+
+```kotlin
+lifecycleScope.launch {
+    try {
+        room.join()
+    } catch (e: VideoSDKException) {
+        Log.e("VideoSDK", "Join failed: ${e.code} ${e.name}")
+    }
+}
 ```
 
 ## [Leave or End Meeting](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/leave-end-meeting)
 
-```js
-// Only one participant will leave/exit the meeting; the rest of the participants will remain.
-meeting!!.leave();
+```kotlin
+lifecycleScope.launch {
+    // Only one participant will leave/exit the meeting; the rest of the participants will remain.
+    room.leave()
 
-// The meeting will come to an end for each and every participant. So, use this function in accordance with your requirements.
-meeting!!.end();
+    // The meeting will come to an end for each and every participant. So, use this function in accordance with your requirements.
+    room.end()
+}
 ```
 
-## [Setup MeetingEventListener](https://docs.videosdk.live/android/api/sdk-reference/meeting-class/meeting-event-listener-class)
+## [Setup RoomEventListener](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/quick-start)
 
-By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client app whenever there is a change or update in the meeting after a user joins.
+By implementing `RoomEventListener`, VideoSDK sends callbacks to the client app whenever there is a change or update in the meeting after a user joins.
 
-```js
-  val meetingEventListener: MeetingEventListener = object : MeetingEventListener() {
+```kotlin
+  val roomEventListener: RoomEventListener = object : RoomEventListener() {
 
-        override fun onMeetingJoined() {
+        override fun onRoomJoined(switchRoomId: String?) {
            // This event will be emitted when a localParticipant(you) successfully joined the meeting.
         }
 
-        override fun onMeetingLeft() {
+        override fun onRoomLeft(reason: LeaveReason) {
            // This event will be emitted when a localParticipant(you) left the meeting.
         }
 
@@ -197,16 +198,16 @@ By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client a
            // [participant]: new participant who joined the meeting
         }
 
-        override fun onParticipantLeft(participant: Participant) {
+        override fun onParticipantLeft(participant: Participant, reason: LeaveReason) {
            // This event will be emitted when a joined participant left the meeting.
            // [participant]: participant who left the meeting
         }
 
-        override fun onHlsStateChanged(HlsState: JSONObject) {
+        override fun onHlsStateChanged(state: HLSState, hlsUrl: HLSUrl?) {
            // This event will be emitted whenever meeting HLS state changes.
-           // [HlsState] : state of HLS
+           // [state] : state of HLS, [hlsUrl] : the playback urls once it is HLS_PLAYABLE
         }
-    };
+    }
 ```
 
 <br/>
@@ -217,20 +218,20 @@ By implementing `MeetingEventListener`, VideoSDK sends callbacks to the client a
 
 - You can get the **`playbackHlsUrl`** and **`livestreamUrl`** of the HLS to play it on the Viewer side when the state changes to **`HLS_PLAYABLE`**.
 
-```js
-private val meetingEventListener: MeetingEventListener = object : MeetingEventListener() {
+```kotlin
+private val roomEventListener: RoomEventListener = object : RoomEventListener() {
 
-  override fun onHlsStateChanged(HlsState: JSONObject) {
-    when (HlsState.getString("status")) {
-        "HLS_STARTING" -> Log.d("onHlsStateChanged", "Meeting hls is starting")
-        "HLS_STARTED" -> Log.d("onHlsStateChanged", "Meeting hls is started")
-        "HLS_PLAYABLE" -> {
+  override fun onHlsStateChanged(state: HLSState, hlsUrl: HLSUrl?) {
+    when (state) {
+        HLSState.HLS_STARTING -> Log.d("onHlsStateChanged", "Meeting hls is starting")
+        HLSState.HLS_STARTED -> Log.d("onHlsStateChanged", "Meeting hls is started")
+        HLSState.HLS_PLAYABLE -> {
             Log.d("onHlsStateChanged", "Meeting hls is playable now")
             // on hls playable you will receive playbackHlsUrl
-            val playbackHlsUrl = HlsState.getString("playbackHlsUrl")
+            val playbackHlsUrl = hlsUrl?.playbackHlsUrl
         }
-        "HLS_STOPPING" -> Log.d("onHlsStateChanged", "Meeting hls is stopping")
-        "HLS_STOPPED" -> Log.d("onHlsStateChanged", "Meeting hls is stopped")
+        HLSState.HLS_STOPPING -> Log.d("onHlsStateChanged", "Meeting hls is stopping")
+        HLSState.HLS_STOPPED -> Log.d("onHlsStateChanged", "Meeting hls is stopped")
     }
   }
 
@@ -241,62 +242,73 @@ private val meetingEventListener: MeetingEventListener = object : MeetingEventLi
 
 ## [Mute/Unmute Local Audio](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/mic-controls)
 
-```js
-// unmute mic
-meeting!!.unmuteMic()
+```kotlin
+lifecycleScope.launch {
+    // unmute mic
+    room.unmuteMic()
 
-// mute mic
-meeting!!.muteMic()
+    // mute mic
+    room.muteMic()
+}
 ```
 
 ## [Enable/Disable Local Webcam](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/camera-controls)
 
-```js
-// enable webcam
-meeting!!.enableWebcam()
+```kotlin
+lifecycleScope.launch {
+    // enable webcam
+    room.enableCam()
 
-// disable webcam
-meeting!!.disableWebcam()
+    // disable webcam
+    room.disableCam()
+}
 ```
 
 ## [Switch Local Webcam](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/features/camera-controls)
 
-```js
-// switch webcam
-meeting!!.changeWebcam()
+```kotlin
+lifecycleScope.launch {
+    // move to the next camera
+    room.changeCam()
+}
 ```
 
 ## [Start/Stop HLS]()
 
-```js
-// start HLS
-meeting!!.startHls(config: JSONObject?);
+```kotlin
+lifecycleScope.launch {
+    // start HLS
+    room.startHLS(config = HLSConfig(layout = ConfigLayout(type = ConfigLayoutGrid.SPOTLIGHT)))
 
-// stop HLS
-meeting!!.stopHls();
+    // stop HLS
+    room.stopHLS()
+}
 ```
 
 ## [Pin/Unpin Participant]()
 
-```js
-// pin local participant
-meeting!!.getLocalParticipant().pin(type: String?);
+```kotlin
+lifecycleScope.launch {
+    // pin local participant
+    room.localParticipant.pin(PinType.SHARE_AND_CAM)
 
-// unpin local participant
-meeting!!.getLocalParticipant().unpin(type: String?);
+    // unpin local participant
+    room.localParticipant.unpin(PinType.SHARE_AND_CAM)
+}
 ```
 
-## [Setup ParticipantEventListener](https://docs.videosdk.live/android/api/sdk-reference/participant-class/participant-event-listener-class)
+## [Setup ParticipantEventListener](https://docs.videosdk.live/android/guide/video-and-audio-calling-api-sdk/quick-start)
 
 By implementing `ParticipantEventListener`, VideoSDK sends callbacks to the client app whenever a participant's video, audio, or screen share stream is enabled or disabled.
 
-```js
+```kotlin
  val participantEventListener: ParticipantEventListener = object : ParticipantEventListener() {
-       override fun onStreamEnabled(stream: Stream) {
+       override fun onStreamEnabled(stream: RTCStream) {
           // This event will be triggered whenever a participant's video, audio or screen share stream is enabled.
+          // It is also called right away, for the streams the participant already has, when you add the listener.
        }
 
-       override fun onStreamDisabled(stream: Stream) {
+       override fun onStreamDisabled(stream: RTCStream) {
           // This event will be triggered whenever a participant's video, audio or screen share stream is disabled.
        }
    }

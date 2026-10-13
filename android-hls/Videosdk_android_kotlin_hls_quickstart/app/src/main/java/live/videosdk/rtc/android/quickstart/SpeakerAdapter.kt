@@ -5,49 +5,46 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import live.videosdk.rtc.android.Meeting
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import live.videosdk.rtc.android.MediaType
 import live.videosdk.rtc.android.Participant
-import live.videosdk.rtc.android.Stream
+import live.videosdk.rtc.android.PinType
+import live.videosdk.rtc.android.RTCStream
+import live.videosdk.rtc.android.Room
 import live.videosdk.rtc.android.VideoView
-import live.videosdk.rtc.android.listeners.MeetingEventListener
+import live.videosdk.rtc.android.lib.LeaveReason
+import live.videosdk.rtc.android.lib.Mode
+import live.videosdk.rtc.android.lib.VideoSDKException
 import live.videosdk.rtc.android.listeners.ParticipantEventListener
-import org.webrtc.VideoTrack
+import live.videosdk.rtc.android.listeners.RoomEventListener
+import videosdk.org.webrtc.VideoTrack
 
-class SpeakerAdapter(private val meeting: Meeting) :
+class SpeakerAdapter(private val room: Room, private val scope: CoroutineScope) :
     RecyclerView.Adapter<SpeakerAdapter.PeerViewHolder?>() {
     private var participantList: MutableList<Participant> = ArrayList()
 
     init {
         updateParticipantList()
 
-        // adding Meeting Event listener to get the participant join/leave event in the meeting.
-        meeting.addEventListener(object : MeetingEventListener() {
+        // adding Room Event listener to get the participant join/leave event in the meeting.
+        room.addEventListener(object : RoomEventListener() {
             override fun onParticipantJoined(participant: Participant) {
                 // check participant join as Host/Speaker or not
-                if (participant.mode == "CONFERENCE") {
+                if (participant.mode == Mode.SEND_AND_RECV) {
                     // pin the participant
-                    participant.pin("SHARE_AND_CAM")
+                    pin(participant)
                     // add participant in participantList
                     participantList.add(participant)
                 }
                 notifyDataSetChanged()
             }
 
-            override fun onParticipantLeft(participant: Participant) {
-                var pos = -1
-                for (i in participantList.indices) {
-                    if (participantList[i].id == participant.id) {
-                        pos = i
-                        break
-                    }
-                }
-                if (participantList.contains(participant)) {
-                    // unpin participant who left the meeting
-                    participant.unpin("SHARE_AND_CAM")
-                    // remove participant from participantList
-                    participantList.remove(participant)
-                }
+            override fun onParticipantLeft(participant: Participant, reason: LeaveReason) {
+                val pos = participantList.indexOfFirst { it.id == participant.id }
                 if (pos >= 0) {
+                    // remove participant from participantList
+                    participantList.removeAt(pos)
                     notifyItemRemoved(pos)
                 }
             }
@@ -56,15 +53,24 @@ class SpeakerAdapter(private val meeting: Meeting) :
 
     private fun updateParticipantList() {
         // adding the local participant(You) to the list
-        participantList.add(meeting.localParticipant)
+        participantList.add(room.localParticipant)
 
         // adding participants who join as Host/Speaker
-        val participants: Iterator<Participant> = meeting.participants.values.iterator()
-        for (i in 0 until meeting.participants.size) {
-            val participant = participants.next()
-            if (participant.mode == "CONFERENCE") {
-                participant.pin("SHARE_AND_CAM")
+        for (participant in room.participants.values) {
+            if (participant.mode == Mode.SEND_AND_RECV) {
+                pin(participant)
                 participantList.add(participant)
+            }
+        }
+    }
+
+    // pin() is a suspend function that throws VideoSDKException
+    private fun pin(participant: Participant) {
+        scope.launch {
+            try {
+                participant.pin(PinType.SHARE_AND_CAM)
+            } catch (e: VideoSDKException) {
+                // the participant left, or the room is reconnecting
             }
         }
     }
@@ -79,28 +85,19 @@ class SpeakerAdapter(private val meeting: Meeting) :
         val participant = participantList[position]
         holder.tvName.text = participant.displayName
 
-        // adding the initial video stream for the participant into the 'VideoView'
-        for ((_, stream) in participant.streams) {
-            if (stream.kind.equals("video", ignoreCase = true)) {
-                holder.participantView.visibility = View.VISIBLE
-                val videoTrack = stream.track as VideoTrack
-                holder.participantView.addTrack(videoTrack)
-                break
-            }
-        }
-
-        // add Listener to the participant which will update start or stop the video stream of that participant
+        // add Listener to the participant which will update start or stop the video stream of that participant.
+        // addEventListener also calls onStreamEnabled right away for the streams the participant already has.
         participant.addEventListener(object : ParticipantEventListener() {
-            override fun onStreamEnabled(stream: Stream) {
-                if (stream.kind.equals("video", ignoreCase = true)) {
+            override fun onStreamEnabled(stream: RTCStream) {
+                if (stream.kind == MediaType.VIDEO) {
                     holder.participantView.visibility = View.VISIBLE
                     val videoTrack = stream.track as VideoTrack
                     holder.participantView.addTrack(videoTrack)
                 }
             }
 
-            override fun onStreamDisabled(stream: Stream) {
-                if (stream.kind.equals("video", ignoreCase = true)) {
+            override fun onStreamDisabled(stream: RTCStream) {
+                if (stream.kind == MediaType.VIDEO) {
                     holder.participantView.removeTrack()
                     holder.participantView.visibility = View.GONE
                 }
