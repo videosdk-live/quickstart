@@ -7,9 +7,10 @@ import {
   FlatList,
 } from 'react-native';
 import {
-  MeetingProvider,
-  useMeeting,
+  RoomProvider,
+  useRoom,
   useParticipant,
+  useMediaDevice,
   MediaStream,
   RTCView,
   Constants,
@@ -130,14 +131,12 @@ function ParticipantView({ participantId }) {
 
 // Responsible for managing meeting controls such as toggle mic / webcam and leave
 function Controls() {
-  const { toggleWebcam, toggleMic, startHls, stopHls, hlsState } = useMeeting(
-    {},
-  );
+  const { toggleCam, toggleMic, startHLS, stopHLS, hlsState } = useRoom({});
 
   const _handleHLS = async () => {
     try {
       if (!hlsState || hlsState === 'HLS_STOPPED') {
-        await startHls({
+        await startHLS({
           layout: {
             type: 'GRID',
             priority: 'PIN',
@@ -147,7 +146,7 @@ function Controls() {
           orientation: 'portrait',
         });
       } else if (hlsState === 'HLS_STARTED' || hlsState === 'HLS_PLAYABLE') {
-        await stopHls();
+        await stopHLS();
       }
     } catch (error) {
       console.error('Failed to toggle HLS', error);
@@ -156,7 +155,7 @@ function Controls() {
 
   const handleToggleWebcam = async () => {
     try {
-      await toggleWebcam();
+      await toggleCam();
     } catch (error) {
       console.error('Failed to toggle webcam', error);
     }
@@ -218,14 +217,14 @@ function Controls() {
 
 // Responsible for Speaker side view, which contains Meeting Controls(toggle mic/webcam & leave) and Participant list
 function SpeakerView() {
-  // Get the Participant Map and meetingId
-  const { meetingId, participants } = useMeeting({});
+  // Get the Participant Map
+  const { participants } = useRoom({});
 
   // For getting speaker participant, we will filter out `SEND_AND_RECV` mode participant
   const speakers = useMemo(() => {
     const speakerParticipants = [...participants.values()].filter(
       participant => {
-        return participant.mode == Constants.modes.SEND_AND_RECV;
+        return participant.mode == Constants.Mode.SEND_AND_RECV;
       },
     );
     return speakerParticipants;
@@ -253,7 +252,7 @@ function SpeakerView() {
 }
 
 function HeaderView() {
-  const { meetingId, leave } = useMeeting();
+  const { roomId, leave } = useRoom();
 
   const handleLeave = async () => {
     try {
@@ -272,14 +271,14 @@ function HeaderView() {
         alignItems: 'center',
       }}
     >
-      <Text style={{ fontSize: 24, color: 'white' }}>{meetingId}</Text>
+      <Text style={{ fontSize: 24, color: 'white' }}>{roomId}</Text>
       <Button
         btnStyle={{
           borderWidth: 1,
           borderColor: 'white',
         }}
         onPress={() => {
-          Clipboard.setString(meetingId);
+          Clipboard.setString(roomId);
           alert('MeetingId copied successfully');
         }}
         buttonText={'Copy MeetingId'}
@@ -296,7 +295,7 @@ function HeaderView() {
 
 // Responsible for Viewer side view, which contains video player for streaming HLS and managing HLS state (HLS_STARTED, HLS_STOPPING, HLS_STARTING, etc.)
 function ViewerView({}) {
-  const { hlsState, hlsUrls } = useMeeting();
+  const { hlsState, hlsUrls } = useRoom();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
@@ -329,9 +328,10 @@ function ViewerView({}) {
 
 // Responsible for managing two view (Speaker & Viewer) based on provided mode (`SEND_AND_RECV` & `SIGNALLING_ONLY`)
 function Container() {
-  const { join, localParticipant } = useMeeting();
-  const mMeeting = useMeeting({
-    onMeetingJoined: async () => {
+  const { join, localParticipant } = useRoom();
+  const { requestPermission } = useMediaDevice();
+  const mMeeting = useRoom({
+    onRoomJoined: async () => {
       // Pin the local participant if he joins in SEND_AND_RECV mode
       if (mMeetingRef.current.localParticipant.mode === 'SEND_AND_RECV') {
         try {
@@ -355,6 +355,8 @@ function Container() {
 
   const handleJoin = async () => {
     try {
+      // Android no longer asks for camera and microphone access by itself
+      await requestPermission(Constants.permission.AUDIO_AND_VIDEO);
       await join();
     } catch (error) {
       console.error('Failed to join meeting', error);
@@ -363,9 +365,9 @@ function Container() {
 
   return (
     <View style={{ flex: 1 }}>
-      {localParticipant?.mode == Constants.modes.SEND_AND_RECV ? (
+      {localParticipant?.mode == Constants.Mode.SEND_AND_RECV ? (
         <SpeakerView />
-      ) : localParticipant?.mode == Constants.modes.SIGNALLING_ONLY ? (
+      ) : localParticipant?.mode == Constants.Mode.SIGNALLING_ONLY ? (
         <ViewerView />
       ) : (
         <View
@@ -432,12 +434,12 @@ function AppContent() {
   };
 
   return authToken && meetingId ? (
-    <MeetingProvider
+    <RoomProvider
       config={{
-        meetingId,
+        roomId: meetingId,
         micEnabled: true,
-        webcamEnabled: true,
-        name: 'Ahmed',
+        camEnabled: true,
+        participantName: 'Ahmed',
         //These will be the mode of the participant SEND_AND_RECV or SIGNALLING_ONLY
         mode: mode,
         defaultCamera: 'front',
@@ -445,7 +447,7 @@ function AppContent() {
       token={authToken}
     >
       <Container />
-    </MeetingProvider>
+    </RoomProvider>
   ) : (
     <JoinScreen getMeetingAndToken={getMeetingAndToken} setMode={setMode} />
   );
