@@ -2,3 +2,19 @@ ios-hls/.DS_Store
 ios-rtc/.DS_Store
 ios-rtc/.DS_Store
 ios-rtc/iOSQuickStartDemo.xcodeproj/project.xcworkspace/xcuserdata/parthasodariya.xcuserdatad/UserInterfaceState.xcuserstate
+
+# Build outputs and local caches, for every example
+build/
+.gradle/
+.cxx/
+local.properties
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+node_modules/
+.expo/
+Pods/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+.DS_Store
