@@ -7,7 +7,6 @@
 
 import SwiftUI
 import VideoSDKRTC
-import WebRTC
 
 struct LiveStreamView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -59,9 +58,9 @@ struct LiveStreamView: View {
                             if participant.mode != .RECV_ONLY {
                                 Text("Participant Name: \(participant.displayName)")
                                 ZStack {
-                                    ParticipantView(track: participant.streams.first(where: { $1.kind == .state(value: .video) })?.value.track as? RTCVideoTrack)
+                                    ParticipantView(track: participant.streams.first(where: { $1.kind == .video })?.value.track as? RTCVideoTrack)
                                         .frame(height: 250)
-                                    if participant.streams.first(where: { $1.kind == .state(value: .video) }) == nil {
+                                    if participant.streams.first(where: { $1.kind == .video }) == nil {
                                         Color.white.opacity(1.0)
                                             .frame(width: UIScreen.main.bounds.width, height: 250)
                                         Text("No media")
@@ -76,12 +75,15 @@ struct LiveStreamView: View {
                         HStack(spacing: 15) {
                             // Button to toggle microphone mute/unmute
                              Button {
-                                      isUnMute.toggle()
-                                        if isUnMute {
-                                            liveStreamViewController.meeting?.unmuteMic()
-                                        } else {
-                                            liveStreamViewController.meeting?.muteMic()
-                                        }
+                                      guard let room = liveStreamViewController.meeting else { return }
+                                      Task { @MainActor in
+                                          do {
+                                              if room.isMicEnabled { try await room.muteMic() } else { try await room.unmuteMic() }
+                                          } catch {
+                                              print("Mic toggle failed: \(error)")
+                                          }
+                                          isUnMute = room.isMicEnabled
+                                      }
                                       } label: {
                                         ModeButton(
                                             text: isUnMute ? "Mute Mic" : "Unmute Mic",
@@ -91,12 +93,15 @@ struct LiveStreamView: View {
                                         
                                         // Button to enable/disable webcam
                               Button {
-                                       camEnabled.toggle()
-                                         if camEnabled {
-                                              liveStreamViewController.meeting?.enableWebcam()
-                                         } else {
-                                              liveStreamViewController.meeting?.disableWebcam()
-                                        }
+                                       guard let room = liveStreamViewController.meeting else { return }
+                                       Task { @MainActor in
+                                           do {
+                                               if room.isCamEnabled { try await room.disableCam() } else { try await room.enableCam() }
+                                           } catch {
+                                               print("Webcam toggle failed: \(error)")
+                                           }
+                                           camEnabled = room.isCamEnabled
+                                       }
                                     } label: {
                                         ModeButton(
                                             text: camEnabled ? "Disable Webcam" : "Enable Webcam",
@@ -110,7 +115,8 @@ struct LiveStreamView: View {
                      HStack(spacing: 15) {
                             // Button to leave the call
                             Button {
-                                    liveStreamViewController.meeting?.leave()
+                                    let room = liveStreamViewController.meeting
+                                    Task { try? await room?.leave() }
                                     presentationMode.wrappedValue.dismiss()
                                     } label: {
                                     ModeButton(text: "Leave Call", color: .red)
@@ -120,7 +126,11 @@ struct LiveStreamView: View {
                         Button {
                             let newMode: Mode = isAudienceMode ? .SEND_AND_RECV : .RECV_ONLY
                                Task{
-                                  await liveStreamViewController.meeting?.changeMode(newMode)
+                                  do {
+                                      try await liveStreamViewController.meeting?.changeMode(newMode)
+                                  } catch {
+                                      print("Mode change failed: \(error)")
+                                  }
                                }
                                 currentMode = newMode
                             } label: {
@@ -135,7 +145,6 @@ struct LiveStreamView: View {
             }
         }
         .onAppear {
-            VideoSDK.config(token: liveStreamViewController.token)
             if let streamId = streamId, !streamId.isEmpty {
                 liveStreamViewController.joinStream(streamId: streamId, userName: userName ?? "Guest", mode: currentMode)
             } else {

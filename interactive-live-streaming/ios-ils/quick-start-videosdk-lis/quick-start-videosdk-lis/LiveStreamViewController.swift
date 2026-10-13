@@ -21,7 +21,7 @@ class LiveStreamViewController: ObservableObject {
     var streamId: String = ""
     var name: String = ""
     
-    @Published var meeting: Meeting? = nil
+    @Published var meeting: Room? = nil
     @Published var localParticipantView: VideoView? = nil
     @Published var videoTrack: RTCVideoTrack?
     @Published var participants: [Participant] = []
@@ -30,23 +30,35 @@ class LiveStreamViewController: ObservableObject {
     private var needsRefresh = false
 
     func initializeStream(streamId: String, userName: String, mode: Mode) {
-        meeting = VideoSDK.initMeeting(
-            meetingId : streamId,
-            participantName: userName,
-            micEnabled: true,
-            webcamEnabled: true,
-            mode: mode // Pass the mode here
-        )
-        // Join the meeting
-        meeting?.join()
-        // Add event listeners
+        do {
+            meeting = try VideoSDK.createRoom(
+                roomId: streamId,
+                token: token,
+                participantName: userName,
+                micEnabled: true,
+                camEnabled: true,
+                mode: mode // Pass the mode here
+            )
+        } catch {
+            print("Setup failed: \(error)")
+            return
+        }
+        // Add event listeners before joining: onRoomJoined can arrive before join() returns
         meeting?.addEventListener(self)
+        // Join the meeting
+        Task {
+            do {
+                try await meeting?.join()
+            } catch {
+                print("Join failed: \(error)")
+            }
+        }
     }
 }
 
-extension LiveStreamViewController: MeetingEventListener {
+extension LiveStreamViewController: RoomEventListener {
 
-    func onMeetingJoined() {
+    func onRoomJoined() {
         guard let localParticipant = self.meeting?.localParticipant else { return }
         // add to list
         participants.append(localParticipant)
@@ -61,23 +73,23 @@ extension LiveStreamViewController: MeetingEventListener {
         // add listener
         participant.addEventListener(self)
 
-        participant.setQuality(.high)
+        Task { try? await participant.setQuality(.high) }
     }
 
-    func onParticipantLeft(_ participant: Participant) {
+    func onParticipantLeft(_ participant: Participant, reason: LeaveReason) {
         participants = participants.filter({ $0.id != participant.id })
         participants.removeAll()
     }
 
-    func onMeetingLeft() {
+    func onRoomLeft(reason: LeaveReason) {
         meeting?.localParticipant.removeEventListener(self)
         meeting?.removeEventListener(self)
     }
 
-    func onMeetingStateChanged(meetingState: MeetingState) {
-        switch meetingState {
+    func onRoomStateChanged(roomState: RoomState) {
+        switch roomState {
 
-        case .CLOSED:
+        case .DISCONNECTED:
             participants.removeAll()
 
         default:
@@ -89,9 +101,8 @@ extension LiveStreamViewController: MeetingEventListener {
            DispatchQueue.main.async { [weak self] in
                if var currentParticipants = self?.participants {
                    // Find and update the participant whose mode changed
-                   if let index = currentParticipants.firstIndex(where: { $0.id == participantId }) {
-                       currentParticipants[index].mode = mode
-                       // Update the published array to trigger refresh
+                   // the SDK has already updated the participant's mode; republish to trigger a refresh
+                   if currentParticipants.contains(where: { $0.id == participantId }) {
                        self?.participants = currentParticipants
                    }
                }
@@ -100,7 +111,7 @@ extension LiveStreamViewController: MeetingEventListener {
 }
 
 extension LiveStreamViewController: ParticipantEventListener {
-    func onStreamEnabled(_ stream: MediaStream, forParticipant participant: Participant) {
+    func onStreamEnabled(_ stream: RTCStream, forParticipant participant: Participant) {
         if participant.isLocal   {
             if let track = stream.track as? RTCVideoTrack {
                 DispatchQueue.main.async {
@@ -116,7 +127,7 @@ extension LiveStreamViewController: ParticipantEventListener {
         }
     }
 
-    func onStreamDisabled(_ stream: MediaStream, forParticipant participant: Participant) {
+    func onStreamDisabled(_ stream: RTCStream, forParticipant participant: Participant) {
 
         if participant.isLocal {
             if let _ = stream.track as? RTCVideoTrack {
