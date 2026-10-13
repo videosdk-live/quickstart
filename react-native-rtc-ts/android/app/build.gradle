@@ -117,5 +117,4 @@ dependencies {
         implementation jscFlavor
     }
 
-    implementation project(':rnwebrtc')
 }

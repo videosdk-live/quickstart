@@ -104,17 +104,17 @@ Token is used to create and validate a meeting using API and also initialise a m
 
 ## [Initialize a Meeting](https://docs.videosdk.live/react-native/api/sdk-reference/meeting-provider)
 
-- You can initialize the meeting using `MeetingProvider`. Meeting Provider simplifies configuration of meeting with by wrapping up core logic with `react-context`.
+- You can initialize the meeting using `RoomProvider` (called `MeetingProvider` before 2.0.0). It simplifies configuration of the meeting by wrapping up core logic with `react-context`.
 
 ```js
-<MeetingProvider
+<RoomProvider
   config={{
-    meetingId: 'meeting-id',
+    roomId: 'meeting-id',
     micEnabled: true,
-    webcamEnabled: true,
-    name: 'Participant Name',
+    camEnabled: true,
+    participantName: 'Participant Name',
   }}
-  token={'token'}></MeetingProvider>
+  token={'token'}></RoomProvider>
 ```
 
 <br/>
@@ -122,11 +122,11 @@ Token is used to create and validate a meeting using API and also initialise a m
 ## [Enable/Disable Local Webcam](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/handling-media/on-off-camera)
 
 ```js
-const {toggleWebcam} = useMeeting();
+const {toggleCam} = useRoom();
 
 const onPress = () => {
   // Enable/Disable Webcam in Meeting
-  toggleWebcam();
+  toggleCam();
 };
 ```
 
@@ -135,7 +135,7 @@ const onPress = () => {
 ## [Mute/Unmute Local Audio](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/handling-media/mute-unmute-mic)
 
 ```js
-const {toggleMic} = useMeeting();
+const {toggleMic} = useRoom();
 
 const onPress = () => {
   // Enable/Disable Mic in Meeting
@@ -148,7 +148,7 @@ const onPress = () => {
 ## [Leave or End Meeting](https://docs.videosdk.live/react-native/guide/video-and-audio-calling-api-sdk/setup-call/leave-end-meeting)
 
 ```js
-const {leave, end} = useMeeting();
+const {leave, end} = useRoom();
 
 const onPress = () => {
   // Leave Meeting
@@ -166,18 +166,18 @@ const onPress = () => {
 By registering callback handlers, VideoSDK sends callbacks to the client app whenever there is a change or update in the meeting after a user joins.
 
 ```js
-function onMeetingJoined() {
+function onRoomJoined() {
   // This event will be emitted when a localParticipant(you) successfully joined the meeting.
-  console.log('onMeetingJoined');
+  console.log('onRoomJoined');
 }
-function onMeetingLeft() {
+function onRoomLeft() {
   // This event will be emitted when a localParticipant(you) left the meeting.
-  console.log('onMeetingLeft');
+  console.log('onRoomLeft');
 }
 
-const {meetingId, meeting, localParticipant} = useMeeting({
-  onMeetingJoined,
-  onMeetingLeft,
+const {roomId, room, localParticipant} = useRoom({
+  onRoomJoined,
+  onRoomLeft,
 });
 ```
 

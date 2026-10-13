@@ -5,7 +5,7 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '18.0'
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -23,7 +23,7 @@ target 'LatestReactNative' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  pod 'react-native-webrtc', :path => '../node_modules/@videosdk.live/react-native-webrtc'
+  pod 'VideoSDKRTC', :podspec => '../node_modules/@videosdk.live/react-native-sdk/ios/VideoSDKRTC.podspec'
 
   post_install do |installer|
     react_native_post_install(
