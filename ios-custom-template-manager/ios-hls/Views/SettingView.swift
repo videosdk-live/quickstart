@@ -9,7 +9,7 @@ import SwiftUI
 import VideoSDKRTC
 
 struct SettingView: View {
-    var meeting: Meeting? = nil
+    var meeting: Room? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var hexInput: String = ""
     @State private var isPublishingColor: Bool = false
@@ -159,7 +159,7 @@ struct SettingView: View {
         defer { isPublishingColor = false }
         
         do {
-            try await meeting.pubsub.publish(topic: "CHANGE_BACKGROUND", message: hex)
+            try await meeting.pubSub.publish(topic: "CHANGE_BACKGROUND", message: hex)
         } catch {
             await MainActor.run {
                 colorErrorMessage = "Failed to publish color: \(error.localizedDescription)"
@@ -184,7 +184,7 @@ struct SettingView: View {
         defer { isPublishingMessage = false }
         
         do {
-            try await meeting.pubsub.publish(topic: "VIEWER_MESSAGE", message: message)
+            try await meeting.pubSub.publish(topic: "VIEWER_MESSAGE", message: message)
             await MainActor.run {
                 viewerMessage = ""
             }
