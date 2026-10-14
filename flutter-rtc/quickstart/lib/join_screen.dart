@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'api_call.dart';
-import 'meeting_screen.dart';
+import 'room_screen.dart';
 
 class JoinScreen extends StatelessWidget {
-  final _meetingIdController = TextEditingController();
+  final _roomIdController = TextEditingController();
 
   JoinScreen({super.key});
 
   void onCreateButtonPressed(BuildContext context) async {
-    // call api to create meeting and navigate to MeetingScreen with meetingId,token
-    await createMeeting().then((meetingId) {
+    // call api to create room and then navigate to RoomScreen with roomId,token
+    await createRoomId().then((roomId) {
       if (!context.mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => MeetingScreen(
-            meetingId: meetingId,
+          builder: (context) => RoomScreen(
+            roomId: roomId,
             token: token,
           ),
         ),
@@ -23,23 +23,23 @@ class JoinScreen extends StatelessWidget {
   }
 
   void onJoinButtonPressed(BuildContext context) {
-    // check meeting id is not null or invaild
-    // if meeting id is vaild then navigate to MeetingScreen with meetingId,token
-    String meetingId = _meetingIdController.text;
+    String roomId = _roomIdController.text;
     var re = RegExp("\\w{4}\\-\\w{4}\\-\\w{4}");
-    if (meetingId.isNotEmpty && re.hasMatch(meetingId)) {
-      _meetingIdController.clear();
+    // check room id is not null or invaild
+    // if room id is vaild then navigate to RoomScreen with roomId,token
+    if (roomId.isNotEmpty && re.hasMatch(roomId)) {
+      _roomIdController.clear();
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => MeetingScreen(
-            meetingId: meetingId,
+          builder: (context) => RoomScreen(
+            roomId: roomId,
             token: token,
           ),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please enter valid meeting id"),
+        content: Text("Please enter valid room id"),
       ));
     }
   }
@@ -57,21 +57,21 @@ class JoinScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () => onCreateButtonPressed(context),
-              child: const Text('Create Meeting'),
+              child: const Text('Create Room'),
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
               child: TextField(
                 decoration: const InputDecoration(
-                  hintText: 'Meeting Id',
+                  hintText: 'Room Id',
                   border: OutlineInputBorder(),
                 ),
-                controller: _meetingIdController,
+                controller: _roomIdController,
               ),
             ),
             ElevatedButton(
               onPressed: () => onJoinButtonPressed(context),
-              child: const Text('Join Meeting'),
+              child: const Text('Join Room'),
             ),
           ],
         ),

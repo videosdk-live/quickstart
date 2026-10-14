@@ -3,7 +3,7 @@ import 'package:videosdk/videosdk.dart';
 
 class ParticipantTile extends StatelessWidget {
   final Participant participant;
-  final Stream? videoStream;
+  final RTCStream? videoStream;
 
   const ParticipantTile({
     super.key,

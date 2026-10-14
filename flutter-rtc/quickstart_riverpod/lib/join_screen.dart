@@ -1,39 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api_call.dart';
-import 'meeting_screen.dart';
+import 'room_screen.dart';
 
 class JoinScreen extends ConsumerWidget {
-  final TextEditingController _meetingIdController = TextEditingController();
+  final TextEditingController _roomIdController = TextEditingController();
 
   JoinScreen({super.key});
 
   void onCreateButtonPressed(BuildContext context, WidgetRef ref) async {
-    final meetingId = await createMeeting();
+    // call api to create room and then navigate to RoomScreen with roomId,token
+    final roomId = await createRoomId();
     if (context.mounted) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => MeetingScreen(meetingId: meetingId, token: token),
+          builder: (_) => RoomScreen(roomId: roomId, token: token),
         ),
       );
     }
   }
 
   void onJoinButtonPressed(BuildContext context, WidgetRef ref) {
-    final meetingId = _meetingIdController.text.trim();
+    final roomId = _roomIdController.text.trim();
     final re = RegExp(r'\w{4}-\w{4}-\w{4}');
-    if (meetingId.isNotEmpty && re.hasMatch(meetingId)) {
-      _meetingIdController.clear();
+
+    // check room id is not null or invaild
+    // if room id is vaild then navigate to RoomScreen with roomId,token
+    if (roomId.isNotEmpty && re.hasMatch(roomId)) {
+      _roomIdController.clear();
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => MeetingScreen(meetingId: meetingId, token: token),
+          builder: (_) => RoomScreen(roomId: roomId, token: token),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid meeting ID")),
+        const SnackBar(content: Text("Please enter a valid room ID")),
       );
     }
   }
@@ -49,21 +53,21 @@ class JoinScreen extends ConsumerWidget {
           children: [
             ElevatedButton(
               onPressed: () => onCreateButtonPressed(context, ref),
-              child: const Text('Create Meeting'),
+              child: const Text('Create Room'),
             ),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               child: TextField(
-                controller: _meetingIdController,
+                controller: _roomIdController,
                 decoration: const InputDecoration(
-                  hintText: 'Meeting ID',
+                  hintText: 'Room ID',
                   border: OutlineInputBorder(),
                 ),
               ),
             ),
             ElevatedButton(
               onPressed: () => onJoinButtonPressed(context, ref),
-              child: const Text('Join Meeting'),
+              child: const Text('Join Room'),
             ),
           ],
         ),

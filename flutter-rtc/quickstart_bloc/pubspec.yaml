@@ -34,9 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  videosdk: ^2.2.0
+  videosdk: ^5.0.0
+  permission_handler: ^12.0.1
   http: ^1.4.0
-  bloc: ^9.0.0
   equatable: ^2.0.7
   flutter_bloc: ^9.1.1
 
@@ -56,6 +56,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # The SDK's iOS plugin ships as a Swift Package.
+  config:
+    enable-swift-package-manager: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

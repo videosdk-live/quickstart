@@ -4,9 +4,9 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 class LivestreamPlayer extends StatefulWidget {
   final String playbackHlsUrl;
   const LivestreamPlayer({
-    Key? key,
+    super.key,
     required this.playbackHlsUrl,
-  }) : super(key: key);
+  });
 
   @override
   LivestreamPlayerState createState() => LivestreamPlayerState();
@@ -22,6 +22,7 @@ class LivestreamPlayerState extends State<LivestreamPlayer>
   @override
   void initState() {
     super.initState();
+    //initializing the player
     _controller = VlcPlayerController.network(widget.playbackHlsUrl,
         options: VlcPlayerOptions());
   }
@@ -35,6 +36,7 @@ class LivestreamPlayerState extends State<LivestreamPlayer>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    //rendering the VlcPlayer
     return VlcPlayer(
       controller: _controller,
       aspectRatio: 9 / 16,

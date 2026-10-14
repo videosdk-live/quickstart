@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutterils/api_call.dart';
-import 'package:flutterils/ils_screen.dart';
-
 import 'package:videosdk/videosdk.dart';
+import 'api_call.dart';
+import 'ils_screen.dart';
 
 class JoinScreen extends StatelessWidget {
   final _livestreamIdController = TextEditingController();
 
   JoinScreen({super.key});
 
-  //Creates new livestream Id and joins it in CONFERNCE mode.
+  //Creates new livestream Id and joins it in SEND_AND_RECV mode.
   void onCreateButtonPressed(BuildContext context) async {
     // call api to create livestream and navigate to ILSScreen with livestreamId,token and mode
     await createLivestream().then((liveStreamId) {

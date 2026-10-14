@@ -1,7 +1,9 @@
+import 'dart:async' show unawaited;
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutterils/ils_view.dart';
-import 'package:flutterils/join_screen.dart';
 import 'package:videosdk/videosdk.dart';
+import 'ils_view.dart';
+import 'join_screen.dart';
 
 class ILSScreen extends StatefulWidget {
   final String liveStreamId;
@@ -25,15 +27,15 @@ class _ILSScreenState extends State<ILSScreen> {
 
   @override
   void initState() {
+    super.initState();
     // create room when widget loads
     _room = VideoSDK.createRoom(
       roomId: widget.liveStreamId,
       token: widget.token,
-      displayName: "John Doe",
+      participantName: "John Doe",
       micEnabled: true,
       camEnabled: true,
-      defaultCameraIndex:
-          1, // Index of MediaDevices will be used to set default camera
+      defaultCamera: FacingMode.FRONT, // camera used when the livestream starts
       mode: widget.mode,
     );
     localParticipantMode = widget.mode;
@@ -41,16 +43,34 @@ class _ILSScreenState extends State<ILSScreen> {
     setLivestreamEventListener();
 
     // Joining room
-    _room.join();
+    unawaited(joinRoom());
+  }
 
-    super.initState();
+  Future<void> joinRoom() async {
+    // On Android, the SDK does not ask for camera and microphone permission.
+    if (widget.mode == Mode.SEND_AND_RECV) {
+      await VideoSDK.requestPermissions();
+    }
+    try {
+      await _room.join();
+    } on VideoSDKError catch (error) {
+      log("Could not join the livestream: ${error.code} ${error.name}");
+    }
+  }
+
+  Future<void> pinLocalParticipant() async {
+    try {
+      await _room.localParticipant.pin();
+    } on VideoSDKError catch (error) {
+      log("Could not pin: ${error.code} ${error.name}");
+    }
   }
 
   // listening to room events
   void setLivestreamEventListener() {
     _room.on(Events.roomJoined, () {
       if (widget.mode == Mode.SEND_AND_RECV) {
-        _room.localParticipant.pin();
+        unawaited(pinLocalParticipant());
       }
       setState(() {
         localParticipantMode = _room.localParticipant.mode;
@@ -68,16 +88,24 @@ class _ILSScreenState extends State<ILSScreen> {
     });
   }
 
-  // onbackButton pressed leave the room
-  Future<bool> _onWillPop() async {
-    _room.leave();
-    return true;
+  Future<void> leaveRoom() async {
+    try {
+      await _room.leave();
+    } on VideoSDKError catch (error) {
+      // 3054: the room has already left the livestream.
+      if (error.code != 3054) {
+        log("Could not leave the livestream: ${error.code} ${error.name}");
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onWillPop(),
+    return PopScope(
+      // leave the livestream when the back button closes the screen
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) unawaited(leaveRoom());
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

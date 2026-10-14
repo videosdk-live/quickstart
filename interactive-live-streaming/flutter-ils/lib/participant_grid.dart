@@ -1,39 +1,33 @@
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'participant_tile.dart';
 import 'package:videosdk/videosdk.dart';
 
-class ParticipantGridTile extends StatefulWidget {
-  final Participant participant;
-  final bool isLocalParticipant;
-  const ParticipantGridTile({
-    Key? key,
-    required this.participant,
-
-    this.isLocalParticipant = false,
-  }) : super(key: key);
+class ParticipantGrid extends StatefulWidget {
+  final Room room;
+  const ParticipantGrid({Key? key, required this.room}) : super(key: key);
 
   @override
-  State<ParticipantGridTile> createState() => _ParticipantGridTileState();
+  State<ParticipantGrid> createState() => _ParticipantGridState();
 }
 
-class _ParticipantGridTileState extends State<ParticipantGridTile> {
-  Stream? videoStream;
-  Stream? audioStream;
+class _ParticipantGridState extends State<ParticipantGrid> {
+  late Participant localParticipant;
+  int numberofColumns = 1;
+  int numberOfMaxOnScreenParticipants = 6;
+  Map<String, Participant> participants = {};
+  Map<String, Participant> onScreenParticipants = {};
 
   @override
   void initState() {
-    _initStreamListeners();
-    super.initState();
+    localParticipant = widget.room.localParticipant;
+    participants.putIfAbsent(localParticipant.id, () => localParticipant);
+    participants.addAll(widget.room.participants);
+    updateOnScreenParticipants();
+    // Setting livestream event listeners
+    setLivestreamEventListener(widget.room);
 
-    widget.participant.streams.forEach((key, Stream stream) {
-      setState(() {
-        if (stream.kind == 'video') {
-          videoStream = stream;
-        } else if (stream.kind == 'audio') {
-          audioStream = stream;
-        }
-      });
-    });
+    super.initState();
   }
 
   @override
@@ -45,79 +39,160 @@ class _ParticipantGridTileState extends State<ParticipantGridTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.black12,
-      ),
-      child: Stack(
-        children: [
-          videoStream != null
-              ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: RTCVideoView(
-                  videoStream?.renderer as RTCVideoRenderer,
-                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                ),
-              )
-              : Center(
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.black12,
+    return Flex(
+      direction: Axis.vertical,
+      children: [
+        for (int i = 0;
+            i < (onScreenParticipants.length / numberofColumns).ceil();
+            i++)
+          Flexible(
+            child: Flex(
+              direction: Axis.vertical,
+              children: [
+                for (int j = 0;
+                    j <
+                        onScreenParticipants.values
+                            .toList()
+                            .sublist(
+                              i * numberofColumns,
+                              (i + 1) * numberofColumns >
+                                      onScreenParticipants.length
+                                  ? onScreenParticipants.length
+                                  : (i + 1) * numberofColumns,
+                            )
+                            .length;
+                    j++)
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: ParticipantTile(
+                        room: widget.room,
+                        key: Key(
+                          onScreenParticipants.values
+                              .toList()
+                              .sublist(
+                                i * numberofColumns,
+                                (i + 1) * numberofColumns >
+                                        onScreenParticipants.length
+                                    ? onScreenParticipants.length
+                                    : (i + 1) * numberofColumns,
+                              )
+                              .elementAt(j)
+                              .id,
+                        ),
+                        participant: onScreenParticipants.values
+                            .toList()
+                            .sublist(
+                              i * numberofColumns,
+                              (i + 1) * numberofColumns >
+                                      onScreenParticipants.length
+                                  ? onScreenParticipants.length
+                                  : (i + 1) * numberofColumns,
+                            )
+                            .elementAt(j),
+                      ),
+                    ),
                   ),
-                  child: Text(
-                    widget.participant.displayName.characters.first
-                        .toUpperCase(),
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                ),
-              ),
-        ],
-      ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
-  _initStreamListeners() {
-    widget.participant.on(Events.streamEnabled, (Stream _stream) {
+  void setLivestreamEventListener(Room livestream) {
+    // Called when participant joined livestream
+    livestream.on(Events.participantJoined, (Participant participant) {
+      final newParticipants = participants;
+      newParticipants[participant.id] = participant;
       setState(() {
-        if (_stream.kind == 'video') {
-          videoStream = _stream;
-        } else if (_stream.kind == 'audio') {
-          audioStream = _stream;
-        }
+        participants = newParticipants;
+        updateOnScreenParticipants();
       });
     });
 
-    widget.participant.on(Events.streamDisabled, (Stream _stream) {
+    // Called when participant left livestream
+    livestream.on(Events.participantLeft,
+        (Participant participant, LeaveReason reason) {
+      final newParticipants = participants;
+
+      newParticipants.remove(participant.id);
       setState(() {
-        if (_stream.kind == 'video' && videoStream?.id == _stream.id) {
-          videoStream = null;
-        } else if (_stream.kind == 'audio' && audioStream?.id == _stream.id) {
-          audioStream = null;
-        }
+        participants = newParticipants;
+        updateOnScreenParticipants();
       });
     });
 
-    widget.participant.on(Events.streamPaused, (Stream _stream) {
+    livestream.on(Events.participantModeChanged, (Map<String, dynamic> data) {
+      // participant.mode is already updated.
+      Map<String, Participant> _participants = {};
+      Participant _localParticipant = widget.room.localParticipant;
+      _participants.putIfAbsent(_localParticipant.id, () => _localParticipant);
+      _participants.addAll(livestream.participants);
       setState(() {
-        if (_stream.kind == 'video' && videoStream?.id == _stream.id) {
-          videoStream = null;
-        } else if (_stream.kind == 'audio' && audioStream?.id == _stream.id) {
-          audioStream = _stream;
-        }
+        localParticipant = _localParticipant;
+        participants = _participants;
+        updateOnScreenParticipants();
       });
     });
 
-    widget.participant.on(Events.streamResumed, (Stream _stream) {
-      setState(() {
-        if (_stream.kind == 'video' && videoStream?.id == _stream.id) {
-          videoStream = _stream;
-        } else if (_stream.kind == 'audio' && audioStream?.id == _stream.id) {
-          audioStream = _stream;
-        }
-      });
+    // Stream events are delivered on the room; keep only the local screen share.
+    livestream.on(Events.streamEnabled, (RTCStream stream) {
+      if (stream.kind == MediaType.SHARE &&
+          stream.participantId == livestream.localParticipant.id) {
+        setState(() {
+          numberOfMaxOnScreenParticipants = 2;
+          updateOnScreenParticipants();
+        });
+      }
     });
+
+    livestream.on(Events.streamDisabled, (RTCStream stream) {
+      if (stream.kind == MediaType.SHARE &&
+          stream.participantId == livestream.localParticipant.id) {
+        setState(() {
+          numberOfMaxOnScreenParticipants = 6;
+          updateOnScreenParticipants();
+        });
+      }
+    });
+  }
+
+  updateOnScreenParticipants() {
+    Map<String, Participant> newScreenParticipants = <String, Participant>{};
+    List<Participant> conferenceParticipants = participants.values
+        .where((element) => element.mode == Mode.SEND_AND_RECV)
+        .toList();
+
+    conferenceParticipants
+        .sublist(
+      0,
+      conferenceParticipants.length > numberOfMaxOnScreenParticipants
+          ? numberOfMaxOnScreenParticipants
+          : conferenceParticipants.length,
+    )
+        .forEach((participant) {
+      newScreenParticipants.putIfAbsent(participant.id, () => participant);
+    });
+    if (!listEquals(
+      newScreenParticipants.keys.toList(),
+      onScreenParticipants.keys.toList(),
+    )) {
+      setState(() {
+        onScreenParticipants = newScreenParticipants;
+      });
+    }
+    if (numberofColumns !=
+        (newScreenParticipants.length > 2 ||
+                numberOfMaxOnScreenParticipants == 2
+            ? 2
+            : 1)) {
+      setState(() {
+        numberofColumns = newScreenParticipants.length > 2 ||
+                numberOfMaxOnScreenParticipants == 2
+            ? 2
+            : 1;
+      });
+    }
   }
 }

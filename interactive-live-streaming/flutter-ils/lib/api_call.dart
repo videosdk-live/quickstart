@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 //Auth token we will use to generate a liveStream and connect to it
-String token = dotenv.env['AUTH_TOKEN']!;
+String token = "<GENERATED_TOKEN_HERE>";
+
 // API call to create livestream
 Future<String> createLivestream() async {
   final Uri getlivestreamIdUrl =

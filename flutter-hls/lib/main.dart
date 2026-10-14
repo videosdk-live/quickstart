@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'VideoSDK ILS QuickStart',
+      title: 'VideoSDK QuickStart',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

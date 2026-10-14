@@ -1,36 +1,36 @@
 # Video SDK for Flutter (Android and iOS)
 
-[![Documentation](https://img.shields.io/badge/Read-Documentation-blue)](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/getting-started)
+[![Documentation](https://img.shields.io/badge/Read-Documentation-blue)](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/flutter-sdk)
 [![Discord](https://img.shields.io/discord/876774498798551130?label=Join%20on%20Discord)](https://discord.gg/bGZtAbwvab)
 [![Register](https://img.shields.io/badge/Contact-Know%20More-blue)](https://app.videosdk.live/signup)
 
 At Video SDK, we’re building tools to help companies create world-class collaborative products with capabilities of live audio/videos, compose cloud recordings/rtmp/hls and interaction APIs.
 
+This example livestreams a room over HLS with a [custom template](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/hls/custom-template). The host can change the livestream background and send messages to the viewers. It uses Flutter SDK v5.0.0. If you are upgrading your own app from v4.0.1, follow the [Migration Guide](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/migration-guide).
+
 ## Setup Guide
 
 - Sign up on [VideoSDK](https://app.videosdk.live/) and visit [API Keys](https://app.videosdk.live/api-keys) section to get your API key and Secret key.
 
-- Get familiarized with [API key and Secret key](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/signup-and-create-api)
-
-- Get familiarized with [Token](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/server-setup)
+- Get familiarized with [Authentication and Tokens](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/authentication-and-tokens)
 
 <br/>
 
 ## Prerequisites
 
+- Flutter 3.41 or later.
 - If your target platform is iOS, your development environment must meet the following requirements:
-  - Flutter 2.0 or later
-  - Dart 2.12.0 or later
   - macOS
   - Xcode (Latest version recommended)
+  - An iPhone or iPad on iOS 18.0 or later, or the iOS Simulator on a Mac with Apple silicon. The iOS Simulator on an Intel Mac is not supported.
 - If your target platform is Android, your development environment must meet the following requirements:
-  - Flutter 2.0 or later
-  - Dart 2.12.0 or later
-  - macOS or Windows
+  - macOS, Windows or Linux
   - Android Studio (Latest version recommended)
-- If your target platform is iOS, you need a real iOS device.
-- If your target platform is Android, you need an Android simulator or a real Android device.
+  - An arm64 Android device on Android 7.0 (API level 24) or later, or an emulator with an arm64-v8a system image. 32-bit ARM devices and x86 or x86_64 emulators are not supported.
+- Web, macOS and Windows are not supported.
 - Valid Video SDK [Account](https://app.videosdk.live/)
+
+See [Supported Device OS](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/supported-browser-and-device-os) and [Known Issues](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/known-issues) for details.
 
 <br/>
 
@@ -58,7 +58,7 @@ flutter pub get
 Update the api_call.dart file with your Authentication Token generated from [VideoSDK Dashboard](https://app.videosdk.live/api-keys).
 
 ```js
-const token = "<Generated-from-dashboard>";
+String token = "<Generated-from-dashboard>";
 ```
 
 ### 4. Run the sample app
@@ -73,32 +73,59 @@ flutter run
 
 ## Key Concepts
 
-- `Meeting` - A Meeting represents Real time audio and video communication.
+- `Room` - A Room represents Real time audio and video communication.
 
   **`Note : Don't confuse with Room and Meeting keyword, both are same thing 😃`**
 
-- `Sessions` - A particular duration you spend in a given meeting is a referred as session, you can have multiple session of a particular meetingId.
-- `Participant` - Participant represents someone who is attending the meeting's session, `local partcipant` represents self (You), for this self, other participants are `remote participants`.
+- `Sessions` - A particular duration you spend in a given room is a referred as session, you can have multiple session of a particular roomId.
+- `Participant` - Participant represents someone who is attending the room's session, `local partcipant` represents self (You), for this self, other participants are `remote participants`.
 - `Stream` - Stream means video or audio media content that is either published by `local participant` or `remote participants`.
+- `Mode` - The host joins in `Mode.SEND_AND_RECV` and sends audio and video. A viewer joins in `Mode.SIGNALLING_ONLY` and watches the HLS livestream.
 
 <br/>
 
-## Android Permission
+## Android Setup
 
 Add all the following permissions to AndroidManifest.xml file.
 
 ```
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 ```
 
-## iOS Permission
+In `android/app/build.gradle.kts`, use Java 17, set `minSdk` to 24 and build for arm64-v8a only:
+
+```
+android {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    defaultConfig {
+        minSdk = 24
+        ndk {
+            abiFilters.add("arm64-v8a")
+        }
+    }
+}
+```
+
+Add `disable-abi-filtering=true` to `android/gradle.properties`, and keep the SDK's classes in release builds with `android/app/proguard-rules.pro`:
+
+```
+-keep class videosdk.org.** { *; }
+-dontwarn videosdk.org.**
+```
+
+## iOS Setup
 
 Add the following entry to your Info.plist file, located at `<project root>/ios/Runner/Info.plist`:
 
@@ -109,11 +136,19 @@ Add the following entry to your Info.plist file, located at `<project root>/ios/
 <string>$(PRODUCT_NAME) Microphone Usage!</string>
 ```
 
+The SDK's iOS plugin ships as a Swift Package. Turn on Swift Package Manager in `pubspec.yaml`, and set the iOS deployment target to 18.0 (`platform :ios, '18.0'` in the Podfile):
+
+```
+flutter:
+  config:
+    enable-swift-package-manager: true
+```
+
 <br/>
 
 ## Token Generation
 
-Token is used to create and validate a meeting using API and also initialise a meeting.
+Token is used to create and validate a room using API and also initialise a room.
 
 🛠️ `Development Environment`:
 
@@ -125,71 +160,98 @@ Token is used to create and validate a meeting using API and also initialise a m
 
 <br/>
 
-## API: Create and Validate meeting
+## API: Create and Validate room
 
-- `create meeting` - Please refer this [documentation](https://docs.videosdk.live/api-reference/realtime-communication/create-room) to create meeting.
-- `validate meeting`- Please refer this [documentation](https://docs.videosdk.live/api-reference/realtime-communication/validate-room) to validate the meetingId.
+- `create room` - Please refer this [documentation](https://docs.videosdk.live/api-reference/realtime-communication/create-room) to create room.
+- `validate room`- Please refer this [documentation](https://docs.videosdk.live/api-reference/realtime-communication/validate-room) to validate the roomId.
 
 <br/>
 
-## [Initialize a Meeting](https://docs.videosdk.live/flutter/api/sdk-reference/videosdk-class/methods#createroom)
+## [Initialize a Room](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/setup-call/initialise-meeting)
 
-- You can initialize the meeting using `createRoom()` method. `createRoom()` will generate a new `Room` object and the initiated meeting will be returned.
+- You can initialize the room using `createRoom()` method. `createRoom()` will generate a new `Room` object and the initiated room will be returned.
+- On Android, the SDK does not ask for camera and microphone permission, so ask with `VideoSDK.requestPermissions()` before the host joins.
+- `join()` throws a `VideoSDKError` when it fails.
 
 ```js
 Room room = VideoSDK.createRoom(
   roomId: "abcd-efgh-ijkl",
   token: "YOUR TOKEN",
-  displayName: "GUEST",
+  participantName: "GUEST",
   micEnabled: true,
   camEnabled: true,
-  defaultCameraIndex: 1,
+  defaultCamera: FacingMode.FRONT,
+  mode: Mode.SEND_AND_RECV, // Mode.SIGNALLING_ONLY for a viewer
 );
+
+await VideoSDK.requestPermissions();
+try {
+  await room.join();
+} on VideoSDKError catch (error) {
+  log("Could not join the room: ${error.code} ${error.name}");
+}
 ```
 
 <br/>
 
-## [Mute/Unmute Local Audio](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/features/mic-controls)
+## [Mute/Unmute Local Audio](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/handling-media/mute-unmute-mic)
 
 ```js
 // unmute mic
-room.unmuteMic();
+await room.unmuteMic();
 
 // mute mic
-room.muteMic();
+await room.muteMic();
 ```
 
 <br/>
 
-## [Enable/Disable Local Webcam](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/features/camera-controls)
+## [Enable/Disable Local Webcam](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/handling-media/on-off-camera)
 
 ```js
 // enable webcam
-room.enableCam();
+await room.enableCam();
 
 // disable webcam
-room.disableCam();
+await room.disableCam();
+```
+
+These actions return a `Future` that throws a `VideoSDKError` when the action fails, so await them inside `try` / `catch`.
+
+<br/>
+
+## [Leave or End Room](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/setup-call/leave-end-meeting)
+
+```js
+// Only one participant will leave/exit the room; the rest of the participants will remain.
+await room.leave();
+
+// The room will come to an end for each and every participant. So, use this function in accordance with your requirements.
+await room.end();
 ```
 
 <br/>
 
-## [Leave or End Meeting](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/features/leave-end-room)
+## [Start HLS with a Custom Template](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/hls/custom-template)
+
+To use a custom template, the host calls the [Start HLS API](https://docs.videosdk.live/api-reference/realtime-communication/start-hlsStream) with the `templateUrl`, instead of the `startHLS()` method of the `Room` class. See `startHls()` in `lib/hls_speaker_view.dart`.
 
 ```js
-// Only one participant will leave/exit the meeting; the rest of the participants will remain.
-room.leave();
+String templateUrl =
+    'https://lab.videosdk.live/react-custom-template-demo?meetingId=${room.id}&token=$token';
 
-// The meeting will come to an end for each and every participant. So, use this function in accordance with your requirements.
-room.end();
-```
-
-<br/>
-
-## [Start HLS](https://docs.videosdk.live/flutter/guide/interactive-live-streaming/integrate-hls/start-hls)
-
-```js
-// start hls
-room.startHls(config: config);
+await http.post(
+  Uri.parse('https://api.videosdk.live/v2/hls/start'),
+  headers: {
+    'Authorization': token,
+    'Content-Type': "application/json",
+  },
+  body: utf8.encode(json.encode({
+    "roomId": room.id,
+    "templateUrl": templateUrl,
+    "config": {"orientation": "portrait"},
+  })),
+);
 ```
 
 <br/>
@@ -198,84 +260,95 @@ room.startHls(config: config);
 
 ```js
 // stop hls
-room.stopHls();
+await room.stopHLS();
+```
+
+<br/>
+
+## [Send Messages to the Template](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/collaboration-in-meeting/pubsub)
+
+The host changes the livestream background and notifies the viewers by publishing on the topics the template listens to. See `lib/setting_dialog_widget.dart`.
+
+```js
+try {
+  await room.pubSub.publish("CHANGE_BACKGROUND", "#1A1C22");
+  await room.pubSub.publish("VIEWER_MESSAGE", "Welcome to the livestream!");
+} on VideoSDKError catch (error) {
+  log("Could not publish: ${error.code} ${error.name}");
+}
 ```
 
 <br/>
 
 ## [Listen for Room Events](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events)
 
-By registering callback handlers, VideoSDK sends callbacks to the client app whenever there is a change or update in the meeting after a user joins.
+By registering callback handlers, VideoSDK sends callbacks to the client app whenever there is a change or update in the room after a user joins.
 
 ```js
-room.on(
-  Events.roomJoined,
-  () {
-    // This event will be emitted when a localParticipant(you) successfully joined the meeting.
-  },
-);
+room.on(Events.roomJoined, () {
+  // This event will be emitted when a localParticipant(you) successfully joined the room.
+});
 
-room.on(Events.roomLeft, (String? errorMsg) {
-  // This event will be emitted when a localParticipant(you) left the meeting.
-  // [errorMsg]: It will have the message if meeting was left due to some error like Network problem
+room.on(Events.roomLeft, () {
+  // This event will be emitted when a localParticipant(you) left the room.
 });
 
 room.on(Events.participantJoined, (Participant participant) {
-  // This event will be emitted when a new participant joined the meeting.
-  // [participant]: new participant who joined the meeting
+  // This event will be emitted when a new participant joined the room.
+  // [participant]: new participant who joined the room
 });
 
-room.on(Events.participantLeft, (participantId) => {
-  // This event will be emitted when a joined participant left the meeting.
-  // [participantId]: id of participant who left the meeting
+room.on(Events.participantLeft, (Participant participant, LeaveReason reason) {
+  // This event will be emitted when a joined participant left the room.
+  // [participant]: participant who left the room
 });
-room.on(Events.hlsStateChanged, (Map<String, dynamic> data) {
-  // This event will be emitted whenever meeting HLS state changes.
-  // [data] : { state: String, playbackHlsUrl: String }
+
+room.on(Events.error, (VideoSDKError error) {
+  // This event will be emitted when the room reports an error.
 });
 ```
 
 <br/>
 
-## [Listen for Participant Events](https://docs.videosdk.live/flutter/api/sdk-reference/participant-class/events)
+## [Listen for Stream Events](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events)
 
-By registering callback handlers, VideoSDK sends callbacks to the client app whenever a participant's video, audio, or screen share stream is enabled or disabled.
+The room delivers stream events for every participant. `stream.participantId` says whose stream it is.
 
 ```js
-  participant.on(Events.streamEnabled, (Stream _stream) {
-    // This event will be triggered whenever a participant's video, audio or screen share stream is enabled.
-  });
+room.on(Events.streamEnabled, (RTCStream stream) {
+  // This event will be triggered whenever a participant's video, audio or screen share stream is enabled.
+});
 
-  participant.on(Events.stereamDisabled, (Stream _stream) {
-    // This event will be triggered whenever a participant's video, audio or screen share stream is disabled.
-  });
-
+room.on(Events.streamDisabled, (RTCStream stream) {
+  // This event will be triggered whenever a participant's video, audio or screen share stream is disabled.
+});
 ```
 
 <br/>
 
-## [Event associated with HLS](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events#hlsstatechanged)
+## [Event associated with HLS](https://docs.videosdk.live/flutter/api/sdk-reference/room-class/events)
 
-- `hlsStateChanged` - Whenever meeting HLS state changes, then `hlsStateChanged` event will trigger.
+- `hlsStateChanged` - Whenever room HLS state changes, then `hlsStateChanged` event will trigger.
 
 - You can get the `playbackHlsUrl` of the HLS to play it on the Viewer side when the state changes to `HLS_PLAYABLE`
 
 ```js
-room.on(Events.hlsStateChanged, (Map<String, dynamic> data) {
-  //Status can be :: HLS_STARTING
-  //Status can be :: HLS_STARTED
-  //Status can be :: HLS_PLAYABLE
-  //Status can be :: HLS_STOPPING
-  //Status can be :: HLS_STOPPED
-  log("Meeting HLS status : ${data['status']}");
-  if (data['status'] == "HLS_PLAYABLE")
-    log("PLAYBACKHLS URL -- " + data['playbackHlsUrl']);
+room.on(Events.hlsStateChanged, (String state, HLSUrl? hlsUrl) {
+  //State can be :: HLS_STARTING
+  //State can be :: HLS_STARTED
+  //State can be :: HLS_PLAYABLE
+  //State can be :: HLS_STOPPING
+  //State can be :: HLS_STOPPED
+  log("Room HLS state : $state");
+  if (state == "HLS_PLAYABLE") {
+    log("PLAYBACKHLS URL -- ${hlsUrl?.playbackHlsUrl}");
+  }
 });
 ```
 
 <br/>
 
-If you want to learn more about the SDK, read the Complete Documentation of [Flutter VideoSDK](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/getting-started)
+If you want to learn more about the SDK, read the Complete Documentation of [Flutter VideoSDK](https://docs.videosdk.live/flutter/guide/video-and-audio-calling-api-sdk/flutter-sdk)
 
 <br/>
 
