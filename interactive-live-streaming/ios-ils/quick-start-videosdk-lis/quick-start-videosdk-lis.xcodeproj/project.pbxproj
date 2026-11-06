@@ -362,7 +362,7 @@
 			repositoryURL = "https://github.com/videosdk-live/videosdk-rtc-ios-spm";
 			requirement = {
 				kind = exactVersion;
-				version = 4.0.0;
+				version = 4.0.3;
 			};
 		};
 		2C9F93672D40028700FB0032 /* XCRemoteSwiftPackageReference "videosdk-rtc-ios-spm" */ = {
@@ -370,7 +370,7 @@
 			repositoryURL = "https://github.com/videosdk-live/videosdk-rtc-ios-spm";
 			requirement = {
 				kind = exactVersion;
-				version = 4.0.0;
+				version = 4.0.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
