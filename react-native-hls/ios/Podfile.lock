@@ -1765,10 +1765,10 @@ PODS:
     - Yoga
   - SocketRocket (0.7.1):
     - ReactNativeDependencies
-  - VideoSDKReactNative (2.0.0):
+  - VideoSDKReactNative (2.0.3):
     - React-Core
     - VideoSDKRTC
-  - VideoSDKRTC (4.0.0)
+  - VideoSDKRTC (4.0.3)
   - Yoga (0.0.0):
     - React-Core-prebuilt
 
@@ -2136,8 +2136,8 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: ec5530432d8191b38e278117d498aaff05ea9d6f
   RNCClipboard: f2c861be2669e65f3efa4618c22c95ba1b6dadda
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
-  VideoSDKReactNative: c454687ba1845afd6c2b14f1f3f95d3d31bcead7
-  VideoSDKRTC: 7f5c4a94f64fe8c60fe4b07da9a2c87c34904422
+  VideoSDKReactNative: b6dc54f6a2433b69f08d654ce8735cc8e12c7e78
+  VideoSDKRTC: 183808436d2d2f871812e3df3c2ca1f48f798390
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
 
 PODFILE CHECKSUM: 93e50baf1ed3b505303191f74364236c4aa0023c

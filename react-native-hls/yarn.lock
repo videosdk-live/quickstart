@@ -2107,17 +2107,17 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
 
-"@videosdk.live/hooks-core@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@videosdk.live/hooks-core/-/hooks-core-0.0.1.tgz#e96d9823ab27db596e6fbe89d6bdd510342904ec"
-  integrity sha512-VDY6iG1vUg9zGS1NewxEjWN0Wjom2n7spDFD2fZvgXsBirv6bbbriqpgAWxJmgz3F5Z/dR59TVxlGT7az63XCg==
+"@videosdk.live/hooks-core@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@videosdk.live/hooks-core/-/hooks-core-0.0.2.tgz#d4863d8bf3b05599f220c826838d4bcfe42a1119"
+  integrity sha512-AnJbuT2feQkiZMLoLi7kO/JMU6OasYqnzjDSQ3JetGVgfIdiqS3M/rzd9bKfwiTJkb7CKZN2Sg8a6SSpoDzrpg==
 
-"@videosdk.live/react-native-sdk@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@videosdk.live/react-native-sdk/-/react-native-sdk-2.0.0.tgz#57a75b6b31f6d95d1e5aa8951acfc92f42d9aac8"
-  integrity sha512-Wwv7xGqyN5Igjw7vzf7UfadfEZ1SXmS9tnLaHJApPQTHJJtYW9Ty485ccx2ZLJBBi0MUWTHcbwy6fiPo8T3RVQ==
+"@videosdk.live/react-native-sdk@2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@videosdk.live/react-native-sdk/-/react-native-sdk-2.0.3.tgz#9fbd3b648c86675e2e5a22fcc48584dc4be71140"
+  integrity sha512-Bf4QyKp7vS5n41Dw/vOGET2dDEJaeXLXnFl0/wW6gU182ceSGE+NpQLgyWvVGKX3PQeUAG9eaiJF2i48FAsEhw==
   dependencies:
-    "@videosdk.live/hooks-core" "0.0.1"
+    "@videosdk.live/hooks-core" "0.0.2"
     events "3.3.0"
 
 "@vscode/sudo-prompt@^9.0.0":
