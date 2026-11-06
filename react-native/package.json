@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@react-native/new-app-screen": "0.87.0",
-    "@videosdk.live/react-native-sdk": "2.0.0",
+    "@videosdk.live/react-native-sdk": "2.0.3",
     "react": "19.2.3",
     "react-native": "0.87.0",
     "react-native-safe-area-context": "^5.6.2"
