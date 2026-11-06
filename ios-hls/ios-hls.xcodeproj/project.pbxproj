@@ -369,7 +369,7 @@
 			repositoryURL = "https://github.com/videosdk-live/videosdk-rtc-ios-spm.git";
 			requirement = {
 				kind = exactVersion;
-				version = 4.0.0;
+				version = 4.0.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
