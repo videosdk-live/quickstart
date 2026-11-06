@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@videosdk.live/expo-config-plugin": "2.0.0",
-    "@videosdk.live/react-native-sdk": "2.0.0",
+    "@videosdk.live/react-native-sdk": "2.0.3",
     "expo": "~57.0.12",
     "expo-dev-client": "~57.0.20",
     "expo-status-bar": "~57.0.1",
