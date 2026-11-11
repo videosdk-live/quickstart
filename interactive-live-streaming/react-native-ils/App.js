@@ -103,7 +103,7 @@ function StreamView() {
   const { participants } = useRoom(); // Access participants using the VideoSDK useRoom hook
   const participantsArrId = Array.from(participants.entries())
     .filter(
-      ([_, participant]) => participant.mode === Constants.Mode.SEND_AND_RECV
+      ([_, participant]) => participant.mode === Constants.Mode.SEND_AND_RECV,
     )
     .map(([key]) => key);
 
@@ -143,10 +143,16 @@ function Participant({ participantId }) {
 
 // Component for managing stream controls
 function LSControls() {
-  const { leave, toggleMic, toggleCam, changeMode, room } = useRoom(); // Access methods
+  // localParticipant.mode does not refresh after changeMode, so keep the mode in state
+  const [currentMode, setCurrentMode] = useState(null);
+  const { leave, toggleMic, toggleCam, changeMode, room } = useRoom({
+    onParticipantModeChanged: ({ participantId, mode }) => {
+      if (participantId === room?.localParticipant?.id) setCurrentMode(mode);
+    },
+  }); // Access methods
   const { requestPermission } = useMediaDevice();
 
-  const currentMode = room.localParticipant.mode; // Get the current participant's mode
+  const activeMode = currentMode ?? room.localParticipant.mode; // Falls back to the join mode until a change happens
 
   const handleLeave = async () => {
     try {
@@ -174,7 +180,7 @@ function LSControls() {
 
   const handleChangeMode = async () => {
     const nextMode =
-      currentMode === Constants.Mode.SEND_AND_RECV
+      activeMode === Constants.Mode.SEND_AND_RECV
         ? Constants.Mode.RECV_ONLY
         : Constants.Mode.SEND_AND_RECV;
     try {
@@ -183,7 +189,16 @@ function LSControls() {
         await requestPermission(Constants.permission.AUDIO_AND_VIDEO);
       }
       await changeMode(nextMode);
+      setCurrentMode(nextMode);
     } catch (error) {
+      if (
+        /ALREADY_IN_REQUESTED_STATE/.test(
+          `${error?.code} ${error?.name} ${error?.message}`,
+        )
+      ) {
+        setCurrentMode(nextMode); // The SDK is already in that mode, so just sync the UI
+        return;
+      }
       console.error("Failed to change mode", error);
     }
   };
@@ -193,7 +208,7 @@ function LSControls() {
       <TouchableOpacity style={styles.button} onPress={handleLeave}>
         <Text style={styles.buttonText}>Leave</Text>
       </TouchableOpacity>
-      {currentMode === Constants.Mode.SEND_AND_RECV && (
+      {activeMode === Constants.Mode.SEND_AND_RECV && (
         <>
           <TouchableOpacity style={styles.button} onPress={handleToggleMic}>
             <Text style={styles.buttonText}>Toggle Mic</Text>
@@ -205,7 +220,7 @@ function LSControls() {
       )}
       <TouchableOpacity style={styles.button} onPress={handleChangeMode}>
         <Text style={styles.buttonText}>
-          {currentMode === Constants.Mode.SEND_AND_RECV
+          {activeMode === Constants.Mode.SEND_AND_RECV
             ? "Switch to Audience"
             : "Switch to Host"}
         </Text>

@@ -12,7 +12,7 @@
   "dependencies": {
     "@videosdk.live/expo-config-plugin": "2.0.0",
     "@videosdk.live/react-native-foreground-service": "^0.0.4",
-    "@videosdk.live/react-native-sdk": "2.0.0",
+    "@videosdk.live/react-native-sdk": "2.0.3",
     "expo": "~57.0.12",
     "expo-asset": "~57.0.19",
     "expo-status-bar": "~57.0.1",
