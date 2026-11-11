@@ -1,2 +1,3 @@
 -keep class videosdk.org.** { *; }
 -dontwarn videosdk.org.**
+-dontwarn videosdk.org.webrtc.AudioTrack$AudioProcessingPlatformPolicy
